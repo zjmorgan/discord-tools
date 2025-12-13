@@ -4,24 +4,31 @@ import numpy as np
 
 from scipy.linalg import cholesky
 
-
 from mantid.geometry import CrystalStructure
 
-kB = 0.08617  # meV/K
-muB = 0.05788  # meV/T
-
+from discord.parameters.constants import muB
 
 class Crystal:
 
-    def __init__(self, cell, space_group, sites, super_cell=(4, 4, 4)):
+    def __init__(self, cell, space_group, sites, super_cell=(4, 4, 4), S=0.5):
 
         self.cell = " ".join(6 * ["{}"]).format(*cell)
 
         self.space_group = space_group
 
-        self.Ns = super_cell
+        self.N = super_cell
+
+        n_sites = len(sites)
+
+        S = np.asarray(S)
+
+        self.S = S if S.ndim == 1 else np.full(n_sites, S)
+
+        assert len(self.S) == n_sites
 
         self.process_sites(sites)
+
+        self.initialize_random_spin_configurations(1)
 
     def process_sites(self, sites):
         self.sites = []
@@ -42,16 +49,25 @@ class Crystal:
         self.G = uc.getG().copy()
         self.generate_matrices()
 
-        self.n_atoms = len(self.sites)
-
-        self.xyz = np.empty((self.n_atoms, 3), dtype="float")
+        self.xyz = []
         self.atoms = []
+
+        mu = self.get_effective_moment()
+        self.mu = []
 
         for j, site in enumerate(sites):
             atom, x, y, z = site
             for pos in sg.getEquivalentPositions([x, y, z]):
                 self.atoms.append(atom)
-                self.xyz[j] = self._wrap(np.array(pos))
+                self.xyz.append(self._wrap(np.array(pos)))
+                self.mu.append(mu[j])
+
+        self.n_atoms = len(self.atoms)
+
+        self.xyz = np.array(self.xyz)
+        self.atoms = np.array(self.atoms)
+
+        self.mu = np.array(self.mu)
 
     def _wrap(self, val):
         val = np.array(val)
@@ -68,7 +84,7 @@ class Crystal:
         self.C = np.dot(self.A, np.diag(1 / np.sqrt(np.diag(self.G))))
 
     def get_super_cell_shape(self):
-        return self.Ns
+        return self.N
 
     def get_direct_reciprocal_rotation(self):
         return self.R
@@ -89,7 +105,6 @@ class Crystal:
         return self.G_
 
     def generate_bonds(self, d_cut=5, radius=4):
-
         i, j = np.indices((self.n_atoms, self.n_atoms))
         i, j = i.flatten(), j.flatten()
 
@@ -116,11 +131,17 @@ class Crystal:
         all_offsets = np.repeat(offsets, self.n_bonds, axis=0)
         self.d_ijk = all_offsets[mask].T.astype(int)
 
-    def get_n_bonds(self):
-        return self.n_pairs
+    def get_number_bonds(self):
+        return self.n_bonds
 
-    def get_n_atoms(self):
+    def get_number_atoms(self):
         return self.n_atoms
+
+    def get_unit_cell_atom_types(self):
+        return self.atoms
+
+    def get_unit_atom_position(self):
+        return self.xyz
 
     def build_neighbor_arrays(self):
         counts = np.bincount(self.bi, minlength=self.n_atoms)
@@ -142,3 +163,18 @@ class Crystal:
             cursor[l] += 1
 
         return nb_offsets, nb_atom, nb_ijk
+
+    def initialize_random_spin_configurations(self, n_replicas):
+        n_ijk = self.get_super_cell_shape()
+        n_atoms = self.get_number_atoms()
+
+        s = np.random.normal(size=(n_replicas, n_atoms, *n_ijk, 3))
+        s /= np.linalg.norm(s, axis=5)[..., np.newaxis]
+        self.s = s
+
+    def get_effective_moment(self, g=2):
+        return g * np.sqrt(self.S * (self.S + 1)) * muB
+
+    def get_spin_moments(self):
+        return np.einsum("j,ij...->ij...", self.mu, self.s)
+        
