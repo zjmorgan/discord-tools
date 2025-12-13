@@ -19,24 +19,24 @@ def dot(a, b):
 
 
 @njit
-def unravel_site(idx, n, Nx, Ny, Nz):
-    Nyz = Ny * Nz
-    Nxyz = Nx * Nyz
+def unravel_site(idx, n_atoms, ni, nj, nk):
+    njk = nj * nk
+    nijk = ni * njk
 
-    mu = idx // Nxyz
-    r = idx % Nxyz
-    i = r // Nyz
-    r = r % Nyz
-    j = r // Nz
-    k = r % Nz
-    return mu, i, j, k
+    i_atom = idx // nijk
+    r = idx % nijk
+    i = r // njk
+    r = r % njk
+    j = r // nk
+    k = r % nk
+    return i_atom, i, j, k
 
 
 @njit
-def ravel_site(mu, i, j, k, n, Nx, Ny, Nz):
-    Nyz = Ny * Nz
-    Nxyz = Nx * Nyz
-    return mu * Nxyz + i * Nyz + j * Nz + k
+def ravel_site(i_atom, i, j, k, n_atoms, ni, nj, nk):
+    njk = nj * nk
+    nijk = ni * njk
+    return i_atom * nijk + i * njk + j * nk + k
 
 
 @njit
@@ -48,3 +48,128 @@ def random_unit_vector():
     if v == 0.0:
         return np.array([0.0, 0.0, 1.0])
     return np.array([v0 / v, v1 / v, v2 / v])
+
+
+@njit
+def total_heisenberg_energy(S, nb_offsets, nb_atom, nb_ijk, nb_J, K, H, muB, g):
+
+    n_atoms, ni, nj, nk, _ = S.shape
+
+    EJ = 0.0
+    for i_atom in range(n_atoms):
+        for i in range(ni):
+            for j in range(nj):
+                for k in range(nk):
+                    Sl = S[i_atom, i, j, k]
+                    h_eff = local_field_at_site(
+                        S, i_atom, i, j, k,
+                        nb_offsets, nb_atom, nb_ijk, nb_J,
+                        ni, nj, nk
+                    )
+                    EJ -= 0.5 * dot(Sl, h_eff)
+
+    EK = 0.0
+    for i_atom in range(n_atoms):
+        K_l = K[i_atom]
+        for i in range(ni):
+            for j in range(nj):
+                for k in range(nk):
+                    v = S[i_atom, i, j, k]
+                    Kv = matvec(K_l, v)
+                    EK -= dot(v, Kv)
+
+    EH = 0.0
+    for i_atom in range(n_atoms):
+        for i in range(ni):
+            for j in range(nj):
+                for k in range(nk):
+                    v = S[i_atom, i, j, k]
+                    EH -= muB * g * dot(v, H)
+
+    return EJ + EK + EH
+
+
+@njit
+def local_field_at_site(S, i_atom, i, j, k,
+                        nb_offsets, nb_atom, nb_ijk, nb_J,
+                        ni, nj, nk):
+
+    h = np.zeros(3)
+    start = nb_offsets[i_atom]
+    end   = nb_offsets[i_atom+1]
+
+    for b in range(start, end):
+        nn  = nb_atom[b]
+        di = nb_ijk[b, 0]
+        dj = nb_ijk[b, 1]
+        dk = nb_ijk[b, 2]
+
+        ii = (i + di) % ni
+        jj = (j + dj) % nj
+        kk = (k + dk) % nk
+
+        Snn = S[nn, ii, jj, kk]
+        h += matvec(nb_J[b], Snn)
+
+    return h
+
+
+@njit
+def metropolis_heisenberg_kernel(idx, S, beta, E, n_local_sweeps,
+                      nb_offsets, nb_atom, nb_ijk, nb_J,
+                      K, H, muB, g, seed):
+
+    np.random.seed(seed)
+
+    n_atoms, ni, nj, nk, _ = S.shape
+    n = n_atoms * ni * nj * nk
+
+    for _ in range(n_local_sweeps * n):
+        flat_idx = np.random.randint(n)
+        i_atom, i, j, k = unravel_site(flat_idx, n_atoms, ni, nj, nk)
+
+        S_orig = S[i_atom, i, j, k].copy()
+
+        S_cand = np.empty(3)
+        S_cand[0] = np.random.normal()
+        S_cand[1] = np.random.normal()
+        S_cand[2] = np.random.normal()
+
+        norm = np.sqrt(dot(S_cand, S_cand))
+
+        S_cand[0] /= norm
+        S_cand[1] /= norm
+        S_cand[2] /= norm
+
+        delta = np.empty(3)
+        delta[0] = S_cand[0] - S_orig[0]
+        delta[1] = S_cand[1] - S_orig[1]
+        delta[2] = S_cand[2] - S_orig[2]
+
+        h_eff = local_field_at_site(
+            S, i_atom, i, j, k,
+            nb_offsets, nb_atom, nb_ijk, nb_J,
+            ni, nj, nk
+        )
+        dEJ = -dot(delta, h_eff)
+
+        K_ion = K[i_atom]
+        S_sum = np.empty(3)
+        S_sum[0] = S_cand[0] + S_orig[0]
+        S_sum[1] = S_cand[1] + S_orig[1]
+        S_sum[2] = S_cand[2] + S_orig[2]
+
+        K_S_sum = matvec(K_ion, S_sum)
+        dEK = -dot(delta, K_S_sum)
+
+        dEH = -muB * g * dot(delta, H)
+
+        dE = dEJ + dEK + dEH
+
+        if dE <= 0.0 or np.random.rand() < np.exp(-beta * dE):
+            S[i_atom, i, j, k, 0] = S_cand[0]
+            S[i_atom, i, j, k, 1] = S_cand[1]
+            S[i_atom, i, j, k, 2] = S_cand[2]
+            E += dE
+
+    return idx, E, int(np.random.randint(0, 2**31 - 1))

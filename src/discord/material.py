@@ -130,15 +130,15 @@ class Crystal:
 
         n_bonds = nb_offsets[-1]
 
-        nb_m = np.empty(n_bonds, dtype=np.int64)
-        nb_d_ijk = np.empty((n_bonds, 3), dtype=np.int64)
+        nb_atom = np.empty(n_bonds, dtype=np.int64)
+        nb_ijk = np.empty((n_bonds, 3), dtype=np.int64)
 
         cursor = nb_offsets.copy()
         for i in range(self.bi.size):
             l = self.bi[i]
             pos = cursor[l]
-            nb_m[pos] = self.bj[i]
-            nb_d_ijk[pos] = self.d_ijk[i]
+            nb_atom[pos] = self.bj[i]
+            nb_ijk[pos] = self.d_ijk[i]
             cursor[l] += 1
 
-        return nb_offsets, nb_m, nb_d_ijk
+        return nb_offsets, nb_atom, nb_ijk
