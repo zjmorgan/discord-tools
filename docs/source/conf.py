@@ -6,42 +6,42 @@ import sys
 import inspect
 import importlib
 
-ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-sys.path.insert(0, os.path.join(ROOT, 'src'))
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+sys.path.insert(0, os.path.join(ROOT, "src"))
 
-project = 'discord'
-author = 'Zachary Morgan'
+project = "discord"
+author = "Zachary Morgan"
 
 # -- General configuration ---------------------------------------------------
 
 # Sphinx extensions. Keep these minimal but useful; add more as needed.
 extensions = [
-    'sphinx.ext.githubpages',
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.linkcode',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.todo',
-    'sphinx_autodoc_typehints',
-    'matplotlib.sphinxext.plot_directive',
+    "sphinx.ext.githubpages",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.linkcode",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.todo",
+    "sphinx_autodoc_typehints",
+    "matplotlib.sphinxext.plot_directive",
 ]
 
-templates_path = ['_templates']
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+templates_path = ["_templates"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
-root_doc = 'index'
+root_doc = "index"
 
 autosummary_generate = True
-autodoc_typehints = 'both'
+autodoc_typehints = "both"
 add_module_names = False
 
 # -- Options for HTML output -------------------------------------------------
 
-html_theme = 'pydata_sphinx_theme'
-html_static_path = ['_static']
-html_permalinks_icon = '#'
+html_theme = "pydata_sphinx_theme"
+html_static_path = ["_static"]
+html_permalinks_icon = "#"
 html_show_sourcelink = False
 html_copy_source = True
 
@@ -63,7 +63,7 @@ plt.ioff()
 plot_include_source = True
 plot_html_show_formats = False
 plot_html_show_source_link = False
-plot_basedir = ''
+plot_basedir = ""
 
 
 def linkcode_resolve(domain, info):
@@ -73,23 +73,23 @@ def linkcode_resolve(domain, info):
     the `main` branch. If source lines can't be found, a fallback URL to the
     module file is returned.
     """
-    if domain != 'py':
+    if domain != "py":
         return None
-    if not info.get('module'):
+    if not info.get("module"):
         return None
 
-    baseurl = 'https://github.com/zjmorgan/discord/blob/main/src/{}.py'
-    filename = info['module'].replace('.', '/')
+    baseurl = "https://github.com/zjmorgan/discord/blob/main/src/{}.py"
+    filename = info["module"].replace(".", "/")
     url = baseurl.format(filename)
 
     try:
-        mod = importlib.import_module(info['module'])
+        mod = importlib.import_module(info["module"])
     except Exception:
         return url
 
     # Try to find the object and its source lines
     try:
-        objname, *attr = info.get('fullname', '').split('.')
+        objname, *attr = info.get("fullname", "").split(".")
         obj = getattr(mod, objname) if objname else mod
         for a in attr:
             obj = getattr(obj, a)
@@ -117,4 +117,4 @@ def skip_qt_members(app, what, name, obj, skip, options):
 
 
 def setup(app):
-    app.connect('autodoc-skip-member', skip_qt_members)
+    app.connect("autodoc-skip-member", skip_qt_members)

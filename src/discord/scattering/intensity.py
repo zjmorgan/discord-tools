@@ -2,7 +2,7 @@ import numpy as np
 
 from discord.parameters import tables
 
-p = 2.695 # fm/muB
+p = 2.695  # fm/muB
 
 
 class StrctureFactor:
@@ -43,16 +43,18 @@ class StrctureFactor:
         for i, atom in enumerate(self.atoms):
             A, a, B, b, C, c, D = tables.j0.get(atom, [0] * 7)
             j0 = (
-                + A * np.exp(-a * s**2)
+                +A * np.exp(-a * s**2)
                 + B * np.exp(-b * s**2)
                 + C * np.exp(-c * s**2)
                 + D
             )
             A, a, B, b, C, c, D = tables.j2.get(atom, [0] * 7)
-            j2 = A*s**2*np.exp(-a*s**2)+\
-                   B*s**2*np.exp(-b*s**2)+\
-                   C*s**2*np.exp(-c*s**2)+\
-                   D*s**2
+            j2 = (
+                A * s**2 * np.exp(-a * s**2)
+                + B * s**2 * np.exp(-b * s**2)
+                + C * s**2 * np.exp(-c * s**2)
+                + D * s**2
+            )
             f[i] = j0 + k * j2
         f[f < 0] = 0.0
         return f

@@ -7,8 +7,9 @@ from scipy.linalg import cholesky
 
 from mantid.geometry import CrystalStructure
 
-kB = 0.08617 # meV/K
-muB = 0.05788 # meV/T
+kB = 0.08617  # meV/K
+muB = 0.05788  # meV/T
+
 
 class Crystal:
 
@@ -43,7 +44,7 @@ class Crystal:
 
         self.n_atoms = len(self.sites)
 
-        self.xyz = np.empty((self.n_atoms, 3), dtype='float')
+        self.xyz = np.empty((self.n_atoms, 3), dtype="float")
         self.atoms = []
 
         for j, site in enumerate(sites):
@@ -129,18 +130,15 @@ class Crystal:
 
         n_bonds = nb_offsets[-1]
 
-        nb_m  = np.empty(n_bonds, dtype=np.int64)
+        nb_m = np.empty(n_bonds, dtype=np.int64)
         nb_d_ijk = np.empty((n_bonds, 3), dtype=np.int64)
 
         cursor = nb_offsets.copy()
         for i in range(self.bi.size):
             l = self.bi[i]
             pos = cursor[l]
-            nb_m[pos]  = self.bj[i]
+            nb_m[pos] = self.bj[i]
             nb_d_ijk[pos] = self.d_ijk[i]
             cursor[l] += 1
 
         return nb_offsets, nb_m, nb_d_ijk
-
-
-

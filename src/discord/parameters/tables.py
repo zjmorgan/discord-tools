@@ -4,6 +4,7 @@ import numpy as np
 
 directory = os.path.abspath(os.path.dirname(__file__))
 
+
 def magnetic_form_factor_coefficients_j0():
     """
     Table of magnetic form factors zeroth-order :math:`j_0` coefficients.
@@ -16,22 +17,24 @@ def magnetic_form_factor_coefficients_j0():
 
     """
 
-    filename = os.path.join(directory, 'j0.csv')
-    names = ('Ion', 'A', 'a', 'B', 'b', 'C', 'c', 'D')
-    formats = ('U15', float, float, float, float, float, float, float)
+    filename = os.path.join(directory, "j0.csv")
+    names = ("Ion", "A", "a", "B", "b", "C", "c", "D")
+    formats = ("U15", float, float, float, float, float, float, float)
     columns = (0, 1, 2, 3, 4, 5, 6, 7)
 
-    ion, A, a, B, b, C, c, D = np.loadtxt(filename,
-                                          delimiter=',',
-                                          dtype={'names': names,
-                                                 'formats': formats},
-                                          usecols=columns,
-                                          skiprows=1,
-                                          unpack=True)
+    ion, A, a, B, b, C, c, D = np.loadtxt(
+        filename,
+        delimiter=",",
+        dtype={"names": names, "formats": formats},
+        usecols=columns,
+        skiprows=1,
+        unpack=True,
+    )
 
     vals = [A, a, B, b, C, c, D]
 
     return dict(zip(ion, zip(*vals)))
+
 
 def magnetic_form_factor_coefficients_j2():
     """
@@ -45,22 +48,24 @@ def magnetic_form_factor_coefficients_j2():
 
     """
 
-    filename = os.path.join(directory, 'j2.csv')
-    names = ('Ion', 'A', 'a', 'B', 'b', 'C', 'c', 'D')
-    formats = ('U15', float, float, float, float, float, float, float)
+    filename = os.path.join(directory, "j2.csv")
+    names = ("Ion", "A", "a", "B", "b", "C", "c", "D")
+    formats = ("U15", float, float, float, float, float, float, float)
     columns = (0, 1, 2, 3, 4, 5, 6, 7)
 
-    ion, A, a, B, b, C, c, D = np.loadtxt(filename,
-                                          delimiter=',',
-                                          dtype={'names': names,
-                                                 'formats': formats},
-                                          usecols=columns,
-                                          skiprows=1,
-                                          unpack=True)
+    ion, A, a, B, b, C, c, D = np.loadtxt(
+        filename,
+        delimiter=",",
+        dtype={"names": names, "formats": formats},
+        usecols=columns,
+        skiprows=1,
+        unpack=True,
+    )
 
     vals = [A, a, B, b, C, c, D]
 
     return dict(zip(ion, zip(*vals)))
+
 
 def neutron_scattering_length_b():
     """
@@ -73,19 +78,22 @@ def neutron_scattering_length_b():
 
     """
 
-    filename = os.path.join(directory, 'b.csv')
-    names = ('Isotope', 'b')
-    formats = ('U15', complex)
+    filename = os.path.join(directory, "b.csv")
+    names = ("Isotope", "b")
+    formats = ("U15", complex)
     columns = (0, 1)
 
-    isotope, b = np.loadtxt(filename,
-                            delimiter=',',
-                            dtype={'names': names,'formats': formats},
-                            usecols=columns,
-                            skiprows=1,
-                            unpack=True)
+    isotope, b = np.loadtxt(
+        filename,
+        delimiter=",",
+        dtype={"names": names, "formats": formats},
+        usecols=columns,
+        skiprows=1,
+        unpack=True,
+    )
 
     return dict(zip(isotope, b))
+
 
 def xray_form_factor_coefficients():
     """
@@ -98,24 +106,37 @@ def xray_form_factor_coefficients():
 
     """
 
-    filename = os.path.join(directory, 'x.csv')
-    names = ('Ion', 'a1', 'b1', 'a2,', 'b2', 'a3', 'b3', 'a4', 'b4', 'c')
-    formats = ('U15', float, float, float, float,
-               float, float, float, float, float)
+    filename = os.path.join(directory, "x.csv")
+    names = ("Ion", "a1", "b1", "a2,", "b2", "a3", "b3", "a4", "b4", "c")
+    formats = (
+        "U15",
+        float,
+        float,
+        float,
+        float,
+        float,
+        float,
+        float,
+        float,
+        float,
+    )
     columns = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
 
-    data = np.loadtxt(filename,
-                      delimiter=',',
-                      dtype={'names': names, 'formats': formats},
-                      usecols=columns,
-                      skiprows=1,
-                      unpack=True)
+    data = np.loadtxt(
+        filename,
+        delimiter=",",
+        dtype={"names": names, "formats": formats},
+        usecols=columns,
+        skiprows=1,
+        unpack=True,
+    )
 
     ion, a1, b1, a2, b2, a3, b3, a4, b4, c = data
 
     vals = [a1, b1, a2, b2, a3, b3, a4, b4, c]
 
     return dict(zip(ion, zip(*vals)))
+
 
 def electron_form_factor_coefficients():
     """
@@ -128,25 +149,50 @@ def electron_form_factor_coefficients():
 
     """
 
-    filename = os.path.join(directory, 'e.csv')
-    names = ('Ion', 'a1', 'b1', 'a2,', 'b2',
-             'a3', 'b3', 'a4', 'b4', 'a5', 'b5')
-    formats = ('U15', float, float, float, float, float,
-               float, float, float, float, float)
+    filename = os.path.join(directory, "e.csv")
+    names = (
+        "Ion",
+        "a1",
+        "b1",
+        "a2,",
+        "b2",
+        "a3",
+        "b3",
+        "a4",
+        "b4",
+        "a5",
+        "b5",
+    )
+    formats = (
+        "U15",
+        float,
+        float,
+        float,
+        float,
+        float,
+        float,
+        float,
+        float,
+        float,
+        float,
+    )
     columns = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 
-    data = np.loadtxt(filename,
-                      delimiter=',',
-                      dtype={'names': names, 'formats': formats},
-                      usecols=columns,
-                      skiprows=1,
-                      unpack=True)
+    data = np.loadtxt(
+        filename,
+        delimiter=",",
+        dtype={"names": names, "formats": formats},
+        usecols=columns,
+        skiprows=1,
+        unpack=True,
+    )
 
     ion, a1, b1, a2, b2, a3, b3, a4, b4, a5, b5 = data
 
     vals = [a1, b1, a2, b2, a3, b3, a4, b4, a5, b5]
 
     return dict(zip(ion, zip(*vals)))
+
 
 def atomic_numbers():
     """
@@ -159,21 +205,24 @@ def atomic_numbers():
 
     """
 
-    filename = os.path.join(directory, 'z.csv')
-    names = ('Ion', 'Z')
-    formats = ('U15', int)
+    filename = os.path.join(directory, "z.csv")
+    names = ("Ion", "Z")
+    formats = ("U15", int)
     columns = (0, 1)
 
-    ion, z = np.loadtxt(filename,
-                        delimiter=',',
-                        dtype={'names': names, 'formats': formats},
-                        usecols=columns,
-                        skiprows=1,
-                        unpack=True)
+    ion, z = np.loadtxt(
+        filename,
+        delimiter=",",
+        dtype={"names": names, "formats": formats},
+        usecols=columns,
+        skiprows=1,
+        unpack=True,
+    )
 
     vals = [z]
 
     return dict(zip(ion, zip(*vals)))
+
 
 def element_radii():
     """
@@ -186,22 +235,24 @@ def element_radii():
 
     """
 
-    filename = os.path.join(directory, 'r.csv')
-    names = ('Element', 'Empirical', 'Calculated', 'van der Waals')
-    formats = ('U15', float, float, float)
+    filename = os.path.join(directory, "r.csv")
+    names = ("Element", "Empirical", "Calculated", "van der Waals")
+    formats = ("U15", float, float, float)
     columns = (0, 1, 2, 3)
 
-    element, emp, cal, vdw = np.loadtxt(filename,
-                                        delimiter=',',
-                                        dtype={'names': names,
-                                               'formats': formats},
-                                        usecols=columns,
-                                        skiprows=1,
-                                        unpack=True)
+    element, emp, cal, vdw = np.loadtxt(
+        filename,
+        delimiter=",",
+        dtype={"names": names, "formats": formats},
+        usecols=columns,
+        skiprows=1,
+        unpack=True,
+    )
 
     vals = [emp, cal, vdw]
 
     return dict(zip(element, zip(*vals)))
+
 
 def element_colors():
     """
@@ -214,21 +265,24 @@ def element_colors():
 
     """
 
-    filename = os.path.join(directory, 'c.csv')
-    names = ('Element', 'Red', 'Green', 'Blue')
-    formats = ('U15', float, float, float)
+    filename = os.path.join(directory, "c.csv")
+    names = ("Element", "Red", "Green", "Blue")
+    formats = ("U15", float, float, float)
     columns = (0, 1, 2, 3)
 
-    element, r, g, b = np.loadtxt(filename,
-                                  delimiter=',',
-                                  dtype={'names': names, 'formats': formats},
-                                  usecols=columns,
-                                  skiprows=1,
-                                  unpack=True)
+    element, r, g, b = np.loadtxt(
+        filename,
+        delimiter=",",
+        dtype={"names": names, "formats": formats},
+        usecols=columns,
+        skiprows=1,
+        unpack=True,
+    )
 
     vals = [r, g, b]
 
     return dict(zip(element, zip(*vals)))
+
 
 j0 = magnetic_form_factor_coefficients_j0()
 j2 = magnetic_form_factor_coefficients_j2()
