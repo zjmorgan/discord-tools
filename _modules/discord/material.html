@@ -289,26 +289,33 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.linalg</span><span class="w"> </span><span class="kn">import</span> <span class="n">cholesky</span>
 
-
 <span class="kn">from</span><span class="w"> </span><span class="nn">mantid.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">CrystalStructure</span>
 
-<span class="n">kB</span> <span class="o">=</span> <span class="mf">0.08617</span>  <span class="c1"># meV/K</span>
-<span class="n">muB</span> <span class="o">=</span> <span class="mf">0.05788</span>  <span class="c1"># meV/T</span>
-
+<span class="kn">from</span><span class="w"> </span><span class="nn">discord.parameters.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">muB</span>
 
 <div class="viewcode-block" id="Crystal">
 <a class="viewcode-back" href="../../discord.html#discord.material.Crystal">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Crystal</span><span class="p">:</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">space_group</span><span class="p">,</span> <span class="n">sites</span><span class="p">,</span> <span class="n">super_cell</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">space_group</span><span class="p">,</span> <span class="n">sites</span><span class="p">,</span> <span class="n">super_cell</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">S</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">cell</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="mi">6</span> <span class="o">*</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">cell</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">space_group</span> <span class="o">=</span> <span class="n">space_group</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">Ns</span> <span class="o">=</span> <span class="n">super_cell</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">=</span> <span class="n">super_cell</span>
+
+        <span class="n">n_sites</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sites</span><span class="p">)</span>
+
+        <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">S</span> <span class="o">=</span> <span class="n">S</span> <span class="k">if</span> <span class="n">S</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">n_sites</span><span class="p">,</span> <span class="n">S</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">)</span> <span class="o">==</span> <span class="n">n_sites</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">process_sites</span><span class="p">(</span><span class="n">sites</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialize_random_spin_configurations</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Crystal.process_sites">
 <a class="viewcode-back" href="../../discord.html#discord.material.Crystal.process_sites">[docs]</a>
@@ -331,16 +338,25 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">uc</span><span class="o">.</span><span class="n">getG</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">generate_matrices</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xyz</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">mu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_effective_moment</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mu</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">site</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sites</span><span class="p">):</span>
             <span class="n">atom</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">site</span>
             <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">sg</span><span class="o">.</span><span class="n">getEquivalentPositions</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">]):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrap</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pos</span><span class="p">))</span></div>
+                <span class="bp">self</span><span class="o">.</span><span class="n">xyz</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrap</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pos</span><span class="p">)))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mu</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xyz</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">)</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_wrap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
@@ -363,7 +379,7 @@
 <div class="viewcode-block" id="Crystal.get_super_cell_shape">
 <a class="viewcode-back" href="../../discord.html#discord.material.Crystal.get_super_cell_shape">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_super_cell_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ns</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span></div>
 
 
 <div class="viewcode-block" id="Crystal.get_direct_reciprocal_rotation">
@@ -405,7 +421,6 @@
 <div class="viewcode-block" id="Crystal.generate_bonds">
 <a class="viewcode-back" href="../../discord.html#discord.material.Crystal.generate_bonds">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">generate_bonds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d_cut</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
-
         <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">indices</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span><span class="p">))</span>
         <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">i</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">j</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
 
@@ -433,16 +448,28 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">d_ijk</span> <span class="o">=</span> <span class="n">all_offsets</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Crystal.get_n_bonds">
-<a class="viewcode-back" href="../../discord.html#discord.material.Crystal.get_n_bonds">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_n_bonds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pairs</span></div>
+<div class="viewcode-block" id="Crystal.get_number_bonds">
+<a class="viewcode-back" href="../../discord.html#discord.material.Crystal.get_number_bonds">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_number_bonds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_bonds</span></div>
 
 
-<div class="viewcode-block" id="Crystal.get_n_atoms">
-<a class="viewcode-back" href="../../discord.html#discord.material.Crystal.get_n_atoms">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_n_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.get_number_atoms">
+<a class="viewcode-back" href="../../discord.html#discord.material.Crystal.get_number_atoms">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_number_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span></div>
+
+
+<div class="viewcode-block" id="Crystal.get_unit_cell_atom_types">
+<a class="viewcode-back" href="../../discord.html#discord.material.Crystal.get_unit_cell_atom_types">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_unit_cell_atom_types</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span></div>
+
+
+<div class="viewcode-block" id="Crystal.get_unit_atom_position">
+<a class="viewcode-back" href="../../discord.html#discord.material.Crystal.get_unit_atom_position">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_unit_atom_position</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">xyz</span></div>
 
 
 <div class="viewcode-block" id="Crystal.build_neighbor_arrays">
@@ -467,8 +494,32 @@
             <span class="n">cursor</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="k">return</span> <span class="n">nb_offsets</span><span class="p">,</span> <span class="n">nb_atom</span><span class="p">,</span> <span class="n">nb_ijk</span></div>
+
+
+<div class="viewcode-block" id="Crystal.initialize_random_spin_configurations">
+<a class="viewcode-back" href="../../discord.html#discord.material.Crystal.initialize_random_spin_configurations">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_random_spin_configurations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_replicas</span><span class="p">):</span>
+        <span class="n">n_ijk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_super_cell_shape</span><span class="p">()</span>
+        <span class="n">n_atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_number_atoms</span><span class="p">()</span>
+
+        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n_replicas</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">,</span> <span class="o">*</span><span class="n">n_ijk</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="n">s</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">5</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s</span> <span class="o">=</span> <span class="n">s</span></div>
+
+
+<div class="viewcode-block" id="Crystal.get_effective_moment">
+<a class="viewcode-back" href="../../discord.html#discord.material.Crystal.get_effective_moment">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_effective_moment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">g</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">S</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">S</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="n">muB</span></div>
+
+
+<div class="viewcode-block" id="Crystal.get_spin_moments">
+<a class="viewcode-back" href="../../discord.html#discord.material.Crystal.get_spin_moments">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_spin_moments</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;j,ij...-&gt;ij...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">)</span></div>
 </div>
 
+        
 </pre></div>
 
                 </article>

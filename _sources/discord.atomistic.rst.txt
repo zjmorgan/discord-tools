@@ -1,0 +1,29 @@
+discord.atomistic package
+=========================
+
+Submodules
+----------
+
+discord.atomistic.kernel module
+-------------------------------
+
+.. automodule:: discord.atomistic.kernel
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+discord.atomistic.simulation module
+-----------------------------------
+
+.. automodule:: discord.atomistic.simulation
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+Module contents
+---------------
+
+.. automodule:: discord.atomistic
+   :members:
+   :show-inheritance:
+   :undoc-members:

@@ -1,0 +1,21 @@
+discord.scattering package
+==========================
+
+Submodules
+----------
+
+discord.scattering.intensity module
+-----------------------------------
+
+.. automodule:: discord.scattering.intensity
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+Module contents
+---------------
+
+.. automodule:: discord.scattering
+   :members:
+   :show-inheritance:
+   :undoc-members:

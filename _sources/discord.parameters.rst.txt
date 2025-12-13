@@ -1,0 +1,29 @@
+discord.parameters package
+==========================
+
+Submodules
+----------
+
+discord.parameters.constants module
+-----------------------------------
+
+.. automodule:: discord.parameters.constants
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+discord.parameters.tables module
+--------------------------------
+
+.. automodule:: discord.parameters.tables
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+Module contents
+---------------
+
+.. automodule:: discord.parameters
+   :members:
+   :show-inheritance:
+   :undoc-members:
