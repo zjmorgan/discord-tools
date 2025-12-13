@@ -51,7 +51,9 @@ def random_unit_vector():
 
 
 @njit
-def total_heisenberg_energy(S, nb_offsets, nb_atom, nb_ijk, nb_J, K, H, muB, g):
+def total_heisenberg_energy(
+    S, nb_offsets, nb_atom, nb_ijk, nb_J, K, H, muB, g
+):
 
     n_atoms, ni, nj, nk, _ = S.shape
 
@@ -62,9 +64,18 @@ def total_heisenberg_energy(S, nb_offsets, nb_atom, nb_ijk, nb_J, K, H, muB, g):
                 for k in range(nk):
                     Sl = S[i_atom, i, j, k]
                     h_eff = local_field_at_site(
-                        S, i_atom, i, j, k,
-                        nb_offsets, nb_atom, nb_ijk, nb_J,
-                        ni, nj, nk
+                        S,
+                        i_atom,
+                        i,
+                        j,
+                        k,
+                        nb_offsets,
+                        nb_atom,
+                        nb_ijk,
+                        nb_J,
+                        ni,
+                        nj,
+                        nk,
                     )
                     EJ -= 0.5 * dot(Sl, h_eff)
 
@@ -90,16 +101,16 @@ def total_heisenberg_energy(S, nb_offsets, nb_atom, nb_ijk, nb_J, K, H, muB, g):
 
 
 @njit
-def local_field_at_site(S, i_atom, i, j, k,
-                        nb_offsets, nb_atom, nb_ijk, nb_J,
-                        ni, nj, nk):
+def local_field_at_site(
+    S, i_atom, i, j, k, nb_offsets, nb_atom, nb_ijk, nb_J, ni, nj, nk
+):
 
     h = np.zeros(3)
     start = nb_offsets[i_atom]
-    end   = nb_offsets[i_atom+1]
+    end = nb_offsets[i_atom + 1]
 
     for b in range(start, end):
-        nn  = nb_atom[b]
+        nn = nb_atom[b]
         di = nb_ijk[b, 0]
         dj = nb_ijk[b, 1]
         dk = nb_ijk[b, 2]
@@ -115,9 +126,22 @@ def local_field_at_site(S, i_atom, i, j, k,
 
 
 @njit
-def metropolis_heisenberg_kernel(idx, S, beta, E, n_local_sweeps,
-                      nb_offsets, nb_atom, nb_ijk, nb_J,
-                      K, H, muB, g, seed):
+def metropolis_heisenberg_kernel(
+    idx,
+    S,
+    beta,
+    E,
+    n_local_sweeps,
+    nb_offsets,
+    nb_atom,
+    nb_ijk,
+    nb_J,
+    K,
+    H,
+    muB,
+    g,
+    seed,
+):
 
     np.random.seed(seed)
 
@@ -147,9 +171,7 @@ def metropolis_heisenberg_kernel(idx, S, beta, E, n_local_sweeps,
         delta[2] = S_cand[2] - S_orig[2]
 
         h_eff = local_field_at_site(
-            S, i_atom, i, j, k,
-            nb_offsets, nb_atom, nb_ijk, nb_J,
-            ni, nj, nk
+            S, i_atom, i, j, k, nb_offsets, nb_atom, nb_ijk, nb_J, ni, nj, nk
         )
         dEJ = -dot(delta, h_eff)
 
