@@ -1,0 +1,17 @@
+name: discord
+channels:
+  - conda-forge
+  - mantid/label/nightly
+dependencies:
+  - python>=3.11
+  - numpy
+  - scipy
+  - matplotlib
+  - numba
+  - pip
+  - mantid
+  - pytest
+  - black
+  - sphinx
+  - sphinx-autodoc-typehints
+  - pydata-sphinx-theme

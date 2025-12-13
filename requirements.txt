@@ -1,0 +1,5 @@
+numpy
+scipy
+matplotlib
+numba
+# mantid-framework is distributed via conda (mantid channel)
