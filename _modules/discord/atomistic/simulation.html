@@ -378,12 +378,14 @@
 <div class="viewcode-block" id="MonteCarlo.sample_parameters">
 <a class="viewcode-back" href="../../../discord.atomistic.html#discord.atomistic.simulation.MonteCarlo.sample_parameters">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">sample_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hkl</span><span class="p">):</span>
-        <span class="n">M</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crystal</span><span class="o">.</span><span class="n">net_moment</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">M_sum</span> <span class="o">+=</span> <span class="n">M</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">M_sq_sum</span> <span class="o">+=</span> <span class="n">M</span><span class="p">[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">M</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">n_sites</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crystal</span><span class="o">.</span><span class="n">get_total_sites</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">E_sum</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">E</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">E_sq_sum</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">E</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">M</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crystal</span><span class="o">.</span><span class="n">net_moment</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">M_sum</span> <span class="o">+=</span> <span class="n">M</span> <span class="o">/</span> <span class="n">n_sites</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">M_sq_sum</span> <span class="o">+=</span> <span class="n">M</span><span class="p">[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">M</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">/</span> <span class="n">n_sites</span><span class="o">**</span><span class="mi">2</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">E_sum</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">E</span> <span class="o">/</span> <span class="n">n_sites</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">E_sq_sum</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">E</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">n_sites</span><span class="o">**</span><span class="mi">2</span>
 
         <span class="k">if</span> <span class="n">hkl</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">struct_fact</span> <span class="o">=</span> <span class="n">StructureFactor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crystal</span><span class="p">)</span>
