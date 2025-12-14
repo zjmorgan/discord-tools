@@ -7,6 +7,7 @@ from discord.scattering.intensity import StructureFactor
 from discord.atomistic import kernel
 from discord.parameters.constants import kB, muB
 
+
 class MonteCarlo:
 
     def __init__(self, crystal, T=[0, 300], n_replicas=31):
@@ -36,17 +37,17 @@ class MonteCarlo:
                     self.seeds[i], self.seeds[j] = self.seeds[j], self.seeds[i]
 
     def metropolis_hastings(
-            self,
-            n_local_sweeps, 
-            n_replicas,
-            nb_offsets,
-            nb_atom,
-            nb_ijk,
-            nb_J,
-            K,
-            H,
-            g=2,
-        ):
+        self,
+        n_local_sweeps,
+        n_replicas,
+        nb_offsets,
+        nb_atom,
+        nb_ijk,
+        nb_J,
+        K,
+        H,
+        g=2,
+    ):
         args = [
             (
                 i,
@@ -102,7 +103,7 @@ class MonteCarlo:
         E_ave = self.E_sum / n_sample
         E_sq_ave = self.E_sq_sum / n_sample
 
-        E_var = (E_sq_ave - E_ave**2)
+        E_var = E_sq_ave - E_ave**2
         E_std = np.sqrt(E_var)
 
         C = self.beta**2 * E_var
@@ -116,23 +117,24 @@ class MonteCarlo:
             I_std = np.sqrt(I_sq_ave - I_ave**2)
 
         parameters = {
-            "M(ave)" : M_ave,
-            "M(std)" : M_std,
-            "chi" : chi,
-            "E(std)" : E_ave,
-            "E(ave)" : E_std,
+            "M(ave)": M_ave,
+            "M(std)": M_std,
+            "chi": chi,
+            "E(std)": E_ave,
+            "E(ave)": E_std,
             "C": C,
             "I(std)": I_ave,
-            "I(ave)" : I_std,
+            "I(ave)": I_std,
         }
 
         return parameters
 
-    def parallel_tempering(self,
-       hkl=None,
-       n_local_sweeps=2,
-       n_outer=10000,
-       n_thermal=7000,
+    def parallel_tempering(
+        self,
+        hkl=None,
+        n_local_sweeps=2,
+        n_outer=10000,
+        n_thermal=7000,
     ):
         n_sample = n_outer - n_thermal
         assert n_sample > 0, "Outer steps less than thermalization steps"
@@ -163,14 +165,16 @@ class MonteCarlo:
             for i_outer in range(n_outer):
                 print(f"{i_outer}/{n_outer}")
 
-                self.metropolis(            n_local_sweeps, 
-                            n_replicas,
-                            nb_offsets,
-                            nb_atom,
-                            nb_ijk,
-                            nb_J,
-                            K,
-                            H)
+                self.metropolis(
+                    n_local_sweeps,
+                    n_replicas,
+                    nb_offsets,
+                    nb_atom,
+                    nb_ijk,
+                    nb_J,
+                    K,
+                    H,
+                )
 
                 self.replica_exchange()
 
