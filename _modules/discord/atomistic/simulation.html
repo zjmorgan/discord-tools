@@ -297,7 +297,7 @@
 <a class="viewcode-back" href="../../../discord.atomistic.html#discord.atomistic.simulation.MonteCarlo">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MonteCarlo</span><span class="p">:</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">crystal</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">300</span><span class="p">],</span> <span class="n">n_replicas</span><span class="o">=</span><span class="mi">31</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">crystal</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">300</span><span class="p">],</span> <span class="n">n_replicas</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">crystal</span> <span class="o">=</span> <span class="n">crystal</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">*</span><span class="n">T</span><span class="p">,</span> <span class="n">n_replicas</span><span class="p">)</span>
@@ -327,7 +327,7 @@
                 <span class="n">E0</span><span class="p">,</span> <span class="n">E1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">E</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">E</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
                 <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">beta0</span> <span class="o">-</span> <span class="n">beta1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">E1</span> <span class="o">-</span> <span class="n">E0</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">d</span><span class="p">):</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">E</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">E</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">E</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">E</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">seeds</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">seeds</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">seeds</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">seeds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span></div>
 
@@ -366,18 +366,18 @@
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_replicas</span><span class="p">)</span>
         <span class="p">]</span>
 
-        <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">kernel</span><span class="o">.</span><span class="n">metropolis</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">kernel</span><span class="o">.</span><span class="n">metropolis_heisenberg</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
         <span class="n">results</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">sp</span><span class="p">,</span> <span class="n">Ep</span><span class="p">,</span> <span class="n">seed</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">sp</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">E</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ep</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">seed</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">E</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">E</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">seeds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">seed</span></div>
 
 
-<div class="viewcode-block" id="MonteCarlo.sample">
-<a class="viewcode-back" href="../../../discord.atomistic.html#discord.atomistic.simulation.MonteCarlo.sample">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hkl</span><span class="p">):</span>
+<div class="viewcode-block" id="MonteCarlo.sample_parameters">
+<a class="viewcode-back" href="../../../discord.atomistic.html#discord.atomistic.simulation.MonteCarlo.sample_parameters">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sample_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hkl</span><span class="p">):</span>
         <span class="n">M</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crystal</span><span class="o">.</span><span class="n">net_moment</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">M_sum</span> <span class="o">+=</span> <span class="n">M</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">M_sq_sum</span> <span class="o">+=</span> <span class="n">M</span><span class="p">[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">M</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
@@ -421,14 +421,15 @@
             <span class="n">I_std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">I_sq_ave</span> <span class="o">-</span> <span class="n">I_ave</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
 
         <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;T&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
             <span class="s2">&quot;M(ave)&quot;</span><span class="p">:</span> <span class="n">M_ave</span><span class="p">,</span>
             <span class="s2">&quot;M(std)&quot;</span><span class="p">:</span> <span class="n">M_std</span><span class="p">,</span>
             <span class="s2">&quot;chi&quot;</span><span class="p">:</span> <span class="n">chi</span><span class="p">,</span>
-            <span class="s2">&quot;E(std)&quot;</span><span class="p">:</span> <span class="n">E_ave</span><span class="p">,</span>
-            <span class="s2">&quot;E(ave)&quot;</span><span class="p">:</span> <span class="n">E_std</span><span class="p">,</span>
+            <span class="s2">&quot;E(ave)&quot;</span><span class="p">:</span> <span class="n">E_ave</span><span class="p">,</span>
+            <span class="s2">&quot;E(std)&quot;</span><span class="p">:</span> <span class="n">E_std</span><span class="p">,</span>
             <span class="s2">&quot;C&quot;</span><span class="p">:</span> <span class="n">C</span><span class="p">,</span>
-            <span class="s2">&quot;I(std)&quot;</span><span class="p">:</span> <span class="n">I_ave</span><span class="p">,</span>
-            <span class="s2">&quot;I(ave)&quot;</span><span class="p">:</span> <span class="n">I_std</span><span class="p">,</span>
+            <span class="s2">&quot;I(ave)&quot;</span><span class="p">:</span> <span class="n">I_ave</span><span class="p">,</span>
+            <span class="s2">&quot;I(std)&quot;</span><span class="p">:</span> <span class="n">I_std</span><span class="p">,</span>
         <span class="p">}</span>
 
         <span class="k">return</span> <span class="n">parameters</span></div>
@@ -440,15 +441,16 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">hkl</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">n_local_sweeps</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-        <span class="n">n_outer</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
-        <span class="n">n_thermal</span><span class="o">=</span><span class="mi">7000</span><span class="p">,</span>
+        <span class="n">n_outer</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+        <span class="n">n_thermal</span><span class="o">=</span><span class="mi">700</span><span class="p">,</span>
+        <span class="n">g</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="n">n_sample</span> <span class="o">=</span> <span class="n">n_outer</span> <span class="o">-</span> <span class="n">n_thermal</span>
         <span class="k">assert</span> <span class="n">n_sample</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Outer steps less than thermalization steps&quot;</span>
 
         <span class="n">n_replicas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_n_replicas</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">kB</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">kB</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">seeds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_seeds</span><span class="p">(</span><span class="n">n_replicas</span><span class="p">)</span>
 
         <span class="n">nb_offsets</span><span class="p">,</span> <span class="n">nb_atom</span><span class="p">,</span> <span class="n">nb_ijk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crystal</span><span class="o">.</span><span class="n">get_compressed_sparse_row</span><span class="p">()</span>
@@ -468,11 +470,21 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">I_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_replicas</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">hkl</span><span class="p">)))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">I_sq_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_replicas</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">hkl</span><span class="p">)))</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">crystal</span><span class="o">.</span><span class="n">initialize_random_spin_configurations</span><span class="p">(</span><span class="n">n_replicas</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crystal</span><span class="o">.</span><span class="n">get_spin_vectors</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">E</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_replicas</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_replicas</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">E</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">kernel</span><span class="o">.</span><span class="n">total_heisenberg_energy</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">nb_offsets</span><span class="p">,</span> <span class="n">nb_atom</span><span class="p">,</span> <span class="n">nb_ijk</span><span class="p">,</span> <span class="n">nb_J</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">muB</span><span class="p">,</span> <span class="n">g</span>
+            <span class="p">)</span>
+
         <span class="k">with</span> <span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">n_replicas</span><span class="p">)</span> <span class="k">as</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i_outer</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_outer</span><span class="p">):</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i_outer</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">n_outer</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-                <span class="bp">self</span><span class="o">.</span><span class="n">metropolis</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metropolis_hastings</span><span class="p">(</span>
                     <span class="n">n_local_sweeps</span><span class="p">,</span>
                     <span class="n">n_replicas</span><span class="p">,</span>
                     <span class="n">nb_offsets</span><span class="p">,</span>
@@ -487,7 +499,9 @@
 
                 <span class="k">if</span> <span class="n">i_outer</span> <span class="o">&gt;=</span> <span class="n">n_thermal</span><span class="p">:</span>
 
-                    <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">hkl</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">crystal</span><span class="o">.</span><span class="n">set_spin_vectors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">)</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">sample_parameters</span><span class="p">(</span><span class="n">hkl</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensemble_average</span><span class="p">(</span><span class="n">n_sample</span><span class="p">)</span></div>
 </div>
