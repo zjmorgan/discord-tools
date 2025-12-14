@@ -24,7 +24,7 @@ class Crystal:
 
         self.S = S if S.ndim == 1 else np.full(n_sites, S)
 
-        assert len(self.S) == n_sites
+        assert len(self.S) == n_sites, "Mismatched quantum number length"
 
         self.process_sites(sites)
 
@@ -117,7 +117,7 @@ class Crystal:
         bj = np.tile(j, offsets.shape[0])
 
         u = np.einsum("ij,klj->ikl", self.A, bonds).reshape(3, -1)
-        d = np.liang.norm(u, axis=0)
+        d = np.linalg.norm(u, axis=0)
 
         mask = (d < d_cut) & (d > 0)
 
@@ -129,7 +129,60 @@ class Crystal:
         self.n_bonds = uvw.shape[0]
 
         all_offsets = np.repeat(offsets, self.n_bonds, axis=0)
-        self.d_ijk = all_offsets[mask].T.astype(int)
+        self.d_ijk = all_offsets[mask].astype(int)
+
+        self.bonds = {
+            i : uni[i] for i in range(uni.size)
+        }
+        return self.bonds
+
+    def initialize_magnetic_parameters(self):
+        self.K = np.zeros((self.n_atoms, 3, 3))
+        self.J = np.zeros((self.n_bonds, 3, 3))
+        self._build_neighbor_arrays()
+        self._build_nb_from_types(self.J)
+        return self.K, self.J
+
+    def assign_magnetic_parameters(self, K, J, H=np.zeros(3)):
+        self.K = K
+        assert self.K.shape == (self.n_atoms, 3, 3)
+        self.J = J
+        assert self.J.shape == (self.n_bonds, 3, 3)
+        self.H = np.array(H)
+        assert self.H.size == 3
+        self._build_neighbor_arrays()
+        self._build_nb_from_types(self.J)
+
+    def _build_neighbor_arrays(self):
+        counts = np.bincount(self.bi, minlength=self.n_atoms)
+        self.nb_offsets = np.empty(self.n_atoms + 1, dtype=np.int64)
+        self.nb_offsets[0] = 0
+        self.nb_offsets[1:] = np.cumsum(counts)
+
+        n_bonds = self.nb_offsets[-1]
+
+        self.nb_atom = np.empty(n_bonds, dtype=np.int64)
+        self.nb_ijk = np.empty((n_bonds, 3), dtype=np.int64)
+
+        cursor = self.nb_offsets.copy()
+        for i in range(self.bi.size):
+            l = self.bi[i]
+            pos = cursor[l]
+            self.nb_atom[pos] = self.bj[i]
+            self.nb_ijk[pos] = self.d_ijk[i]
+            cursor[l] += 1
+
+    def _build_nb_from_types(self, J):
+        self.nb_J = np.zeros((self.inverses.size, 3, 3))
+        for i in range(J.shape[0]):
+            mask = self.inverses == i
+            self.nb_J[mask] = J[i]
+
+    def get_compressed_sparse_row(self):
+        return self.nb_offsets, self.nb_atom, self.nb_ijk 
+
+    def get_magnetic_parameters(self):
+        return self.nb_J, self.K, self.H
 
     def get_number_bonds(self):
         return self.n_bonds
@@ -142,27 +195,6 @@ class Crystal:
 
     def get_unit_atom_position(self):
         return self.xyz
-
-    def build_neighbor_arrays(self):
-        counts = np.bincount(self.bi, minlength=self.n_atoms)
-        nb_offsets = np.empty(self.n_atoms + 1, dtype=np.int64)
-        nb_offsets[0] = 0
-        nb_offsets[1:] = np.cumsum(counts)
-
-        n_bonds = nb_offsets[-1]
-
-        nb_atom = np.empty(n_bonds, dtype=np.int64)
-        nb_ijk = np.empty((n_bonds, 3), dtype=np.int64)
-
-        cursor = nb_offsets.copy()
-        for i in range(self.bi.size):
-            l = self.bi[i]
-            pos = cursor[l]
-            nb_atom[pos] = self.bj[i]
-            nb_ijk[pos] = self.d_ijk[i]
-            cursor[l] += 1
-
-        return nb_offsets, nb_atom, nb_ijk
 
     def initialize_random_spin_configurations(self, n_replicas):
         n_ijk = self.get_super_cell_shape()
@@ -177,4 +209,15 @@ class Crystal:
 
     def get_spin_moments(self):
         return np.einsum("j,ij...->ij...", self.mu, self.s)
-        
+
+    def get_spin_vectors(self):
+        return self.s 
+
+    def set_spin_vectors(self, s):
+        self.s = s
+
+    def net_moment(self):
+        return self.get_spin_moments().sum(axis=(1, 2, 3, 4))
+
+    def get_total_sites(self):
+        return self.n_atoms * np.prod(self.N)

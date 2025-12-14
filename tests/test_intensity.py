@@ -24,7 +24,7 @@ def crystal_MnF2():
     cell = [4.873, 4.873, 3.130, 90, 90, 90]
     space_group = "P 42/m n m"
     sites = [["Mn", 0, 0.0, 0.0]]
-    return Crystal(cell, space_group, sites)
+    return Crystal(cell, space_group, sites, S=2.5)
 
 
 def test_struct_fact_MnF2_ferro(crystal_MnF2):
