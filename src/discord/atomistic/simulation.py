@@ -10,7 +10,7 @@ from discord.parameters.constants import kB, muB
 
 class MonteCarlo:
 
-    def __init__(self, crystal, T=[0, 300], n_replicas=31):
+    def __init__(self, crystal, T=[10, 300], n_replicas=30):
         self.crystal = crystal
 
         self.T = np.linspace(*T, n_replicas)
@@ -32,7 +32,7 @@ class MonteCarlo:
                 E0, E1 = self.E[i], self.E[j]
                 d = (beta0 - beta1) * (E1 - E0)
                 if np.random.rand() < np.exp(-d):
-                    self.s[i], self.s[j] = self.s[j], self.s[i]
+                    self.s[i], self.s[j] = self.s[j].copy(), self.s[i].copy()
                     self.E[i], self.E[j] = self.E[j], self.E[i]
                     self.seeds[i], self.seeds[j] = self.seeds[j], self.seeds[i]
 
@@ -68,15 +68,15 @@ class MonteCarlo:
             for i in range(n_replicas)
         ]
 
-        results = self.pool.map(kernel.metropolis, args)
+        results = self.pool.starmap(kernel.metropolis_heisenberg, args)
         results.sort(key=lambda x: x[0])
 
-        for i, sp, Ep, seed in results:
-            self.s[i] = sp
-            self.E[i] = Ep
+        for i, s, E, seed in results:
+            self.s[i] = s
+            self.E[i] = E
             self.seeds[i] = seed
 
-    def sample(self, hkl):
+    def sample_parameters(self, hkl):
         M = self.crystal.net_moment()
         self.M_sum += M
         self.M_sq_sum += M[:, :, None] * M[:, None, :]
@@ -117,14 +117,15 @@ class MonteCarlo:
             I_std = np.sqrt(I_sq_ave - I_ave**2)
 
         parameters = {
+            "T": self.T,
             "M(ave)": M_ave,
             "M(std)": M_std,
             "chi": chi,
-            "E(std)": E_ave,
-            "E(ave)": E_std,
+            "E(ave)": E_ave,
+            "E(std)": E_std,
             "C": C,
-            "I(std)": I_ave,
-            "I(ave)": I_std,
+            "I(ave)": I_ave,
+            "I(std)": I_std,
         }
 
         return parameters
@@ -133,15 +134,16 @@ class MonteCarlo:
         self,
         hkl=None,
         n_local_sweeps=2,
-        n_outer=10000,
-        n_thermal=7000,
+        n_outer=1000,
+        n_thermal=700,
+        g=2,
     ):
         n_sample = n_outer - n_thermal
         assert n_sample > 0, "Outer steps less than thermalization steps"
 
         n_replicas = self.get_n_replicas()
 
-        self.beta = 1.0 / (kB * self.T + np.finfo(float).eps)
+        self.beta = 1.0 / (kB * self.T)
         self.seeds = self.make_seeds(n_replicas)
 
         nb_offsets, nb_atom, nb_ijk = self.crystal.get_compressed_sparse_row()
@@ -161,11 +163,21 @@ class MonteCarlo:
             self.I_sum = np.zeros((n_replicas, len(hkl)))
             self.I_sq_sum = np.zeros((n_replicas, len(hkl)))
 
+        self.crystal.initialize_random_spin_configurations(n_replicas)
+
+        self.s = self.crystal.get_spin_vectors()
+        self.E = np.zeros(n_replicas)
+
+        for i in range(n_replicas):
+            self.E[i] = kernel.total_heisenberg_energy(
+                self.s[i], nb_offsets, nb_atom, nb_ijk, nb_J, K, H, muB, g
+            )
+
         with Pool(processes=n_replicas) as self.pool:
             for i_outer in range(n_outer):
                 print(f"{i_outer}/{n_outer}")
 
-                self.metropolis(
+                self.metropolis_hastings(
                     n_local_sweeps,
                     n_replicas,
                     nb_offsets,
@@ -180,6 +192,8 @@ class MonteCarlo:
 
                 if i_outer >= n_thermal:
 
-                    self.sample(hkl)
+                    self.crystal.set_spin_vectors(self.s)
+
+                    self.sample_parameters(hkl)
 
         return self.ensemble_average(n_sample)

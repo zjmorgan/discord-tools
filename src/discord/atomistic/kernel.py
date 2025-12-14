@@ -52,19 +52,19 @@ def random_unit_vector():
 
 @njit
 def total_heisenberg_energy(
-    S, nb_offsets, nb_atom, nb_ijk, nb_J, K, H, muB, g
+    s, nb_offsets, nb_atom, nb_ijk, nb_J, K, H, muB, g
 ):
 
-    n_atoms, ni, nj, nk, _ = S.shape
+    n_atoms, ni, nj, nk, _ = s.shape
 
     EJ = 0.0
     for i_atom in range(n_atoms):
         for i in range(ni):
             for j in range(nj):
                 for k in range(nk):
-                    Sl = S[i_atom, i, j, k]
+                    sl = s[i_atom, i, j, k]
                     h_eff = local_field_at_site(
-                        S,
+                        s,
                         i_atom,
                         i,
                         j,
@@ -77,7 +77,7 @@ def total_heisenberg_energy(
                         nj,
                         nk,
                     )
-                    EJ -= 0.5 * dot(Sl, h_eff)
+                    EJ -= 0.5 * dot(sl, h_eff)
 
     EK = 0.0
     for i_atom in range(n_atoms):
@@ -85,7 +85,7 @@ def total_heisenberg_energy(
         for i in range(ni):
             for j in range(nj):
                 for k in range(nk):
-                    v = S[i_atom, i, j, k]
+                    v = s[i_atom, i, j, k]
                     Kv = matvec(K_l, v)
                     EK -= dot(v, Kv)
 
@@ -94,7 +94,7 @@ def total_heisenberg_energy(
         for i in range(ni):
             for j in range(nj):
                 for k in range(nk):
-                    v = S[i_atom, i, j, k]
+                    v = s[i_atom, i, j, k]
                     EH -= muB * g * dot(v, H)
 
     return EJ + EK + EH
@@ -102,7 +102,7 @@ def total_heisenberg_energy(
 
 @njit
 def local_field_at_site(
-    S, i_atom, i, j, k, nb_offsets, nb_atom, nb_ijk, nb_J, ni, nj, nk
+    s, i_atom, i, j, k, nb_offsets, nb_atom, nb_ijk, nb_J, ni, nj, nk
 ):
 
     h = np.zeros(3)
@@ -119,16 +119,16 @@ def local_field_at_site(
         jj = (j + dj) % nj
         kk = (k + dk) % nk
 
-        Snn = S[nn, ii, jj, kk]
-        h += matvec(nb_J[b], Snn)
+        snn = s[nn, ii, jj, kk]
+        h += matvec(nb_J[b], snn)
 
     return h
 
 
 @njit
-def metropolis_heisenberg_kernel(
+def metropolis_heisenberg(
     idx,
-    S,
+    s,
     beta,
     E,
     n_local_sweeps,
@@ -145,53 +145,64 @@ def metropolis_heisenberg_kernel(
 
     np.random.seed(seed)
 
-    n_atoms, ni, nj, nk, _ = S.shape
+    n_atoms, ni, nj, nk, _ = s.shape
     n = n_atoms * ni * nj * nk
 
     for _ in range(n_local_sweeps * n):
         flat_idx = np.random.randint(n)
         i_atom, i, j, k = unravel_site(flat_idx, n_atoms, ni, nj, nk)
 
-        S_orig = S[i_atom, i, j, k].copy()
+        s_orig = s[i_atom, i, j, k].copy()
 
-        S_cand = np.empty(3)
-        S_cand[0] = np.random.normal()
-        S_cand[1] = np.random.normal()
-        S_cand[2] = np.random.normal()
+        s_cand = np.empty(3)
+        s_cand[0] = np.random.normal()
+        s_cand[1] = np.random.normal()
+        s_cand[2] = np.random.normal()
 
-        norm = np.sqrt(dot(S_cand, S_cand))
+        norm = np.sqrt(dot(s_cand, s_cand))
 
-        S_cand[0] /= norm
-        S_cand[1] /= norm
-        S_cand[2] /= norm
+        s_cand[0] /= norm
+        s_cand[1] /= norm
+        s_cand[2] /= norm
 
         delta = np.empty(3)
-        delta[0] = S_cand[0] - S_orig[0]
-        delta[1] = S_cand[1] - S_orig[1]
-        delta[2] = S_cand[2] - S_orig[2]
+        delta[0] = s_cand[0] - s_orig[0]
+        delta[1] = s_cand[1] - s_orig[1]
+        delta[2] = s_cand[2] - s_orig[2]
 
         h_eff = local_field_at_site(
-            S, i_atom, i, j, k, nb_offsets, nb_atom, nb_ijk, nb_J, ni, nj, nk
+            s,
+            i_atom,
+            i,
+            j,
+            k,
+            nb_offsets,
+            nb_atom,
+            nb_ijk,
+            nb_J,
+            ni,
+            nj,
+            nk,
         )
         dEJ = -dot(delta, h_eff)
 
         K_ion = K[i_atom]
-        S_sum = np.empty(3)
-        S_sum[0] = S_cand[0] + S_orig[0]
-        S_sum[1] = S_cand[1] + S_orig[1]
-        S_sum[2] = S_cand[2] + S_orig[2]
+        s_sum = np.empty(3)
+        s_sum[0] = s_cand[0] + s_orig[0]
+        s_sum[1] = s_cand[1] + s_orig[1]
+        s_sum[2] = s_cand[2] + s_orig[2]
 
-        K_S_sum = matvec(K_ion, S_sum)
-        dEK = -dot(delta, K_S_sum)
+        K_s_sum = matvec(K_ion, s_sum)
+        dEK = -dot(delta, K_s_sum)
 
         dEH = -muB * g * dot(delta, H)
 
         dE = dEJ + dEK + dEH
 
         if dE <= 0.0 or np.random.rand() < np.exp(-beta * dE):
-            S[i_atom, i, j, k, 0] = S_cand[0]
-            S[i_atom, i, j, k, 1] = S_cand[1]
-            S[i_atom, i, j, k, 2] = S_cand[2]
+            s[i_atom, i, j, k, 0] = s_cand[0]
+            s[i_atom, i, j, k, 1] = s_cand[1]
+            s[i_atom, i, j, k, 2] = s_cand[2]
             E += dE
 
-    return idx, E, int(np.random.randint(0, 2**31 - 1))
+    return idx, s, E, int(np.random.randint(0, 2**31 - 1))
