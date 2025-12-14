@@ -8,7 +8,7 @@ from discord.material import Crystal
 def crystal_MnF2():
     cell = [4.873, 4.873, 3.130, 90, 90, 90]
     space_group = "P 42/m n m"
-    sites = [["Mn", 0, 0.0, 0.0]]
+    sites = [["Mn", 0.0, 0.0, 0.0]]
     return Crystal(cell, space_group, sites, S=2.5)
 
 
@@ -26,6 +26,7 @@ def test_crystal_MnF2_transforms(a, c, crystal_MnF2):
     assert np.allclose(R, np.eye(3))
     C = crystal_MnF2.get_moment_cartesian_transform()
     assert np.allclose(C, np.eye(3))
+
 
 def test_crystal_MnF2_atoms(crystal_MnF2):
     assert crystal_MnF2.get_number_atoms() == 2

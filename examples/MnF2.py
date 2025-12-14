@@ -32,21 +32,59 @@ T = result["T"]
 chi_xx = result["chi"][:, 0, 0]
 chi_yy = result["chi"][:, 1, 1]
 chi_zz = result["chi"][:, 2, 2]
+chi_yz = result["chi"][:, 1, 2]
+chi_xz = result["chi"][:, 0, 2]
+chi_xy = result["chi"][:, 0, 1]
 
-fig, ax = plt.subplots(1, 1)
+fig, ax = plt.subplots(1, 1, layout="constrained")
 ax.minorticks_on()
 ax.plot(T, chi_xx, "-o", label="$\chi_{xx}$")
 ax.plot(T, chi_yy, "-o", label="$\chi_{yy}$")
-ax.plot(T, chi_zz, "o", label="$\chi_{zz}$")
+ax.plot(T, chi_zz, "-o", label="$\chi_{zz}$")
+ax.plot(T, chi_yz, "-o", label="$\chi_{yz}$")
+ax.plot(T, chi_xz, "-o", label="$\chi_{xz}$")
+ax.plot(T, chi_xy, "-o", label="$\chi_{xy}$")
 ax.legend(shadow=True)
 ax.set_xlabel("$T$ [K]")
 ax.set_ylabel("$\chi_{ij}$ [$\mu_B^2$/eV]")
 fig.savefig("MnF2_susceptibility.png")
 
+Mx = result["M(ave)"][:, 0]
+My = result["M(ave)"][:, 1]
+Mz = result["M(ave)"][:, 2]
+
+fig, ax = plt.subplots(1, 1, layout="constrained")
+ax.minorticks_on()
+ax.plot(T, Mx, "-o", label="$M_{x}$")
+ax.plot(T, My, "-o", label="$M_{y}$")
+ax.plot(T, Mz, "-o", label="$M_{z}$")
+ax.legend(shadow=True)
+ax.set_xlabel("$T$ [K]")
+ax.set_ylabel("$M_{i}$ [$\mu_B$]")
+fig.savefig("MnF2_magnetization.png")
+
+C = result["C"]
+
+fig, ax = plt.subplots(1, 1, layout="constrained")
+ax.minorticks_on()
+ax.plot(T, C, "-o")
+ax.set_xlabel("$T$ [K]")
+ax.set_ylabel("$C$ [eV/K]")
+fig.savefig("MnF2_heat_capacity.png")
+
+E = result["E(ave)"]
+
+fig, ax = plt.subplots(1, 1, layout="constrained")
+ax.minorticks_on()
+ax.plot(T, E, "-o")
+ax.set_xlabel("$T$ [K]")
+ax.set_ylabel("$E$ [eV]")
+fig.savefig("MnF2_energy.png")
+
 s = crystal.get_spin_vectors()[0]
 r = crystal.get_atom_positions()
 
-fig = plt.figure()
+fig = plt.figure(layout="constrained")
 ax = fig.add_subplot(111, projection="3d")
 
 x = r[..., 0].flatten()

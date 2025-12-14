@@ -77,12 +77,14 @@ class MonteCarlo:
             self.seeds[i] = seed
 
     def sample_parameters(self, hkl):
-        M = self.crystal.net_moment()
-        self.M_sum += M
-        self.M_sq_sum += M[:, :, None] * M[:, None, :]
+        n_sites = self.crystal.get_total_sites()
 
-        self.E_sum += self.E
-        self.E_sq_sum += self.E**2
+        M = self.crystal.net_moment()
+        self.M_sum += M / n_sites
+        self.M_sq_sum += M[:, :, None] * M[:, None, :] / n_sites**2
+
+        self.E_sum += self.E / n_sites
+        self.E_sq_sum += self.E**2 / n_sites**2
 
         if hkl is not None:
             struct_fact = StructureFactor(self.crystal)
