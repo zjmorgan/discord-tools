@@ -292,6 +292,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">discord.atomistic</span><span class="w"> </span><span class="kn">import</span> <span class="n">kernel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">discord.parameters.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">kB</span><span class="p">,</span> <span class="n">muB</span>
 
+
 <div class="viewcode-block" id="MonteCarlo">
 <a class="viewcode-back" href="../../../discord.atomistic.html#discord.atomistic.simulation.MonteCarlo">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MonteCarlo</span><span class="p">:</span>
@@ -334,17 +335,17 @@
 <div class="viewcode-block" id="MonteCarlo.metropolis_hastings">
 <a class="viewcode-back" href="../../../discord.atomistic.html#discord.atomistic.simulation.MonteCarlo.metropolis_hastings">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">metropolis_hastings</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">n_local_sweeps</span><span class="p">,</span> 
-            <span class="n">n_replicas</span><span class="p">,</span>
-            <span class="n">nb_offsets</span><span class="p">,</span>
-            <span class="n">nb_atom</span><span class="p">,</span>
-            <span class="n">nb_ijk</span><span class="p">,</span>
-            <span class="n">nb_J</span><span class="p">,</span>
-            <span class="n">K</span><span class="p">,</span>
-            <span class="n">H</span><span class="p">,</span>
-            <span class="n">g</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-        <span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">n_local_sweeps</span><span class="p">,</span>
+        <span class="n">n_replicas</span><span class="p">,</span>
+        <span class="n">nb_offsets</span><span class="p">,</span>
+        <span class="n">nb_atom</span><span class="p">,</span>
+        <span class="n">nb_ijk</span><span class="p">,</span>
+        <span class="n">nb_J</span><span class="p">,</span>
+        <span class="n">K</span><span class="p">,</span>
+        <span class="n">H</span><span class="p">,</span>
+        <span class="n">g</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">(</span>
                 <span class="n">i</span><span class="p">,</span>
@@ -406,7 +407,7 @@
         <span class="n">E_ave</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">E_sum</span> <span class="o">/</span> <span class="n">n_sample</span>
         <span class="n">E_sq_ave</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">E_sq_sum</span> <span class="o">/</span> <span class="n">n_sample</span>
 
-        <span class="n">E_var</span> <span class="o">=</span> <span class="p">(</span><span class="n">E_sq_ave</span> <span class="o">-</span> <span class="n">E_ave</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">E_var</span> <span class="o">=</span> <span class="n">E_sq_ave</span> <span class="o">-</span> <span class="n">E_ave</span><span class="o">**</span><span class="mi">2</span>
         <span class="n">E_std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">E_var</span><span class="p">)</span>
 
         <span class="n">C</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">E_var</span>
@@ -420,14 +421,14 @@
             <span class="n">I_std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">I_sq_ave</span> <span class="o">-</span> <span class="n">I_ave</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
 
         <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;M(ave)&quot;</span> <span class="p">:</span> <span class="n">M_ave</span><span class="p">,</span>
-            <span class="s2">&quot;M(std)&quot;</span> <span class="p">:</span> <span class="n">M_std</span><span class="p">,</span>
-            <span class="s2">&quot;chi&quot;</span> <span class="p">:</span> <span class="n">chi</span><span class="p">,</span>
-            <span class="s2">&quot;E(std)&quot;</span> <span class="p">:</span> <span class="n">E_ave</span><span class="p">,</span>
-            <span class="s2">&quot;E(ave)&quot;</span> <span class="p">:</span> <span class="n">E_std</span><span class="p">,</span>
+            <span class="s2">&quot;M(ave)&quot;</span><span class="p">:</span> <span class="n">M_ave</span><span class="p">,</span>
+            <span class="s2">&quot;M(std)&quot;</span><span class="p">:</span> <span class="n">M_std</span><span class="p">,</span>
+            <span class="s2">&quot;chi&quot;</span><span class="p">:</span> <span class="n">chi</span><span class="p">,</span>
+            <span class="s2">&quot;E(std)&quot;</span><span class="p">:</span> <span class="n">E_ave</span><span class="p">,</span>
+            <span class="s2">&quot;E(ave)&quot;</span><span class="p">:</span> <span class="n">E_std</span><span class="p">,</span>
             <span class="s2">&quot;C&quot;</span><span class="p">:</span> <span class="n">C</span><span class="p">,</span>
             <span class="s2">&quot;I(std)&quot;</span><span class="p">:</span> <span class="n">I_ave</span><span class="p">,</span>
-            <span class="s2">&quot;I(ave)&quot;</span> <span class="p">:</span> <span class="n">I_std</span><span class="p">,</span>
+            <span class="s2">&quot;I(ave)&quot;</span><span class="p">:</span> <span class="n">I_std</span><span class="p">,</span>
         <span class="p">}</span>
 
         <span class="k">return</span> <span class="n">parameters</span></div>
@@ -435,11 +436,12 @@
 
 <div class="viewcode-block" id="MonteCarlo.parallel_tempering">
 <a class="viewcode-back" href="../../../discord.atomistic.html#discord.atomistic.simulation.MonteCarlo.parallel_tempering">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">parallel_tempering</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-       <span class="n">hkl</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-       <span class="n">n_local_sweeps</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-       <span class="n">n_outer</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
-       <span class="n">n_thermal</span><span class="o">=</span><span class="mi">7000</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parallel_tempering</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">hkl</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">n_local_sweeps</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">n_outer</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+        <span class="n">n_thermal</span><span class="o">=</span><span class="mi">7000</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="n">n_sample</span> <span class="o">=</span> <span class="n">n_outer</span> <span class="o">-</span> <span class="n">n_thermal</span>
         <span class="k">assert</span> <span class="n">n_sample</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Outer steps less than thermalization steps&quot;</span>
@@ -470,14 +472,16 @@
             <span class="k">for</span> <span class="n">i_outer</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_outer</span><span class="p">):</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i_outer</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">n_outer</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-                <span class="bp">self</span><span class="o">.</span><span class="n">metropolis</span><span class="p">(</span>            <span class="n">n_local_sweeps</span><span class="p">,</span> 
-                            <span class="n">n_replicas</span><span class="p">,</span>
-                            <span class="n">nb_offsets</span><span class="p">,</span>
-                            <span class="n">nb_atom</span><span class="p">,</span>
-                            <span class="n">nb_ijk</span><span class="p">,</span>
-                            <span class="n">nb_J</span><span class="p">,</span>
-                            <span class="n">K</span><span class="p">,</span>
-                            <span class="n">H</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metropolis</span><span class="p">(</span>
+                    <span class="n">n_local_sweeps</span><span class="p">,</span>
+                    <span class="n">n_replicas</span><span class="p">,</span>
+                    <span class="n">nb_offsets</span><span class="p">,</span>
+                    <span class="n">nb_atom</span><span class="p">,</span>
+                    <span class="n">nb_ijk</span><span class="p">,</span>
+                    <span class="n">nb_J</span><span class="p">,</span>
+                    <span class="n">K</span><span class="p">,</span>
+                    <span class="n">H</span><span class="p">,</span>
+                <span class="p">)</span>
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">replica_exchange</span><span class="p">()</span>
 
