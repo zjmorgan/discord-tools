@@ -54,6 +54,7 @@ def random_unit_vector():
 def total_heisenberg_energy(
     s, nb_offsets, nb_atom, nb_ijk, nb_J, K, H, S, muB, g
 ):
+    """Total Heisenberg energy for a single replica."""
 
     n_atoms, ni, nj, nk, _ = s.shape
 
@@ -161,6 +162,12 @@ def metropolis_heisenberg(
     g,
     seed,
 ):
+    """Local Metropolis sweeps for one replica.
+
+    Proposes random unit-vector spins, computes ``dE`` using the same
+    ``S(S+1)`` scaling as :func:`total_heisenberg_energy`, and updates
+    the configuration and running energy ``E`` in place.
+    """
 
     np.random.seed(seed)
 

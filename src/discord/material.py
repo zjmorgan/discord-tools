@@ -10,6 +10,22 @@ from discord.parameters.constants import muB
 
 
 class Crystal:
+    """Crystallographic and magnetic description of a supercell.
+
+    Parameters
+    ----------
+    cell : sequence of float
+        Direct lattice parameters ``[a, b, c, alpha, beta, gamma]``.
+    space_group : str
+        Hermann–Mauguin symbol understood by Mantid.
+    sites : list
+        List of ``[atom, x, y, z]`` entries defining asymmetric sites.
+    super_cell : tuple of int, optional
+        Supercell replication ``(ni, nj, nk)``.
+    S : float or array_like, optional
+        Spin quantum number per site. Stored internally as ``S_site``
+        and expanded to per-atom values ``S`` after applying symmetry.
+    """
 
     def __init__(self, cell, space_group, sites, super_cell=(4, 4, 4), S=0.5):
 
@@ -81,6 +97,13 @@ class Crystal:
         return val
 
     def generate_matrices(self):
+        """Precompute metric and transform matrices.
+
+        ``A`` and ``B`` are Cholesky factors of the direct and reciprocal
+        metric tensors. ``R`` rotates between direct and reciprocal
+        Cartesian frames. ``C`` maps spin components from the internal
+        crystal/moment basis to Cartesian; ``C_`` is its inverse.
+        """
         self.G_ = np.linalg.inv(self.G)
         self.A = cholesky(self.G, lower=False)
         self.B = cholesky(self.G_, lower=False)
@@ -144,12 +167,28 @@ class Crystal:
         return self.bonds
 
     def initialize_magnetic_parameters(self):
+        """Allocate zero magnetic interaction tensors.
+
+        Returns
+        -------
+        K, J : ndarray
+            Anisotropy per atom and exchange per bond type, both in the
+            internal spin basis. Values should be filled by the caller
+            before :meth:`assign_magnetic_parameters`.
+        """
         self.K = np.zeros((self.n_atoms, 3, 3))
         self.J = np.zeros((self.n_types, 3, 3))
         self._build_neighbor_arrays()
         return self.K, self.J
 
     def assign_magnetic_parameters(self, K, J, H=np.zeros(3)):
+        """Assign anisotropy, exchange and field in the spin basis.
+
+        All tensors and fields are interpreted in the same basis as the
+        spins ``self.s`` (crystal/moment basis). Quantum factors
+        ``S(S+1)`` are applied later in the kernels so that ``s`` can
+        remain a unit vector.
+        """
         self.K = K
         assert self.K.shape == (self.n_atoms, 3, 3)
         self.J = J
@@ -200,6 +239,7 @@ class Crystal:
         return self.xyz
 
     def initialize_random_spin_configurations(self, n_replicas):
+        """Initialize random unit spins for the given number of replicas."""
         n_ijk = self.get_super_cell_shape()
         n_atoms = self.get_number_atoms()
 
@@ -211,9 +251,19 @@ class Crystal:
         return g * np.sqrt(self.S_site * (self.S_site + 1)) * muB
 
     def get_spin_moments(self):
+        """Magnetic moments in Cartesian units.
+
+        Returns an array with the same shape as ``self.s`` but scaled by
+        the effective moment ``mu`` for each atom.
+        """
         return np.einsum("j,ij...->ij...", self.mu, self.s)
 
     def get_spin_quantum_numbers(self):
+        """Per-atom spin quantum numbers S.
+
+        Expanded from the per-site ``S_site`` after applying symmetry.
+        Used to apply ``S(S+1)`` factors in the energy kernels.
+        """
         return self.S
 
     def get_spin_vectors(self):

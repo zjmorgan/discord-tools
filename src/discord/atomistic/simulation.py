@@ -9,6 +9,7 @@ from discord.parameters.constants import kB, muB
 
 
 class MonteCarlo:
+    """Replica-exchange Monte Carlo simulation."""
 
     def __init__(self, crystal, T=[10, 300], n_replicas=30):
         self.crystal = crystal
