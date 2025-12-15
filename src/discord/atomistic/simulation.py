@@ -46,6 +46,7 @@ class MonteCarlo:
         nb_J,
         K,
         H,
+        S,
         g=2,
     ):
         args = [
@@ -61,6 +62,7 @@ class MonteCarlo:
                 nb_J,
                 K,
                 H,
+                S,
                 muB,
                 g,
                 self.seeds[i],
@@ -152,6 +154,8 @@ class MonteCarlo:
 
         nb_J, K, H = self.crystal.get_magnetic_parameters()
 
+        S = self.crystal.get_spin_quantum_numbers()
+
         self.M_sum = np.zeros((n_replicas, 3))
         self.M_sq_sum = np.zeros((n_replicas, 3, 3))
 
@@ -172,7 +176,7 @@ class MonteCarlo:
 
         for i in range(n_replicas):
             self.E[i] = kernel.total_heisenberg_energy(
-                self.s[i], nb_offsets, nb_atom, nb_ijk, nb_J, K, H, muB, g
+                self.s[i], nb_offsets, nb_atom, nb_ijk, nb_J, K, H, S, muB, g
             )
 
         with Pool(processes=n_replicas) as self.pool:
@@ -188,6 +192,8 @@ class MonteCarlo:
                     nb_J,
                     K,
                     H,
+                    S,
+                    g,
                 )
 
                 self.replica_exchange()

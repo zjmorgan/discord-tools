@@ -4,6 +4,7 @@ from discord.parameters import tables
 
 from discord.parameters.constants import p
 
+
 class StructureFactor:
 
     def __init__(self, crystal):
@@ -64,28 +65,27 @@ class StructureFactor:
         MQ = Mk[..., ijk[:, 0], ijk[:, 1], ijk[:, 2], :]
 
         F = p * np.sum(MQ * (pf * fQ)[..., np.newaxis], axis=1)
-        
+
         return F
 
     def magnetic_intensity(self, hkl):
+        N = self.crystal.get_total_sites()
         F = self.magnetic_structure_factor(hkl)
 
         d = self.d_spacing(hkl)
         dhkl = hkl * d[:, np.newaxis]
 
-        C = self.crystal.get_moment_cartesian_transform()
         R = self.crystal.get_direct_reciprocal_rotation()
         B = self.crystal.get_reciprocal_cartesian_transform()
 
-        Fc = np.einsum("ij,klj->kli", C, F)
         Qc = np.einsum("ij,kj->ki", R @ B, dhkl)
 
         Q = np.linalg.norm(Qc, axis=1, keepdims=True)
         Q[Q == 0] = 1.0
         Q_hat = Qc / Q
 
-        Fc_dot_Q_hat = np.sum(Fc.conj() * Q_hat, axis=2)
-        Fc_perp = Fc - Q_hat * Fc_dot_Q_hat[..., np.newaxis]
+        F_dot_Q_hat = np.sum(F.conj() * Q_hat, axis=2)
+        F_perp = F - Q_hat * F_dot_Q_hat[..., np.newaxis]
 
-        I = np.sum(Fc_perp.conj() * Fc_perp, axis=2).real
-        return I
+        I = np.sum(F_perp.conj() * F_perp, axis=2).real
+        return I / N

@@ -8,7 +8,7 @@ from discord.atomistic import kernel
 from discord.parameters.constants import muB
 
 
-def total_energy(s, bi, bj, d_ijk, J, K, H, muB, g):
+def total_energy(s, bi, bj, d_ijk, J, K, H, S, muB, g):
 
     n_atoms, ni, nj, nk, _ = s.shape
 
@@ -24,6 +24,7 @@ def total_energy(s, bi, bj, d_ijk, J, K, H, muB, g):
 
     EJ = 0.0
     for i_atom in range(n_atoms):
+        S_eff = S[i_atom] * (S[i_atom] + 1.0)
         Jnn, j_atom, di, dj, dk = Jij[i_atom]
         for i in range(ni):
             for j in range(nj):
@@ -33,14 +34,21 @@ def total_energy(s, bi, bj, d_ijk, J, K, H, muB, g):
                         j_atom, (i + di) % ni, (j + dj) % nj, (k + dk) % nk, :
                     ]
                     h_eff = np.einsum("ijk,ik->j", Jnn, Snn)
-                    EJ += -0.5 * Sn @ h_eff
+                    EJ += -0.5 * S_eff * (Sn @ h_eff)
 
     EK = 0.0
     for i_atom in range(n_atoms):
+        S_eff = S[i_atom] * (S[i_atom] + 1.0)
         Sn = s[i_atom]
-        EK += -np.einsum("...i,ij,...j->", Sn, K[i_atom], Sn, optimize=True)
+        EK += -S_eff * np.einsum(
+            "...i,ij,...j->", Sn, K[i_atom], Sn, optimize=True
+        )
 
-    EH = -muB * g * np.tensordot(s, H, axes=([4], [0])).sum()
+    EH = 0.0
+    for i_atom in range(n_atoms):
+        S_eff = S[i_atom] * (S[i_atom] + 1.0)
+        Sn = s[i_atom]
+        EH += -muB * g * S_eff * np.tensordot(Sn, H, axes=([3], [0])).sum()
     return EJ + EK + EH
 
 
@@ -60,14 +68,16 @@ def test_MnF2(g):
 
     mc = MonteCarlo(crystal)
 
-    J = mc.crystal.J * crystal.S * (crystal.S + 1)
+    J = mc.crystal.J
 
     nb_J, K, H = mc.crystal.get_magnetic_parameters()
     nb_offsets, nb_atom, nb_ijk = mc.crystal.get_compressed_sparse_row()
 
+    S = crystal.get_spin_quantum_numbers()
+
     for i in range(crystal.s.shape[0]):
         E = kernel.total_heisenberg_energy(
-            crystal.s[i], nb_offsets, nb_atom, nb_ijk, nb_J, K, H, muB, g
+            crystal.s[i], nb_offsets, nb_atom, nb_ijk, nb_J, K, H, S, muB, g
         )
         E0 = total_energy(
             crystal.s[i],
@@ -77,6 +87,7 @@ def test_MnF2(g):
             J[crystal.inverses],
             K,
             H,
+            S,
             muB,
             g,
         )
@@ -94,12 +105,13 @@ def test_MnF2(g):
         J[crystal.inverses],
         K,
         H,
+        S,
         muB,
         g,
     )
 
     E = kernel.total_heisenberg_energy(
-        mc.crystal.s[0], nb_offsets, nb_atom, nb_ijk, nb_J, K, H, muB, g
+        mc.crystal.s[0], nb_offsets, nb_atom, nb_ijk, nb_J, K, H, S, muB, g
     )
 
     assert np.isclose(E, E0)

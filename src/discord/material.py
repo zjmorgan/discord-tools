@@ -21,11 +21,11 @@ class Crystal:
 
         n_sites = len(sites)
 
-        S = np.asarray(S)
+        S_site = np.array(S)
 
-        self.S = S if S.ndim == 1 else np.full(n_sites, S)
+        self.S_site = S_site if S_site.ndim == 1 else np.full(n_sites, S)
 
-        assert len(self.S) == n_sites, "Mismatched quantum number length"
+        assert len(self.S_site) == n_sites, "Mismatched quantum number length"
 
         self.process_sites(sites)
 
@@ -55,6 +55,7 @@ class Crystal:
 
         mu = self.get_effective_moment()
         self.mu = []
+        self.S = []
 
         for j, site in enumerate(sites):
             atom, x, y, z = site
@@ -62,6 +63,7 @@ class Crystal:
                 self.atoms.append(atom)
                 self.xyz.append(self._wrap(np.array(pos)))
                 self.mu.append(mu[j])
+                self.S.append(self.S_site[j])
 
         self.n_atoms = len(self.atoms)
 
@@ -69,6 +71,7 @@ class Crystal:
         self.atoms = np.array(self.atoms)
 
         self.mu = np.array(self.mu)
+        self.S = np.array(self.S)
 
     def _wrap(self, val):
         val = np.array(val)
@@ -83,6 +86,7 @@ class Crystal:
         self.B = cholesky(self.G_, lower=False)
         self.R = np.dot(np.linalg.inv(self.A).T, np.linalg.inv(self.B))
         self.C = np.dot(self.A, np.diag(1 / np.sqrt(np.diag(self.G))))
+        self.C_ = np.linalg.inv(self.C)
 
     def get_super_cell_shape(self):
         return self.N
@@ -98,6 +102,9 @@ class Crystal:
 
     def get_moment_cartesian_transform(self):
         return self.C
+
+    def get_moment_crystal_axis_transform(self):
+        return self.C_
 
     def get_direct_metric_tensor(self):
         return self.G
@@ -178,8 +185,7 @@ class Crystal:
         return self.nb_offsets, self.nb_atom, self.nb_ijk
 
     def get_magnetic_parameters(self):
-        scale = self.S * (self.S + 1)
-        return self.nb_J * scale, self.K * scale, self.H
+        return self.nb_J, self.K, self.H
 
     def get_number_bonds(self):
         return self.n_bonds
@@ -202,10 +208,13 @@ class Crystal:
         self.s = s
 
     def get_effective_moment(self, g=2):
-        return g * np.sqrt(self.S * (self.S + 1)) * muB
+        return g * np.sqrt(self.S_site * (self.S_site + 1)) * muB
 
     def get_spin_moments(self):
         return np.einsum("j,ij...->ij...", self.mu, self.s)
+
+    def get_spin_quantum_numbers(self):
+        return self.S
 
     def get_spin_vectors(self):
         return self.s
@@ -228,7 +237,9 @@ class Crystal:
             axis=-1,
         )
 
+        A = self.get_direct_cartesian_transform()
+
         uvw = self.xyz[:, None, None, None, :] + offsets[None, ...]
-        r = np.einsum("ij,...j->...i", self.A, uvw)
+        r = np.einsum("ij,...j->...i", A, uvw)
 
         return r

@@ -26,6 +26,8 @@ def test_crystal_MnF2_transforms(a, c, crystal_MnF2):
     assert np.allclose(R, np.eye(3))
     C = crystal_MnF2.get_moment_cartesian_transform()
     assert np.allclose(C, np.eye(3))
+    C_ = crystal_MnF2.get_moment_crystal_axis_transform()
+    assert np.allclose(C_, np.eye(3))
 
 
 def test_crystal_MnF2_atoms(crystal_MnF2):

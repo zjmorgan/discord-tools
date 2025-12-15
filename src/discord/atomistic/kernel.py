@@ -52,13 +52,14 @@ def random_unit_vector():
 
 @njit
 def total_heisenberg_energy(
-    s, nb_offsets, nb_atom, nb_ijk, nb_J, K, H, muB, g
+    s, nb_offsets, nb_atom, nb_ijk, nb_J, K, H, S, muB, g
 ):
 
     n_atoms, ni, nj, nk, _ = s.shape
 
     EJ = 0.0
     for i_atom in range(n_atoms):
+        S_eff = S[i_atom] * (S[i_atom] + 1.0)
         for i in range(ni):
             for j in range(nj):
                 for k in range(nk):
@@ -79,11 +80,12 @@ def total_heisenberg_energy(
                         nj,
                         nk,
                     )
-                    EJ -= 0.5 * (sl0 * h0 + sl1 * h1 + sl2 * h2)
+                    EJ -= 0.5 * S_eff * (sl0 * h0 + sl1 * h1 + sl2 * h2)
 
     EK = 0.0
     for i_atom in range(n_atoms):
         K_l = K[i_atom]
+        S_eff = S[i_atom] * (S[i_atom] + 1.0)
         for i in range(ni):
             for j in range(nj):
                 for k in range(nk):
@@ -93,17 +95,18 @@ def total_heisenberg_energy(
                     Kv0 = K_l[0, 0] * v0 + K_l[0, 1] * v1 + K_l[0, 2] * v2
                     Kv1 = K_l[1, 0] * v0 + K_l[1, 1] * v1 + K_l[1, 2] * v2
                     Kv2 = K_l[2, 0] * v0 + K_l[2, 1] * v1 + K_l[2, 2] * v2
-                    EK -= v0 * Kv0 + v1 * Kv1 + v2 * Kv2
+                    EK -= S_eff * (v0 * Kv0 + v1 * Kv1 + v2 * Kv2)
 
     EH = 0.0
     for i_atom in range(n_atoms):
+        S_eff = S[i_atom] * (S[i_atom] + 1.0)
         for i in range(ni):
             for j in range(nj):
                 for k in range(nk):
                     v0 = s[i_atom, i, j, k, 0]
                     v1 = s[i_atom, i, j, k, 1]
                     v2 = s[i_atom, i, j, k, 2]
-                    EH -= muB * g * (v0 * H[0] + v1 * H[1] + v2 * H[2])
+                    EH -= muB * g * S_eff * (v0 * H[0] + v1 * H[1] + v2 * H[2])
 
     return EJ + EK + EH
 
@@ -153,6 +156,7 @@ def metropolis_heisenberg(
     nb_J,
     K,
     H,
+    S,
     muB,
     g,
     seed,
@@ -166,6 +170,8 @@ def metropolis_heisenberg(
     for _ in range(n_local_sweeps * n):
         flat_idx = np.random.randint(n)
         i_atom, i, j, k = unravel_site(flat_idx, n_atoms, ni, nj, nk)
+
+        S_eff = S[i_atom] * (S[i_atom] + 1.0)
 
         s_orig0 = s[i_atom, i, j, k, 0]
         s_orig1 = s[i_atom, i, j, k, 1]
@@ -201,7 +207,7 @@ def metropolis_heisenberg(
             nj,
             nk,
         )
-        dEJ = -(delta0 * h0 + delta1 * h1 + delta2 * h2)
+        dEJ = -S_eff * (delta0 * h0 + delta1 * h1 + delta2 * h2)
 
         K_ion = K[i_atom]
         s_sum0 = s_cand0 + s_orig0
@@ -218,9 +224,13 @@ def metropolis_heisenberg(
             K_ion[2, 0] * s_sum0 + K_ion[2, 1] * s_sum1 + K_ion[2, 2] * s_sum2
         )
 
-        dEK = -(delta0 * K_s_sum0 + delta1 * K_s_sum1 + delta2 * K_s_sum2)
+        dEK = -S_eff * (
+            delta0 * K_s_sum0 + delta1 * K_s_sum1 + delta2 * K_s_sum2
+        )
 
-        dEH = -muB * g * (delta0 * H[0] + delta1 * H[1] + delta2 * H[2])
+        dEH = (
+            -muB * g * S_eff * (delta0 * H[0] + delta1 * H[1] + delta2 * H[2])
+        )
 
         dE = dEJ + dEK + dEH
 

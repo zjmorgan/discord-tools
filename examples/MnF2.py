@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 
 from discord.material import Crystal
 from discord.atomistic.simulation import MonteCarlo
+from discord.visualization import Visualize
 
 cell = [4.873, 4.873, 3.130, 90, 90, 90]
 space_group = "P 42/m n m"
@@ -19,31 +20,35 @@ J[0] = 0.028 * np.eye(3)
 J[1] = -0.152 * np.eye(3)
 crystal.assign_magnetic_parameters(K, J)
 
+hkl = np.array([[1, 0, 0]])
+
 mc = MonteCarlo(crystal)
 
 t0 = time.time()
-result = mc.parallel_tempering(n_local_sweeps=2, n_outer=1000, n_thermal=700)
+result = mc.parallel_tempering(
+    hkl, n_local_sweeps=2, n_outer=10000, n_thermal=7000
+)
 t1 = time.time()
 
 print(f"Time: {t1 - t0:.2f} seconds")
 
 T = result["T"]
 
-chi_xx = result["chi"][:, 0, 0]
-chi_yy = result["chi"][:, 1, 1]
-chi_zz = result["chi"][:, 2, 2]
-chi_yz = result["chi"][:, 1, 2]
-chi_xz = result["chi"][:, 0, 2]
-chi_xy = result["chi"][:, 0, 1]
+chi_11 = result["chi"][:, 0, 0]
+chi_22 = result["chi"][:, 1, 1]
+chi_33 = result["chi"][:, 2, 2]
+chi_23 = result["chi"][:, 1, 2]
+chi_13 = result["chi"][:, 0, 2]
+chi_12 = result["chi"][:, 0, 1]
 
 fig, ax = plt.subplots(1, 1, layout="constrained")
 ax.minorticks_on()
-ax.plot(T, chi_xx, "-o", label="$\chi_{xx}$")
-ax.plot(T, chi_yy, "-o", label="$\chi_{yy}$")
-ax.plot(T, chi_zz, "-o", label="$\chi_{zz}$")
-ax.plot(T, chi_yz, "-o", label="$\chi_{yz}$")
-ax.plot(T, chi_xz, "-o", label="$\chi_{xz}$")
-ax.plot(T, chi_xy, "-o", label="$\chi_{xy}$")
+ax.plot(T, chi_11, "-o", label="$\chi_{11}$")
+ax.plot(T, chi_22, "-o", label="$\chi_{22}$")
+ax.plot(T, chi_33, "-o", label="$\chi_{33}$")
+ax.plot(T, chi_23, "-o", label="$\chi_{23}$")
+ax.plot(T, chi_13, "-o", label="$\chi_{13}$")
+ax.plot(T, chi_12, "-o", label="$\chi_{12}$")
 ax.legend(shadow=True)
 ax.set_xlabel("$T$ [K]")
 ax.set_ylabel("$\chi_{ij}$ [$\mu_B^2$/eV]")
@@ -81,44 +86,17 @@ ax.set_xlabel("$T$ [K]")
 ax.set_ylabel("$E$ [eV]")
 fig.savefig("MnF2_energy.png")
 
+I = result["I(ave)"][:, 0]
+sig = result["I(std)"][:, 0]
+
+fig, ax = plt.subplots(1, 1, layout="constrained")
+ax.minorticks_on()
+ax.errorbar(T, I, sig, fmt="-o")
+ax.set_xlabel("$T$ [K]")
+ax.set_ylabel("$I$ [arb. units]")
+fig.savefig("MnF2_intensity.png")
+
 s = crystal.get_spin_vectors()[0]
-r = crystal.get_atom_positions()
 
-fig = plt.figure(layout="constrained")
-ax = fig.add_subplot(111, projection="3d")
-
-x = r[..., 0].flatten()
-y = r[..., 1].flatten()
-z = r[..., 2].flatten()
-
-u = s[..., 0].flatten()
-v = s[..., 1].flatten()
-w = s[..., 2].flatten()
-
-phi = np.arctan2(v, u)
-hue = (phi + np.pi) / (2 * np.pi)
-
-lightness = 0.15 + 0.7 * (w + 1) / 2.0
-saturation = np.ones_like(hue)
-
-colors = [
-    colorsys.hls_to_rgb(hh, ll, ss)
-    for hh, ll, ss in zip(hue, lightness, saturation)
-]
-
-ax.quiver(
-    x,
-    y,
-    z,
-    u,
-    v,
-    w,
-    normalize=True,
-    pivot="middle",
-    color=colors,
-)
-
-ax.set_xlabel("x [$\AA$]")
-ax.set_ylabel("y [$\AA$]")
-ax.set_zlabel("z [$\AA$]")
-fig.savefig("MnF2_ground_state.png")
+viz = Visualize(crystal)
+viz.plot_spins(s, filename="MnF2_ground_state.png")

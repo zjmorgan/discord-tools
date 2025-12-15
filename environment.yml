@@ -10,6 +10,7 @@ dependencies:
   - numba
   - pip
   - mantid
+  - pyvista
   - pytest
   - black
   - sphinx
