@@ -289,6 +289,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">discord.parameters.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">p</span>
 
+
 <div class="viewcode-block" id="StructureFactor">
 <a class="viewcode-back" href="../../../discord.scattering.html#discord.scattering.intensity.StructureFactor">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">StructureFactor</span><span class="p">:</span>
@@ -365,34 +366,33 @@
         <span class="n">MQ</span> <span class="o">=</span> <span class="n">Mk</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ijk</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">ijk</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">ijk</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">:]</span>
 
         <span class="n">F</span> <span class="o">=</span> <span class="n">p</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">MQ</span> <span class="o">*</span> <span class="p">(</span><span class="n">pf</span> <span class="o">*</span> <span class="n">fQ</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        
+
         <span class="k">return</span> <span class="n">F</span></div>
 
 
 <div class="viewcode-block" id="StructureFactor.magnetic_intensity">
 <a class="viewcode-back" href="../../../discord.scattering.html#discord.scattering.intensity.StructureFactor.magnetic_intensity">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">magnetic_intensity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hkl</span><span class="p">):</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crystal</span><span class="o">.</span><span class="n">get_total_sites</span><span class="p">()</span>
         <span class="n">F</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">magnetic_structure_factor</span><span class="p">(</span><span class="n">hkl</span><span class="p">)</span>
 
         <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_spacing</span><span class="p">(</span><span class="n">hkl</span><span class="p">)</span>
         <span class="n">dhkl</span> <span class="o">=</span> <span class="n">hkl</span> <span class="o">*</span> <span class="n">d</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
 
-        <span class="n">C</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crystal</span><span class="o">.</span><span class="n">get_moment_cartesian_transform</span><span class="p">()</span>
         <span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crystal</span><span class="o">.</span><span class="n">get_direct_reciprocal_rotation</span><span class="p">()</span>
         <span class="n">B</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crystal</span><span class="o">.</span><span class="n">get_reciprocal_cartesian_transform</span><span class="p">()</span>
 
-        <span class="n">Fc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ij,klj-&gt;kli&quot;</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">F</span><span class="p">)</span>
         <span class="n">Qc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ij,kj-&gt;ki&quot;</span><span class="p">,</span> <span class="n">R</span> <span class="o">@</span> <span class="n">B</span><span class="p">,</span> <span class="n">dhkl</span><span class="p">)</span>
 
         <span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">Qc</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">Q</span><span class="p">[</span><span class="n">Q</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
         <span class="n">Q_hat</span> <span class="o">=</span> <span class="n">Qc</span> <span class="o">/</span> <span class="n">Q</span>
 
-        <span class="n">Fc_dot_Q_hat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Fc</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span> <span class="o">*</span> <span class="n">Q_hat</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-        <span class="n">Fc_perp</span> <span class="o">=</span> <span class="n">Fc</span> <span class="o">-</span> <span class="n">Q_hat</span> <span class="o">*</span> <span class="n">Fc_dot_Q_hat</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="n">F_dot_Q_hat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span> <span class="o">*</span> <span class="n">Q_hat</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">F_perp</span> <span class="o">=</span> <span class="n">F</span> <span class="o">-</span> <span class="n">Q_hat</span> <span class="o">*</span> <span class="n">F_dot_Q_hat</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
 
-        <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Fc_perp</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span> <span class="o">*</span> <span class="n">Fc_perp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">real</span>
-        <span class="k">return</span> <span class="n">I</span></div>
+        <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">F_perp</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span> <span class="o">*</span> <span class="n">F_perp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">real</span>
+        <span class="k">return</span> <span class="n">I</span> <span class="o">/</span> <span class="n">N</span></div>
 </div>
 
 </pre></div>
