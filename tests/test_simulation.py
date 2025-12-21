@@ -77,7 +77,19 @@ def test_MnF2(g):
 
     for i in range(crystal.s.shape[0]):
         E = kernel.total_heisenberg_energy(
-            crystal.s[i], nb_offsets, nb_atom, nb_ijk, nb_J, K, H, S, muB, g
+            crystal.s[i],
+            crystal.delta_atoms,
+            crystal.delta_ions,
+            crystal.delta_bonds,
+            nb_offsets,
+            nb_atom,
+            nb_ijk,
+            nb_J,
+            K,
+            H,
+            S,
+            muB,
+            g,
         )
         E0 = total_energy(
             crystal.s[i],
@@ -111,7 +123,19 @@ def test_MnF2(g):
     )
 
     E = kernel.total_heisenberg_energy(
-        mc.crystal.s[0], nb_offsets, nb_atom, nb_ijk, nb_J, K, H, S, muB, g
+        mc.crystal.s[0],
+        mc.crystal.delta_atoms,
+        mc.crystal.delta_ions,
+        mc.crystal.delta_bonds,
+        nb_offsets,
+        nb_atom,
+        nb_ijk,
+        nb_J,
+        K,
+        H,
+        S,
+        muB,
+        g,
     )
 
     assert np.isclose(E, E0)

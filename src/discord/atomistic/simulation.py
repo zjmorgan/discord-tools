@@ -41,6 +41,9 @@ class MonteCarlo:
         self,
         n_local_sweeps,
         n_replicas,
+        delta_atoms,
+        delta_ions,
+        delta_bonds,
         nb_offsets,
         nb_atom,
         nb_ijk,
@@ -54,6 +57,9 @@ class MonteCarlo:
             (
                 i,
                 self.s[i],
+                delta_atoms,
+                delta_ions,
+                delta_bonds,
                 self.beta[i],
                 self.E[i],
                 n_local_sweeps,
@@ -155,6 +161,8 @@ class MonteCarlo:
 
         nb_J, K, H = self.crystal.get_magnetic_parameters()
 
+        delta_atoms, delta_ions, delta_bonds = self.crystal.get_delta_arrays()
+
         S = self.crystal.get_spin_quantum_numbers()
 
         self.M_sum = np.zeros((n_replicas, 3))
@@ -177,7 +185,19 @@ class MonteCarlo:
 
         for i in range(n_replicas):
             self.E[i] = kernel.total_heisenberg_energy(
-                self.s[i], nb_offsets, nb_atom, nb_ijk, nb_J, K, H, S, muB, g
+                self.s[i],
+                delta_atoms,
+                delta_ions,
+                delta_bonds,
+                nb_offsets,
+                nb_atom,
+                nb_ijk,
+                nb_J,
+                K,
+                H,
+                S,
+                muB,
+                g,
             )
 
         with Pool(processes=n_replicas) as self.pool:
@@ -187,6 +207,9 @@ class MonteCarlo:
                 self.metropolis_hastings(
                     n_local_sweeps,
                     n_replicas,
+                    delta_atoms,
+                    delta_ions,
+                    delta_bonds,
                     nb_offsets,
                     nb_atom,
                     nb_ijk,

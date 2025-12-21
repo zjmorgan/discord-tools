@@ -10,7 +10,7 @@ from discord.visualization import Visualize
 cell = [4.873, 4.873, 3.130, 90, 90, 90]
 space_group = "P 42/m n m"
 sites = [["Mn", 0.0, 0.0, 0.0]]
-crystal = Crystal(cell, space_group, sites, S=2.5)
+crystal = Crystal(cell, space_group, sites, (8, 8, 8), S=2.5)
 
 crystal.generate_bonds(d_cut=4.8)
 K, J = crystal.initialize_magnetic_parameters()

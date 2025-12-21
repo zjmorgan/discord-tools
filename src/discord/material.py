@@ -179,7 +179,32 @@ class Crystal:
         self.K = np.zeros((self.n_atoms, 3, 3))
         self.J = np.zeros((self.n_types, 3, 3))
         self._build_neighbor_arrays()
+        self._auxiliary_parameter()
         return self.K, self.J
+
+    def _auxiliary_parameter(self):
+        shape = (self.n_atoms, *self.N)
+        self.delta_atoms = np.ones(shape)
+        self.delta_ions = np.ones(shape)
+        self.delta_bonds = np.ones(shape)
+
+    def get_delta_arrays(self):
+        """Obtain auxiliary scaling arrays for atoms, ions and bonds.
+
+        Returns
+        -------
+        delta_atoms, delta_ions, delta_bonds : ndarray
+            Per-atom, per-ion and per-bond scaling factors on the spin
+            lattice, all with shape ``(n_atoms, *N)``.
+        """
+
+        return self.delta_atoms, self.delta_ions, self.delta_bonds
+
+    def set_dela_arrays(self, delta_atoms, delta_ions, delta_bonds):
+        """Update auxiliary scaling arrays for atoms, ions and bonds."""
+        self.delta_atoms = delta_atoms
+        self.delta_ions = delta_ions
+        self.delta_bonds = delta_bonds
 
     def assign_magnetic_parameters(self, K, J, H=np.zeros(3)):
         """Assign anisotropy, exchange and field in the spin basis.

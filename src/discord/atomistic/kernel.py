@@ -52,7 +52,19 @@ def random_unit_vector():
 
 @njit
 def total_heisenberg_energy(
-    s, nb_offsets, nb_atom, nb_ijk, nb_J, K, H, S, muB, g
+    s,
+    delta_atoms,
+    delta_ions,
+    delta_bonds,
+    nb_offsets,
+    nb_atom,
+    nb_ijk,
+    nb_J,
+    K,
+    H,
+    S,
+    muB,
+    g,
 ):
     """Total Heisenberg energy for a single replica."""
 
@@ -67,8 +79,10 @@ def total_heisenberg_energy(
                     sl0 = s[i_atom, i, j, k, 0]
                     sl1 = s[i_atom, i, j, k, 1]
                     sl2 = s[i_atom, i, j, k, 2]
+                    delta = delta_bonds[i_atom, i, j, k]
                     h0, h1, h2 = local_field_at_site(
                         s,
+                        delta_bonds,
                         i_atom,
                         i,
                         j,
@@ -81,7 +95,9 @@ def total_heisenberg_energy(
                         nj,
                         nk,
                     )
-                    EJ -= 0.5 * S_eff * (sl0 * h0 + sl1 * h1 + sl2 * h2)
+                    EJ -= (
+                        0.5 * S_eff * (sl0 * h0 + sl1 * h1 + sl2 * h2) * delta
+                    )
 
     EK = 0.0
     for i_atom in range(n_atoms):
@@ -90,13 +106,14 @@ def total_heisenberg_energy(
         for i in range(ni):
             for j in range(nj):
                 for k in range(nk):
-                    v0 = s[i_atom, i, j, k, 0]
-                    v1 = s[i_atom, i, j, k, 1]
-                    v2 = s[i_atom, i, j, k, 2]
-                    Kv0 = K_l[0, 0] * v0 + K_l[0, 1] * v1 + K_l[0, 2] * v2
-                    Kv1 = K_l[1, 0] * v0 + K_l[1, 1] * v1 + K_l[1, 2] * v2
-                    Kv2 = K_l[2, 0] * v0 + K_l[2, 1] * v1 + K_l[2, 2] * v2
-                    EK -= S_eff * (v0 * Kv0 + v1 * Kv1 + v2 * Kv2)
+                    s0 = s[i_atom, i, j, k, 0]
+                    s1 = s[i_atom, i, j, k, 1]
+                    s2 = s[i_atom, i, j, k, 2]
+                    delta = delta_ions[i_atom, i, j, k]
+                    Ks0 = K_l[0, 0] * s0 + K_l[0, 1] * s1 + K_l[0, 2] * s2
+                    Ks1 = K_l[1, 0] * s0 + K_l[1, 1] * s1 + K_l[1, 2] * s2
+                    Ks2 = K_l[2, 0] * s0 + K_l[2, 1] * s1 + K_l[2, 2] * s2
+                    EK -= S_eff * (s0 * Ks0 + s1 * Ks1 + s2 * Ks2) * delta
 
     EH = 0.0
     for i_atom in range(n_atoms):
@@ -104,17 +121,36 @@ def total_heisenberg_energy(
         for i in range(ni):
             for j in range(nj):
                 for k in range(nk):
-                    v0 = s[i_atom, i, j, k, 0]
-                    v1 = s[i_atom, i, j, k, 1]
-                    v2 = s[i_atom, i, j, k, 2]
-                    EH -= muB * g * S_eff * (v0 * H[0] + v1 * H[1] + v2 * H[2])
+                    s0 = s[i_atom, i, j, k, 0]
+                    s1 = s[i_atom, i, j, k, 1]
+                    s2 = s[i_atom, i, j, k, 2]
+                    delta = delta_atoms[i_atom, i, j, k]
+                    EH -= (
+                        muB
+                        * g
+                        * S_eff
+                        * (s0 * H[0] + s1 * H[1] + s2 * H[2])
+                        * delta
+                    )
 
     return EJ + EK + EH
 
 
 @njit
 def local_field_at_site(
-    s, i_atom, i, j, k, nb_offsets, nb_atom, nb_ijk, nb_J, ni, nj, nk
+    s,
+    delta_bonds,
+    i_atom,
+    i,
+    j,
+    k,
+    nb_offsets,
+    nb_atom,
+    nb_ijk,
+    nb_J,
+    ni,
+    nj,
+    nk,
 ):
     hx = 0.0
     hy = 0.0
@@ -132,14 +168,16 @@ def local_field_at_site(
         jj = (j + dj) % nj
         kk = (k + dk) % nk
 
+        delta_nn = delta_bonds[nn, ii, jj, kk]
+
         snn0 = s[nn, ii, jj, kk, 0]
         snn1 = s[nn, ii, jj, kk, 1]
         snn2 = s[nn, ii, jj, kk, 2]
 
         J = nb_J[b]
-        hx += J[0, 0] * snn0 + J[0, 1] * snn1 + J[0, 2] * snn2
-        hy += J[1, 0] * snn0 + J[1, 1] * snn1 + J[1, 2] * snn2
-        hz += J[2, 0] * snn0 + J[2, 1] * snn1 + J[2, 2] * snn2
+        hx += (J[0, 0] * snn0 + J[0, 1] * snn1 + J[0, 2] * snn2) * delta_nn
+        hy += (J[1, 0] * snn0 + J[1, 1] * snn1 + J[1, 2] * snn2) * delta_nn
+        hz += (J[2, 0] * snn0 + J[2, 1] * snn1 + J[2, 2] * snn2) * delta_nn
 
     return hx, hy, hz
 
@@ -148,6 +186,9 @@ def local_field_at_site(
 def metropolis_heisenberg(
     idx,
     s,
+    delta_atoms,
+    delta_ions,
+    delta_bonds,
     beta,
     E,
     n_local_sweeps,
@@ -200,8 +241,11 @@ def metropolis_heisenberg(
         delta1 = s_cand1 - s_orig1
         delta2 = s_cand2 - s_orig2
 
+        delta_bond = delta_bonds[i_atom, i, j, k]
+
         h0, h1, h2 = local_field_at_site(
             s,
+            delta_bonds,
             i_atom,
             i,
             j,
@@ -214,7 +258,9 @@ def metropolis_heisenberg(
             nj,
             nk,
         )
-        dEJ = -S_eff * (delta0 * h0 + delta1 * h1 + delta2 * h2)
+        dEJ = -S_eff * (delta0 * h0 + delta1 * h1 + delta2 * h2) * delta_bond
+
+        delta_ion = delta_ions[i_atom, i, j, k]
 
         K_ion = K[i_atom]
         s_sum0 = s_cand0 + s_orig0
@@ -231,13 +277,17 @@ def metropolis_heisenberg(
             K_ion[2, 0] * s_sum0 + K_ion[2, 1] * s_sum1 + K_ion[2, 2] * s_sum2
         )
 
-        dEK = -S_eff * (
-            delta0 * K_s_sum0 + delta1 * K_s_sum1 + delta2 * K_s_sum2
+        dEK = (
+            -S_eff
+            * (delta0 * K_s_sum0 + delta1 * K_s_sum1 + delta2 * K_s_sum2)
+            * delta_ion
         )
+
+        delta_atom = delta_atoms[i_atom, i, j, k]
 
         dEH = (
             -muB * g * S_eff * (delta0 * H[0] + delta1 * H[1] + delta2 * H[2])
-        )
+        ) * delta_atom
 
         dE = dEJ + dEK + dEH
 
