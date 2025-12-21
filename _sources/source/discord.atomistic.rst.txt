@@ -4,6 +4,14 @@ discord.atomistic package
 Submodules
 ----------
 
+discord.atomistic.correlations module
+-------------------------------------
+
+.. automodule:: discord.atomistic.correlations
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 discord.atomistic.kernel module
 -------------------------------
 
