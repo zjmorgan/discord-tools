@@ -3,6 +3,7 @@ import colorsys
 import numpy as np
 
 import scipy.linalg
+import scipy.signal
 
 import pyvista as pv
 
@@ -55,6 +56,16 @@ class VisualizeReciprocalSpace:
             for i in range(3)
         ]
         return names
+
+    def get_projection_matrix(self):
+        ei = mtd["volume"].getExperimentInfo(0)
+        W = np.eye(3)
+        if ei.run().hasProperty("W_MATRIX"):
+            W = np.array(ei.run().getLogData("W_MATRIX").value).reshape(3, 3)
+        return W
+
+    def save(self, filename):
+        SaveMD(InputWorkspace="volume", Filename=filename)
 
     def create_volume(
         self,
@@ -133,19 +144,44 @@ class VisualizeReciprocalSpace:
             indexing="ij",
         )
 
-        signal = mtd["volume"].getSignalArray().squeeze().copy()
-        errors = np.sqrt(mtd["volume"].getErrorSquaredArray().squeeze())
+        signal = mtd["volume"].getSignalArray().copy()
+        errors = np.sqrt(mtd["volume"].getErrorSquaredArray())
 
         return xs, signal, errors
+
+    def filter_intensity(self, m=2):
+        N = np.array(self.crystal.get_super_cell_shape())
+        r_cut = 0.5 * (1 - 1 / m)
+
+        W = self.get_projection_matrix()
+
+        (x1, x2, x3), I, _ = self.extract_data()
+        hkl = np.einsum("ij,j...->...i", W, [x1, x2, x3])
+
+        Q = hkl * N
+        G = np.round(Q) * 0
+
+        l = np.sinc((Q - G) / m)
+        l[np.abs(Q - G) > m] = 0.0
+
+        L = np.prod(l, axis=3)
+        W_sinc = np.prod(np.sinc(r_cut * (Q - G)), axis=3)
+
+        I[~np.isfinite(I)] = 0
+
+        W_Q = L * W_sinc
+        W_Q /= np.sum(W_Q)
+
+        I_filt = scipy.signal.convolve(I, W_Q, mode="same")
+
+        mtd["volume"].setSignalArray(I_filt)
 
     def plot_slice(
         self, value=0, thickness=0.1, normal=[0, 0, 1], filename=None
     ):
-        ei = mtd["volume"].getExperimentInfo(0)
-        W = np.eye(3)
-        if ei.run().hasProperty("W_MATRIX"):
-            W = np.array(ei.run().getLogData("W_MATRIX").value).reshape(3, 3)
-        B = ei.sample().getOrientedLattice().getB()
+        self.filter_intensity()
+        W = self.get_projection_matrix()
+        B = self.crystal.get_reciprocal_cartesian_transform()
 
         integrate = [value - thickness, value + thickness]
         slice_lims = [None, None]
@@ -262,47 +298,6 @@ class VisualizeCorrelations:
     def __init__(self, crystal):
         self.crystal = crystal
 
-    @staticmethod
-    def correlations(s):
-        """Compute real-space spin–spin correlations C_ij(r).
-
-        Parameters
-        ----------
-        s : ndarray
-            Spin configuration with shape ``(n_atoms, nx, ny, nz, 3)``.
-
-        Returns
-        -------
-        Cij : ndarray
-            Correlations with shape ``(n_atoms, n_atoms, nx, ny, nz)``.
-        """
-
-        s = np.asarray(s)
-        nb, nx, ny, nz, _ = s.shape
-        N = nx * ny * nz
-
-        F = np.fft.fftn(s, axes=(1, 2, 3))
-
-        Cij = np.empty((nb, nb, nx, ny, nz), dtype=np.float64)
-
-        rx = -np.arange(nx) % nx
-        ry = -np.arange(ny) % ny
-        rz = -np.arange(nz) % nz
-
-        for i in range(nb):
-            for j in range(i, nb):
-                acc = 0.0
-                for a in range(3):
-                    acc += np.fft.ifftn(
-                        np.conj(F[i, ..., a]) * F[j, ..., a]
-                    ).real
-                corr = acc / N
-                Cij[i, j] = corr
-                if j != i:
-                    Cij[j, i] = corr[np.ix_(rx, ry, rz)]
-
-        return Cij
-
     def get_projection_names(self, W):
         char_dict = {0: "0", 1: "{1}", -1: "-{1}"}
         chars = ["u", "v", "w"]
@@ -319,9 +314,11 @@ class VisualizeCorrelations:
         ]
         return names
 
+    def update_result(self, C_ij):
+        self.C_ij = C_ij
+
     def plot_slice(
         self,
-        s,
         p1=[1, 0, 0],
         p2=[0, 1, 0],
         p3=[0, 0, 1],
@@ -329,24 +326,20 @@ class VisualizeCorrelations:
         tolerance=0.1,
         filename=None,
     ):
-        """Plot in-plane spin correlations summed over all atom pairs.
+        """Plot in-plane correlations summed over all atom pairs.
 
         Parameters
         ----------
-        s : ndarray
-            Spin configuration with shape ``(n_atoms, nx, ny, nz, 3)``.
         filename : str
             Output image filename.
         """
 
-        Cij = self.correlations(s)
-
-        n_atoms, _, nx, ny, nz = Cij.shape
+        n_atoms, _, nx, ny, nz = self.C_ij.shape
 
         xyz = self.crystal.get_unit_atom_position()
         A = self.crystal.get_direct_cartesian_transform()
 
-        Cshift = np.fft.fftshift(Cij, axes=(2, 3, 4))
+        Cshift = np.fft.fftshift(self.C_ij, axes=(2, 3, 4))
 
         dx = np.arange(nx) - nx // 2
         dy = np.arange(ny) - ny // 2
@@ -380,11 +373,29 @@ class VisualizeCorrelations:
         x2 = p2[0] * x + p2[1] * y + p2[2] * z
         x3 = p3[0] * x + p3[1] * y + p3[2] * z
 
+        X1 = p1[0] * Dx + p1[1] * Dy + p1[2] * Dz
+        X2 = p2[0] * Dx + p2[1] * Dy + p2[2] * Dz
+        X3 = p3[0] * Dx + p3[1] * Dy + p3[2] * Dz
+
         condition = x3 - value
 
         mask = np.isclose(condition, 0.0, atol=tolerance)
+        r1_all = x1[mask]
+        r2_all = x2[mask]
+        c_all = corr_flat[mask]
 
-        c = corr_flat[mask]
+        if r1_all.size > 0:
+            key = np.round(np.column_stack([r1_all, r2_all]), decimals=8)
+            uniq, inv = np.unique(key, axis=0, return_inverse=True)
+            n_unique = uniq.shape[0]
+
+            r1 = uniq[:, 0]
+            r2 = uniq[:, 1]
+            c_sum = np.bincount(inv, weights=c_all, minlength=n_unique)
+            counts = np.bincount(inv, minlength=n_unique)
+            c = c_sum / counts
+        else:
+            r1 = r2 = c = np.array([])
 
         Ap = np.dot(A, W)
 
@@ -426,10 +437,10 @@ class VisualizeCorrelations:
         ax.minorticks_on()
 
         sc = ax.scatter(
-            x1[mask],
-            x2[mask],
+            r1,
+            r2,
             c=c,
-            cmap="bwr",
+            cmap="seismic",
             vmin=-1,
             vmax=1,
             transform=trans,
@@ -441,10 +452,25 @@ class VisualizeCorrelations:
         ax.set_ylabel(ylabel)
         ax.set_title(title)
 
-        label = r"$\langle \boldsymbol{S}_i(0) . \boldsymbol{S}_j(r) \rangle$"
+        label = (
+            r"$\langle \boldsymbol{S}_i(0) \cdot \boldsymbol{S}_j(r) \rangle$"
+        )
 
         cb = fig.colorbar(sc, label=label)
         cb.ax.minorticks_on()
+
+        super_mask = np.isclose(X3 - value, 0.0, atol=tolerance)
+
+        if np.any(super_mask):
+            xmin = X1[super_mask].min()
+            xmax = X1[super_mask].max()
+            ymin = X2[super_mask].min()
+            ymax = X2[super_mask].max()
+
+            bx = [xmin, xmax, xmax, xmin, xmin]
+            by = [ymin, ymin, ymax, ymax, ymin]
+
+            ax.plot(bx, by, color="k", linewidth=1, transform=trans)
 
         fig.savefig(filename, dpi=200)
 

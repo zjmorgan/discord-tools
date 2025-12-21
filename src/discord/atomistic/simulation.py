@@ -4,7 +4,7 @@ from multiprocessing import Pool
 
 from discord.scattering.intensity import StructureFactor
 
-from discord.atomistic import kernel
+from discord.atomistic import kernel, correlations
 from discord.parameters.constants import kB, muB
 
 
@@ -101,6 +101,11 @@ class MonteCarlo:
             self.I_sum += I
             self.I_sq_sum += I**2
 
+        C_ij = correlations.vector_vector(self.s)
+
+        self.C_ij_sum += C_ij
+        self.C_ij_sq_sum += C_ij**2
+
     def ensemble_average(self, n_sample):
         M_ave = self.M_sum / n_sample
         M_sq_ave = self.M_sq_sum / n_sample
@@ -127,6 +132,10 @@ class MonteCarlo:
 
             I_std = np.sqrt(I_sq_ave - I_ave**2)
 
+        C_ij_ave = self.C_ij_sum / n_sample
+        C_ij_sq_ave = self.C_ij_sq_sum / n_sample
+        C_ij_std = np.sqrt(C_ij_sq_ave - C_ij_ave**2)
+
         parameters = {
             "T": self.T,
             "M(ave)": M_ave,
@@ -137,6 +146,8 @@ class MonteCarlo:
             "C": C,
             "I(ave)": I_ave,
             "I(std)": I_std,
+            "C_ij(ave)": C_ij_ave,
+            "C_ij(std)": C_ij_std,
         }
 
         return parameters
@@ -177,6 +188,12 @@ class MonteCarlo:
         if hkl is not None:
             self.I_sum = np.zeros((n_replicas, len(hkl)))
             self.I_sq_sum = np.zeros((n_replicas, len(hkl)))
+
+        n_atoms = self.crystal.get_number_atoms()
+        N = self.crystal.get_super_cell_shape()
+
+        self.C_ij_sum = np.zeros((n_replicas, n_atoms, n_atoms, *N))
+        self.C_ij_sq_sum = np.zeros((n_replicas, n_atoms, n_atoms, *N))
 
         self.crystal.initialize_random_spin_configurations(n_replicas)
 
