@@ -205,7 +205,7 @@ class VisualizeReciprocalSpace:
 
         i = np.abs(normal).tolist().index(1)
 
-        form = "{} = ({:.2f},{:.2f})"
+        form = "${}$ = $({:.2f},{:.2f})$"
 
         title = form.format(mtd["slice"].getDimension(i).name, *integrate)
         dims = mtd["slice"].getNonIntegratedDimensions()
@@ -217,7 +217,7 @@ class VisualizeReciprocalSpace:
             for dim in dims
         ]
 
-        labels = ["{} ({})".format(dim.name, dim.getUnits()) for dim in dims]
+        labels = ["${}$".format(dim.name) for dim in dims]
         signal = mtd["slice"].getSignalArray().T.copy().squeeze()
 
         signal[signal <= 0] = np.nan
@@ -277,7 +277,6 @@ class VisualizeReciprocalSpace:
 
         ax.set_xlabel(labels[0])
         ax.set_ylabel(labels[1])
-
         ax.set_title(title)
 
         cb = fig.colorbar(im, ax=ax)
@@ -447,12 +446,18 @@ class VisualizeCorrelations:
             rasterized=True,
         )
 
-        ax.set_aspect(aspect)
-        ax.set_xlabel(xlabel)
-        ax.set_ylabel(ylabel)
-        ax.set_title(title)
+        min_value = value - tolerance
+        max_value = value + tolerance
 
-        label = r"$\langle \boldsymbol{S}_i(\boldsymbol{0}) \cdot \boldsymbol{S}_j(\boldsymbol{r}) \rangle$"
+        ax.set_aspect(aspect)
+        ax.set_xlabel(r"${}$".format(xlabel))
+        ax.set_ylabel(r"${}$".format(ylabel))
+        ax.set_title(r"${}$ = $({},{})$".format(title, min_value, max_value))
+
+        label = (
+            r"$\langle \boldsymbol{S}_i(\boldsymbol{0}) \cdot "
+            r"\boldsymbol{S}_j(\boldsymbol{r}_{ij}) \rangle$"
+        )
 
         cb = fig.colorbar(sc, label=label)
         cb.ax.minorticks_on()
