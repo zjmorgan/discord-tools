@@ -452,9 +452,7 @@ class VisualizeCorrelations:
         ax.set_ylabel(ylabel)
         ax.set_title(title)
 
-        label = (
-            r"$\langle \boldsymbol{S}_i(0) \cdot \boldsymbol{S}_j(r) \rangle$"
-        )
+        label = r"$\langle \boldsymbol{S}_i(\boldsymbol{0}) \cdot \boldsymbol{S}_j(\boldsymbol{r}) \rangle$"
 
         cb = fig.colorbar(sc, label=label)
         cb.ax.minorticks_on()
