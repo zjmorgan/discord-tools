@@ -422,11 +422,174 @@ using <a class="reference internal" href="#discord.atomistic.kernel.total_heisen
 </dd></dl>
 
 </section>
+<section id="module-discord.atomistic.plotting">
+<span id="discord-atomistic-plotting-module"></span><h2>discord.atomistic.plotting module<a class="headerlink" href="#module-discord.atomistic.plotting" title="Link to this heading">#</a></h2>
+<p>Plotting utilities for Monte Carlo simulation results.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="discord.atomistic.plotting.plot_energy">
+<span class="sig-name descname"><span class="pre">plot_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E_std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/plotting.py#L152-L193"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.plotting.plot_energy" title="Link to this definition">#</a></dt>
+<dd><p>Plot energy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>T</strong><span class="classifier">array_like</span></dt><dd><p>Temperature array</p>
+</dd>
+<dt><strong>E</strong><span class="classifier">array_like</span></dt><dd><p>Average energy</p>
+</dd>
+<dt><strong>E_std</strong><span class="classifier">array_like, optional</span></dt><dd><p>Standard deviation of energy</p>
+</dd>
+<dt><strong>filename</strong><span class="classifier">str, optional</span></dt><dd><p>If provided, save figure to this path</p>
+</dd>
+<dt><strong>show</strong><span class="classifier">bool, optional</span></dt><dd><p>If True, display the figure</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>fig, ax</strong><span class="classifier">matplotlib figure and axes</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="discord.atomistic.plotting.plot_heat_capacity">
+<span class="sig-name descname"><span class="pre">plot_heat_capacity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/plotting.py#L115-L149"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.plotting.plot_heat_capacity" title="Link to this definition">#</a></dt>
+<dd><p>Plot heat capacity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>T</strong><span class="classifier">array_like</span></dt><dd><p>Temperature array</p>
+</dd>
+<dt><strong>C</strong><span class="classifier">array_like</span></dt><dd><p>Heat capacity</p>
+</dd>
+<dt><strong>filename</strong><span class="classifier">str, optional</span></dt><dd><p>If provided, save figure to this path</p>
+</dd>
+<dt><strong>show</strong><span class="classifier">bool, optional</span></dt><dd><p>If True, display the figure</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>fig, ax</strong><span class="classifier">matplotlib figure and axes</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="discord.atomistic.plotting.plot_intensity">
+<span class="sig-name descname"><span class="pre">plot_intensity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hkl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/plotting.py#L196-L242"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.plotting.plot_intensity" title="Link to this definition">#</a></dt>
+<dd><p>Plot magnetic Bragg intensity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>T</strong><span class="classifier">array_like</span></dt><dd><p>Temperature array</p>
+</dd>
+<dt><strong>I</strong><span class="classifier">array_like</span></dt><dd><p>Intensity</p>
+</dd>
+<dt><strong>sig</strong><span class="classifier">array_like, optional</span></dt><dd><p>Standard deviation of intensity</p>
+</dd>
+<dt><strong>hkl</strong><span class="classifier">array_like, optional</span></dt><dd><p>HKL indices for title</p>
+</dd>
+<dt><strong>filename</strong><span class="classifier">str, optional</span></dt><dd><p>If provided, save figure to this path</p>
+</dd>
+<dt><strong>show</strong><span class="classifier">bool, optional</span></dt><dd><p>If True, display the figure</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>fig, ax</strong><span class="classifier">matplotlib figure and axes</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="discord.atomistic.plotting.plot_magnetization">
+<span class="sig-name descname"><span class="pre">plot_magnetization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M_ave</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M_std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/plotting.py#L59-L112"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.plotting.plot_magnetization" title="Link to this definition">#</a></dt>
+<dd><p>Plot magnetization components.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>T</strong><span class="classifier">array_like</span></dt><dd><p>Temperature array</p>
+</dd>
+<dt><strong>M_ave</strong><span class="classifier">array_like</span></dt><dd><p>Average magnetization with shape (n_temps, 3)</p>
+</dd>
+<dt><strong>M_std</strong><span class="classifier">array_like, optional</span></dt><dd><p>Standard deviation of magnetization</p>
+</dd>
+<dt><strong>filename</strong><span class="classifier">str, optional</span></dt><dd><p>If provided, save figure to this path</p>
+</dd>
+<dt><strong>show</strong><span class="classifier">bool, optional</span></dt><dd><p>If True, display the figure</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>fig, ax</strong><span class="classifier">matplotlib figure and axes</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="discord.atomistic.plotting.plot_results">
+<span class="sig-name descname"><span class="pre">plot_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mc'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outdir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/plotting.py#L245-L321"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.plotting.plot_results" title="Link to this definition">#</a></dt>
+<dd><p>Generate all standard plots from simulation results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>result</strong><span class="classifier">dict</span></dt><dd><p>Dictionary returned by parallel_tempering</p>
+</dd>
+<dt><strong>prefix</strong><span class="classifier">str, optional</span></dt><dd><p>Prefix for output filenames</p>
+</dd>
+<dt><strong>outdir</strong><span class="classifier">str, optional</span></dt><dd><p>Directory to save plots</p>
+</dd>
+<dt><strong>show</strong><span class="classifier">bool, optional</span></dt><dd><p>If True, display figures</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>figures</strong><span class="classifier">dict</span></dt><dd><p>Dictionary of matplotlib figures</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="discord.atomistic.plotting.plot_susceptibility">
+<span class="sig-name descname"><span class="pre">plot_susceptibility</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/plotting.py#L9-L56"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.plotting.plot_susceptibility" title="Link to this definition">#</a></dt>
+<dd><p>Plot magnetic susceptibility tensor components.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>T</strong><span class="classifier">array_like</span></dt><dd><p>Temperature array</p>
+</dd>
+<dt><strong>chi</strong><span class="classifier">array_like</span></dt><dd><p>Susceptibility tensor with shape (n_temps, 3, 3)</p>
+</dd>
+<dt><strong>filename</strong><span class="classifier">str, optional</span></dt><dd><p>If provided, save figure to this path</p>
+</dd>
+<dt><strong>show</strong><span class="classifier">bool, optional</span></dt><dd><p>If True, display the figure</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>fig, ax</strong><span class="classifier">matplotlib figure and axes</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 <section id="module-discord.atomistic.simulation">
 <span id="discord-atomistic-simulation-module"></span><h2>discord.atomistic.simulation module<a class="headerlink" href="#module-discord.atomistic.simulation" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">MonteCarlo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crystal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[10,</span> <span class="pre">300]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_replicas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L11-L390"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">MonteCarlo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crystal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[10,</span> <span class="pre">300]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_replicas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L13-L412"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Replica-exchange Monte Carlo simulation.</p>
 <p class="rubric">Methods</p>
@@ -469,42 +632,42 @@ using <a class="reference internal" href="#discord.atomistic.kernel.total_heisen
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo.ensemble_average">
-<span class="sig-name descname"><span class="pre">ensemble_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_sample</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L164-L208"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.ensemble_average" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">ensemble_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_sample</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L167-L211"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.ensemble_average" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo.get_n_replicas">
-<span class="sig-name descname"><span class="pre">get_n_replicas</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L19-L20"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.get_n_replicas" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_n_replicas</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L21-L22"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.get_n_replicas" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo.make_seeds">
-<span class="sig-name descname"><span class="pre">make_seeds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_replicas</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L22-L25"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.make_seeds" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">make_seeds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_replicas</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L24-L27"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.make_seeds" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo.metropolis_hastings">
-<span class="sig-name descname"><span class="pre">metropolis_hastings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_local_sweeps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_replicas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bonds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_atom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_ijk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L40-L86"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.metropolis_hastings" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">metropolis_hastings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_local_sweeps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_replicas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bonds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_atom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_ijk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L42-L88"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.metropolis_hastings" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo.parallel_tempering">
-<span class="sig-name descname"><span class="pre">parallel_tempering</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hkl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_local_sweeps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_outer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_thermal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">700</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_clusters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L210-L322"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.parallel_tempering" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">parallel_tempering</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hkl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_local_sweeps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_outer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_thermal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">700</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_clusters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outdir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'checkpoints'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mc'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L213-L344"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.parallel_tempering" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo.replica_exchange">
-<span class="sig-name descname"><span class="pre">replica_exchange</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L27-L38"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.replica_exchange" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">replica_exchange</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L29-L40"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.replica_exchange" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo.sample_parameters">
-<span class="sig-name descname"><span class="pre">sample_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hkl</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L143-L162"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.sample_parameters" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">sample_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hkl</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L146-L165"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.sample_parameters" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo.save_results">
-<span class="sig-name descname"><span class="pre">save_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L324-L390"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.save_results" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">save_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L346-L412"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.save_results" title="Link to this definition">#</a></dt>
 <dd><p>Save Monte Carlo simulation results to text files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -520,7 +683,7 @@ using <a class="reference internal" href="#discord.atomistic.kernel.total_heisen
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo.wolff_cluster_updates">
-<span class="sig-name descname"><span class="pre">wolff_cluster_updates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_clusters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_replicas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bonds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_atom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_ijk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L88-L141"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.wolff_cluster_updates" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">wolff_cluster_updates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_clusters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_replicas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bonds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_atom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_ijk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L90-L144"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.wolff_cluster_updates" title="Link to this definition">#</a></dt>
 <dd><p>Perform Wolff-style cluster updates on all replicas.</p>
 <p>This is analogous to <a class="reference internal" href="#discord.atomistic.simulation.MonteCarlo.metropolis_hastings" title="discord.atomistic.simulation.MonteCarlo.metropolis_hastings"><code class="xref py py-meth docutils literal notranslate"><span class="pre">metropolis_hastings()</span></code></a> but uses the
 cluster kernel instead of local single-spin updates. One call
@@ -579,6 +742,15 @@ performs <code class="docutils literal notranslate"><span class="pre">n_clusters
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.kernel.total_heisenberg_energy"><code class="docutils literal notranslate"><span class="pre">total_heisenberg_energy()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.kernel.unravel_site"><code class="docutils literal notranslate"><span class="pre">unravel_site()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.kernel.wolff_heisenberg"><code class="docutils literal notranslate"><span class="pre">wolff_heisenberg()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-discord.atomistic.plotting">discord.atomistic.plotting module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.plotting.plot_energy"><code class="docutils literal notranslate"><span class="pre">plot_energy()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.plotting.plot_heat_capacity"><code class="docutils literal notranslate"><span class="pre">plot_heat_capacity()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.plotting.plot_intensity"><code class="docutils literal notranslate"><span class="pre">plot_intensity()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.plotting.plot_magnetization"><code class="docutils literal notranslate"><span class="pre">plot_magnetization()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.plotting.plot_results"><code class="docutils literal notranslate"><span class="pre">plot_results()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.plotting.plot_susceptibility"><code class="docutils literal notranslate"><span class="pre">plot_susceptibility()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-discord.atomistic.simulation">discord.atomistic.simulation module</a><ul class="nav section-nav flex-column">

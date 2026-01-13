@@ -20,6 +20,14 @@ discord.atomistic.kernel module
    :show-inheritance:
    :undoc-members:
 
+discord.atomistic.plotting module
+---------------------------------
+
+.. automodule:: discord.atomistic.plotting
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 discord.atomistic.simulation module
 -----------------------------------
 

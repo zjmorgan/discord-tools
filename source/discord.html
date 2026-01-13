@@ -353,7 +353,7 @@
 <span id="discord-material-module"></span><h2>discord.material module<a class="headerlink" href="#module-discord.material" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="discord.material.Crystal">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">Crystal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">space_group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sites</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">super_cell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(4,</span> <span class="pre">4,</span> <span class="pre">4)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L12-L351"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">Crystal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">space_group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sites</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">super_cell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(4,</span> <span class="pre">4,</span> <span class="pre">4)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L12-L352"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Crystallographic and magnetic description of a supercell.</p>
 <dl class="field-list simple">
@@ -479,7 +479,7 @@ and expanded to per-atom values <code class="docutils literal notranslate"><span
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.assign_magnetic_parameters">
-<span class="sig-name descname"><span class="pre">assign_magnetic_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([0.,</span> <span class="pre">0.,</span> <span class="pre">0.])</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L240-L254"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.assign_magnetic_parameters" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">assign_magnetic_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([0.,</span> <span class="pre">0.,</span> <span class="pre">0.])</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L241-L255"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.assign_magnetic_parameters" title="Link to this definition">#</a></dt>
 <dd><p>Assign anisotropy, exchange and field in the spin basis.</p>
 <p>All tensors and fields are interpreted in the same basis as the
 spins <code class="docutils literal notranslate"><span class="pre">self.s</span></code> (crystal/moment basis). Quantum factors
@@ -489,7 +489,7 @@ remain a unit vector.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.filter_zero_bonds">
-<span class="sig-name descname"><span class="pre">filter_zero_bonds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bond_type_indices</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L213-L238"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.filter_zero_bonds" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">filter_zero_bonds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bond_type_indices</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L214-L239"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.filter_zero_bonds" title="Link to this definition">#</a></dt>
 <dd><p>Remove bonds of specified types from the neighbor list.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -504,12 +504,12 @@ These bonds will be completely eliminated from the lookup tables.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.generate_bonds">
-<span class="sig-name descname"><span class="pre">generate_bonds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L138-L167"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.generate_bonds" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">generate_bonds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L139-L168"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.generate_bonds" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.generate_matrices">
-<span class="sig-name descname"><span class="pre">generate_matrices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L99-L112"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.generate_matrices" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">generate_matrices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L99-L113"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.generate_matrices" title="Link to this definition">#</a></dt>
 <dd><p>Precompute metric and transform matrices.</p>
 <p><code class="docutils literal notranslate"><span class="pre">A</span></code> and <code class="docutils literal notranslate"><span class="pre">B</span></code> are Cholesky factors of the direct and reciprocal
 metric tensors. <code class="docutils literal notranslate"><span class="pre">R</span></code> rotates between direct and reciprocal
@@ -519,17 +519,17 @@ crystal/moment basis to Cartesian; <code class="docutils literal notranslate"><s
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.get_atom_positions">
-<span class="sig-name descname"><span class="pre">get_atom_positions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L337-L351"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_atom_positions" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_atom_positions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L338-L352"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_atom_positions" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.get_compressed_sparse_row">
-<span class="sig-name descname"><span class="pre">get_compressed_sparse_row</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L279-L280"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_compressed_sparse_row" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_compressed_sparse_row</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L280-L281"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_compressed_sparse_row" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.get_delta_arrays">
-<span class="sig-name descname"><span class="pre">get_delta_arrays</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L192-L203"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_delta_arrays" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_delta_arrays</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L193-L204"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_delta_arrays" title="Link to this definition">#</a></dt>
 <dd><p>Obtain auxiliary scaling arrays for atoms, ions and bonds.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -544,62 +544,62 @@ lattice, all with shape <code class="docutils literal notranslate"><span class="
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.get_direct_cartesian_transform">
-<span class="sig-name descname"><span class="pre">get_direct_cartesian_transform</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L120-L121"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_direct_cartesian_transform" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_direct_cartesian_transform</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L121-L122"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_direct_cartesian_transform" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.get_direct_metric_tensor">
-<span class="sig-name descname"><span class="pre">get_direct_metric_tensor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L132-L133"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_direct_metric_tensor" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_direct_metric_tensor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L133-L134"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_direct_metric_tensor" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.get_direct_reciprocal_rotation">
-<span class="sig-name descname"><span class="pre">get_direct_reciprocal_rotation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L117-L118"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_direct_reciprocal_rotation" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_direct_reciprocal_rotation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L118-L119"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_direct_reciprocal_rotation" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.get_effective_moment">
-<span class="sig-name descname"><span class="pre">get_effective_moment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L306-L307"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_effective_moment" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_effective_moment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L307-L308"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_effective_moment" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.get_magnetic_parameters">
-<span class="sig-name descname"><span class="pre">get_magnetic_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L282-L283"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_magnetic_parameters" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_magnetic_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L283-L284"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_magnetic_parameters" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.get_moment_cartesian_transform">
-<span class="sig-name descname"><span class="pre">get_moment_cartesian_transform</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L126-L127"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_moment_cartesian_transform" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_moment_cartesian_transform</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L127-L128"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_moment_cartesian_transform" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.get_moment_crystal_axis_transform">
-<span class="sig-name descname"><span class="pre">get_moment_crystal_axis_transform</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L129-L130"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_moment_crystal_axis_transform" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_moment_crystal_axis_transform</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L130-L131"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_moment_crystal_axis_transform" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.get_number_atoms">
-<span class="sig-name descname"><span class="pre">get_number_atoms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L288-L289"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_number_atoms" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_number_atoms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L289-L290"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_number_atoms" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.get_number_bonds">
-<span class="sig-name descname"><span class="pre">get_number_bonds</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L285-L286"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_number_bonds" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_number_bonds</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L286-L287"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_number_bonds" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.get_reciprocal_cartesian_transform">
-<span class="sig-name descname"><span class="pre">get_reciprocal_cartesian_transform</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L123-L124"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_reciprocal_cartesian_transform" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_reciprocal_cartesian_transform</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L124-L125"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_reciprocal_cartesian_transform" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.get_reciprocal_metric_tensor">
-<span class="sig-name descname"><span class="pre">get_reciprocal_metric_tensor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L135-L136"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_reciprocal_metric_tensor" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_reciprocal_metric_tensor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L136-L137"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_reciprocal_metric_tensor" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.get_spin_moments">
-<span class="sig-name descname"><span class="pre">get_spin_moments</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L309-L315"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_spin_moments" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_spin_moments</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L310-L316"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_spin_moments" title="Link to this definition">#</a></dt>
 <dd><p>Magnetic moments in Cartesian units.</p>
 <p>Returns an array with the same shape as <code class="docutils literal notranslate"><span class="pre">self.s</span></code> but scaled by
 the effective moment <code class="docutils literal notranslate"><span class="pre">mu</span></code> for each atom.</p>
@@ -607,7 +607,7 @@ the effective moment <code class="docutils literal notranslate"><span class="pre
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.get_spin_quantum_numbers">
-<span class="sig-name descname"><span class="pre">get_spin_quantum_numbers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L317-L323"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_spin_quantum_numbers" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_spin_quantum_numbers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L318-L324"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_spin_quantum_numbers" title="Link to this definition">#</a></dt>
 <dd><p>Per-atom spin quantum numbers S.</p>
 <p>Expanded from the per-site <code class="docutils literal notranslate"><span class="pre">S_site</span></code> after applying symmetry.
 Used to apply <code class="docutils literal notranslate"><span class="pre">S(S+1)</span></code> factors in the energy kernels.</p>
@@ -615,32 +615,32 @@ Used to apply <code class="docutils literal notranslate"><span class="pre">S(S+1
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.get_spin_vectors">
-<span class="sig-name descname"><span class="pre">get_spin_vectors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L325-L326"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_spin_vectors" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_spin_vectors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L326-L327"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_spin_vectors" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.get_super_cell_shape">
-<span class="sig-name descname"><span class="pre">get_super_cell_shape</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L114-L115"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_super_cell_shape" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_super_cell_shape</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L115-L116"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_super_cell_shape" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.get_total_sites">
-<span class="sig-name descname"><span class="pre">get_total_sites</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L334-L335"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_total_sites" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_total_sites</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L335-L336"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_total_sites" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.get_unit_atom_position">
-<span class="sig-name descname"><span class="pre">get_unit_atom_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L294-L295"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_unit_atom_position" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_unit_atom_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L295-L296"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_unit_atom_position" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.get_unit_cell_atom_types">
-<span class="sig-name descname"><span class="pre">get_unit_cell_atom_types</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L291-L292"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_unit_cell_atom_types" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_unit_cell_atom_types</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L292-L293"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.get_unit_cell_atom_types" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.initialize_magnetic_parameters">
-<span class="sig-name descname"><span class="pre">initialize_magnetic_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L169-L184"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.initialize_magnetic_parameters" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">initialize_magnetic_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L170-L185"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.initialize_magnetic_parameters" title="Link to this definition">#</a></dt>
 <dd><p>Allocate zero magnetic interaction tensors.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -656,13 +656,13 @@ before <a class="reference internal" href="#discord.material.Crystal.assign_magn
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.initialize_random_spin_configurations">
-<span class="sig-name descname"><span class="pre">initialize_random_spin_configurations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_replicas</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L297-L304"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.initialize_random_spin_configurations" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">initialize_random_spin_configurations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_replicas</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L298-L305"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.initialize_random_spin_configurations" title="Link to this definition">#</a></dt>
 <dd><p>Initialize random unit spins for the given number of replicas.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.net_moment">
-<span class="sig-name descname"><span class="pre">net_moment</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L331-L332"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.net_moment" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">net_moment</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L332-L333"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.net_moment" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -672,13 +672,13 @@ before <a class="reference internal" href="#discord.material.Crystal.assign_magn
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.set_delta_arrays">
-<span class="sig-name descname"><span class="pre">set_delta_arrays</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bonds</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L205-L211"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.set_delta_arrays" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">set_delta_arrays</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bonds</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L206-L212"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.set_delta_arrays" title="Link to this definition">#</a></dt>
 <dd><p>Update auxiliary scaling arrays for atoms, ions and bonds.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.material.Crystal.set_spin_vectors">
-<span class="sig-name descname"><span class="pre">set_spin_vectors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L328-L329"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.set_spin_vectors" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">set_spin_vectors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/material.py#L329-L330"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.material.Crystal.set_spin_vectors" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
