@@ -85,6 +85,61 @@ class MonteCarlo:
             self.E[i] = E
             self.seeds[i] = seed
 
+    def wolff_cluster_updates(
+        self,
+        n_clusters,
+        n_replicas,
+        delta_atoms,
+        delta_ions,
+        delta_bonds,
+        nb_offsets,
+        nb_atom,
+        nb_ijk,
+        nb_J,
+        K,
+        H,
+        S,
+        g=2,
+    ):
+        """Perform Wolff-style cluster updates on all replicas.
+
+        This is analogous to :meth:`metropolis_hastings` but uses the
+        cluster kernel instead of local single-spin updates. One call
+        performs ``n_clusters`` cluster flips per replica.
+        """
+
+        for _ in range(n_clusters):
+            args = [
+                (
+                    i,
+                    self.s[i],
+                    delta_atoms,
+                    delta_ions,
+                    delta_bonds,
+                    self.beta[i],
+                    self.E[i],
+                    nb_offsets,
+                    nb_atom,
+                    nb_ijk,
+                    nb_J,
+                    K,
+                    H,
+                    S,
+                    muB,
+                    g,
+                    self.seeds[i],
+                )
+                for i in range(n_replicas)
+            ]
+
+            results = self.pool.starmap(kernel.wolff_heisenberg, args)
+            results.sort(key=lambda x: x[0])
+
+            for i, s, E, seed in results:
+                self.s[i] = s
+                self.E[i] = E
+                self.seeds[i] = seed
+
     def sample_parameters(self, hkl):
         n_sites = self.crystal.get_total_sites()
 
@@ -158,6 +213,7 @@ class MonteCarlo:
         n_local_sweeps=2,
         n_outer=1000,
         n_thermal=700,
+        n_clusters=0,
         g=2,
     ):
         n_sample = n_outer - n_thermal
@@ -221,23 +277,39 @@ class MonteCarlo:
             for i_outer in range(n_outer):
                 print(f"{i_outer}/{n_outer}")
 
-                self.metropolis_hastings(
-                    n_local_sweeps,
-                    n_replicas,
-                    delta_atoms,
-                    delta_ions,
-                    delta_bonds,
-                    nb_offsets,
-                    nb_atom,
-                    nb_ijk,
-                    nb_J,
-                    K,
-                    H,
-                    S,
-                    g,
-                )
+                if n_local_sweeps > 0:
+                    self.metropolis_hastings(
+                        n_local_sweeps,
+                        n_replicas,
+                        delta_atoms,
+                        delta_ions,
+                        delta_bonds,
+                        nb_offsets,
+                        nb_atom,
+                        nb_ijk,
+                        nb_J,
+                        K,
+                        H,
+                        S,
+                        g,
+                    )
 
-                self.replica_exchange()
+                if n_clusters > 0:
+                    self.wolff_cluster_updates(
+                        n_clusters,
+                        n_replicas,
+                        delta_atoms,
+                        delta_ions,
+                        delta_bonds,
+                        nb_offsets,
+                        nb_atom,
+                        nb_ijk,
+                        nb_J,
+                        K,
+                        H,
+                        S,
+                        g,
+                    )
 
                 if i_outer >= n_thermal:
 
@@ -245,4 +317,74 @@ class MonteCarlo:
 
                     self.sample_parameters(hkl)
 
+                self.replica_exchange()
+
         return self.ensemble_average(n_sample)
+
+    def save_results(self, result, filename):
+        """
+        Save Monte Carlo simulation results to text files.
+
+        Parameters
+        ----------
+        result : dict
+            Dictionary of results from parallel_tempering method.
+        filename : str
+            Base filename (without extension) for saving results
+        """
+        T = result["T"]
+
+        chi_11 = result["chi"][:, 0, 0]
+        chi_22 = result["chi"][:, 1, 1]
+        chi_33 = result["chi"][:, 2, 2]
+        chi_23 = result["chi"][:, 1, 2]
+        chi_13 = result["chi"][:, 0, 2]
+        chi_12 = result["chi"][:, 0, 1]
+
+        np.savetxt(
+            filename + "_susceptibility.txt",
+            np.column_stack(
+                (T, chi_11, chi_22, chi_33, chi_23, chi_13, chi_12)
+            ),
+            header="T chi_11 chi_22 chi_33 chi_23 chi_13 chi_12",
+        )
+
+        Mx = result["M(ave)"][:, 0]
+        My = result["M(ave)"][:, 1]
+        Mz = result["M(ave)"][:, 2]
+        Mx_std = result["M(std)"][:, 0]
+        My_std = result["M(std)"][:, 1]
+        Mz_std = result["M(std)"][:, 2]
+
+        np.savetxt(
+            filename + "_magnetization.txt",
+            np.column_stack((T, Mx, My, Mz, Mx_std, My_std, Mz_std)),
+            header="T Mx My Mz Mx_std My_std Mz_std",
+        )
+
+        E = result["E(ave)"]
+        E_std = result["E(std)"]
+
+        np.savetxt(
+            filename + "_energy.txt",
+            np.column_stack((T, E, E_std)),
+            header="T E E_std",
+        )
+
+        C = result["C"]
+
+        np.savetxt(
+            filename + "_heat_capacity.txt",
+            np.column_stack((T, C)),
+            header="T C",
+        )
+
+        if result["I(ave)"] is not None:
+            I = result["I(ave)"][:, 0]
+            sig = result["I(std)"][:, 0]
+
+            np.savetxt(
+                filename + "_intensity.txt",
+                np.column_stack((T, I, sig)),
+                header="T I sig",
+            )

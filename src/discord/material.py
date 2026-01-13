@@ -167,7 +167,8 @@ class Crystal:
         return self.bonds
 
     def initialize_magnetic_parameters(self):
-        """Allocate zero magnetic interaction tensors.
+        """
+        Allocate zero magnetic interaction tensors.
 
         Returns
         -------
@@ -189,7 +190,8 @@ class Crystal:
         self.delta_bonds = np.ones(shape)
 
     def get_delta_arrays(self):
-        """Obtain auxiliary scaling arrays for atoms, ions and bonds.
+        """
+        Obtain auxiliary scaling arrays for atoms, ions and bonds.
 
         Returns
         -------
@@ -200,11 +202,40 @@ class Crystal:
 
         return self.delta_atoms, self.delta_ions, self.delta_bonds
 
-    def set_dela_arrays(self, delta_atoms, delta_ions, delta_bonds):
-        """Update auxiliary scaling arrays for atoms, ions and bonds."""
+    def set_delta_arrays(self, delta_atoms, delta_ions, delta_bonds):
+        """
+        Update auxiliary scaling arrays for atoms, ions and bonds.
+        """
         self.delta_atoms = delta_atoms
         self.delta_ions = delta_ions
         self.delta_bonds = delta_bonds
+
+    def filter_zero_bonds(self, bond_type_indices):
+        """
+        Remove bonds of specified types from the neighbor list.
+
+        Parameters
+        ----------
+        bond_type_indices : int or list of int
+            Bond type index or indices to remove from the neighbor arrays.
+            These bonds will be completely eliminated from the lookup tables.
+        """
+        bond_type_indices = np.atleast_1d(bond_type_indices)
+
+        # Create mask for bonds to keep
+        keep_mask = np.ones(self.n_bonds, dtype=bool)
+        for bond_idx in bond_type_indices:
+            keep_mask &= self.inverses != bond_idx
+
+        # Filter the bond arrays
+        self.bi = self.bi[keep_mask]
+        self.bj = self.bj[keep_mask]
+        self.d_ijk = self.d_ijk[keep_mask]
+        self.inverses = self.inverses[keep_mask]
+        self.n_bonds = self.bi.size
+
+        # Rebuild neighbor arrays with filtered bonds
+        self._build_neighbor_arrays()
 
     def assign_magnetic_parameters(self, K, J, H=np.zeros(3)):
         """Assign anisotropy, exchange and field in the spin basis.

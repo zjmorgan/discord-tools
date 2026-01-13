@@ -600,4 +600,4 @@ class VisualizeAtoms:
                 )
 
         self.plotter.show(screenshot=filename)
-        self.plotter.close()
+        # self.plotter.close()
