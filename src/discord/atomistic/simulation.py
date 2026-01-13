@@ -1,4 +1,5 @@
 import numpy as np
+import os
 
 from multiprocessing import Pool
 
@@ -6,6 +7,7 @@ from discord.scattering.intensity import StructureFactor
 
 from discord.atomistic import kernel, correlations
 from discord.parameters.constants import kB, muB
+from discord.atomistic.plotting import plot_results
 
 
 class MonteCarlo:
@@ -101,7 +103,8 @@ class MonteCarlo:
         S,
         g=2,
     ):
-        """Perform Wolff-style cluster updates on all replicas.
+        """
+        Perform Wolff-style cluster updates on all replicas.
 
         This is analogous to :meth:`metropolis_hastings` but uses the
         cluster kernel instead of local single-spin updates. One call
@@ -214,6 +217,9 @@ class MonteCarlo:
         n_outer=1000,
         n_thermal=700,
         n_clusters=0,
+        n_interval=None,
+        outdir="checkpoints",
+        prefix="mc",
         g=2,
     ):
         n_sample = n_outer - n_thermal
@@ -273,6 +279,9 @@ class MonteCarlo:
                 g,
             )
 
+        if n_interval is not None:
+            os.makedirs(outdir, exist_ok=True)
+
         with Pool(processes=n_replicas) as self.pool:
             for i_outer in range(n_outer):
                 print(f"{i_outer}/{n_outer}")
@@ -316,6 +325,19 @@ class MonteCarlo:
                     self.crystal.set_spin_vectors(self.s)
 
                     self.sample_parameters(hkl)
+
+                    i_result = i_outer + 1
+
+                    if n_interval is not None and i_result % n_interval == 0:
+                        n_samples_so_far = max(1, i_result - n_thermal)
+                        result = self.ensemble_average(n_samples_so_far)
+
+                        plot_results(
+                            result,
+                            prefix=prefix,
+                            outdir=outdir,
+                            show=False,
+                        )
 
                 self.replica_exchange()
 

@@ -97,7 +97,8 @@ class Crystal:
         return val
 
     def generate_matrices(self):
-        """Precompute metric and transform matrices.
+        """
+        Precompute metric and transform matrices.
 
         ``A`` and ``B`` are Cholesky factors of the direct and reciprocal
         metric tensors. ``R`` rotates between direct and reciprocal
