@@ -313,6 +313,155 @@ def metropolis_heisenberg(
 
 
 @njit
+def overrelaxation_heisenberg(
+    idx,
+    s,
+    delta_atoms,
+    delta_ions,
+    delta_bonds,
+    beta,
+    E,
+    n_overrelaxation_sweeps,
+    nb_offsets,
+    nb_atom,
+    nb_ijk,
+    nb_J,
+    K,
+    H,
+    g,
+    S,
+    muB,
+    seed,
+):
+    """Overrelaxation sweeps for one replica.
+
+    For each site, reflects the spin across the effective field direction.
+    This is a microcanonical update that preserves energy exactly (for
+    isotropic exchange) and helps decorrelate configurations faster than
+    Metropolis. Small energy changes occur due to anisotropy and Zeeman terms.
+    """
+
+    np.random.seed(seed)
+
+    n_atoms, ni, nj, nk, _ = s.shape
+    n = n_atoms * ni * nj * nk
+
+    for _ in range(n_overrelaxation_sweeps * n):
+        flat_idx = np.random.randint(n)
+        i_atom, i, j, k = unravel_site(flat_idx, n_atoms, ni, nj, nk)
+
+        if delta_atoms[i_atom, i, j, k] <= 0.0:
+            continue
+
+        S_sq_eff = S[i_atom] * (S[i_atom] + 1.0)
+
+        s_orig0 = s[i_atom, i, j, k, 0]
+        s_orig1 = s[i_atom, i, j, k, 1]
+        s_orig2 = s[i_atom, i, j, k, 2]
+
+        # Compute effective field from exchange
+        delta_bond = delta_bonds[i_atom, i, j, k]
+        h0_exch, h1_exch, h2_exch = local_field_at_site(
+            s,
+            delta_bonds,
+            i_atom,
+            i,
+            j,
+            k,
+            nb_offsets,
+            nb_atom,
+            nb_ijk,
+            nb_J,
+            ni,
+            nj,
+            nk,
+        )
+
+        # For overrelaxation, reflect across exchange field only
+        # (including anisotropy/Zeeman breaks microcanonical property)
+        h_norm = np.sqrt(
+            h0_exch * h0_exch + h1_exch * h1_exch + h2_exch * h2_exch
+        )
+        if h_norm < 1e-10:
+            continue
+
+        h0 = h0_exch / h_norm
+        h1 = h1_exch / h_norm
+        h2 = h2_exch / h_norm
+
+        # Reflect spin across field: s_new = 2(h·s)h - s
+        h_dot_s = s_orig0 * h0 + s_orig1 * h1 + s_orig2 * h2
+        s_new0 = 2.0 * h_dot_s * h0 - s_orig0
+        s_new1 = 2.0 * h_dot_s * h1 - s_orig1
+        s_new2 = 2.0 * h_dot_s * h2 - s_orig2
+
+        # Calculate energy change (should be ~0 for isotropic exchange)
+        delta0 = s_new0 - s_orig0
+        delta1 = s_new1 - s_orig1
+        delta2 = s_new2 - s_orig2
+
+        # Compute energy changes
+        dEJ = 0.0
+        if delta_bond > 0.0:
+            dEJ = (
+                -S_sq_eff
+                * (delta0 * h0_exch + delta1 * h1_exch + delta2 * h2_exch)
+                * delta_bond
+            )
+
+        delta_ion = delta_ions[i_atom, i, j, k]
+        dEK = 0.0
+        if delta_ion > 0.0:
+            K_ion = K[i_atom]
+            s_sum0 = s_new0 + s_orig0
+            s_sum1 = s_new1 + s_orig1
+            s_sum2 = s_new2 + s_orig2
+
+            K_s_sum0 = (
+                K_ion[0, 0] * s_sum0
+                + K_ion[0, 1] * s_sum1
+                + K_ion[0, 2] * s_sum2
+            )
+            K_s_sum1 = (
+                K_ion[1, 0] * s_sum0
+                + K_ion[1, 1] * s_sum1
+                + K_ion[1, 2] * s_sum2
+            )
+            K_s_sum2 = (
+                K_ion[2, 0] * s_sum0
+                + K_ion[2, 1] * s_sum1
+                + K_ion[2, 2] * s_sum2
+            )
+
+            dEK = (
+                -S_sq_eff
+                * (delta0 * K_s_sum0 + delta1 * K_s_sum1 + delta2 * K_s_sum2)
+                * delta_ion
+            )
+
+        delta_atom = delta_atoms[i_atom, i, j, k]
+        dEH = 0.0
+        if delta_atom > 0.0:
+            dEH = (
+                -muB
+                * g[i_atom]
+                * S_sq_eff
+                * (delta0 * H[0] + delta1 * H[1] + delta2 * H[2])
+                * delta_atom
+            )
+
+        dE = dEJ + dEK + dEH
+
+        # Update spin and energy
+        s[i_atom, i, j, k, 0] = s_new0
+        s[i_atom, i, j, k, 1] = s_new1
+        s[i_atom, i, j, k, 2] = s_new2
+        E += dE
+
+    return idx, s, E, int(np.random.randint(0, 2**31 - 1))
+
+
+@njit
 def wolff_heisenberg(
     idx,
     s,
@@ -523,9 +672,14 @@ def wolff_heisenberg(
             hz_new += Jsj2_new * delta_nn
 
         if delta_bond_i > 0.0:
+            # Note: We do NOT include the 0.5 factor here because we sum over
+            # cluster sites, which double-counts bonds within the cluster.
+            # The total energy formula E = -0.5 * Σ_i s_i·h_i uses 0.5 to avoid
+            # double-counting when summing over ALL sites. But here we only sum
+            # over cluster sites, so bonds within cluster are counted from both
+            # ends, giving the correct full energy change without needing 0.5.
             dEJ_site = (
-                -0.5
-                * S_sq_eff
+                -S_sq_eff
                 * (
                     (s0p * hx_new + s1p * hy_new + s2p * hz_new)
                     - (s0 * hx_old + s1 * hy_old + s2 * hz_old)

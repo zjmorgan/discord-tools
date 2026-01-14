@@ -112,7 +112,11 @@ def test_MnF2(g):
         assert np.isclose(E, E0)
 
     mc.parallel_tempering(
-        n_local_sweeps=5, n_cluster_sweeps=1, n_outer=100, n_thermal=70
+        n_local_sweeps=1,
+        n_cluster_sweeps=1,
+        n_overrelaxation_sweeps=1,
+        n_outer=100,
+        n_thermal=70,
     )
 
     s = mc.crystal.get_spin_vectors()[0]

@@ -87,6 +87,61 @@ class MonteCarlo:
             self.E[i] = E
             self.seeds[i] = seed
 
+    def overrelaxation(
+        self,
+        n_overrelaxation_sweeps,
+        n_replicas,
+        delta_atoms,
+        delta_ions,
+        delta_bonds,
+        nb_offsets,
+        nb_atom,
+        nb_ijk,
+        nb_J,
+        K,
+        H,
+        g,
+        S,
+    ):
+        """
+        Perform overrelaxation sweeps on all replicas.
+
+        Overrelaxation reflects each spin across its local effective field,
+        providing a microcanonical update that decorrelates configurations
+        faster than Metropolis updates while approximately preserving energy.
+        """
+        args = [
+            (
+                i,
+                self.s[i],
+                delta_atoms,
+                delta_ions,
+                delta_bonds,
+                self.beta[i],
+                self.E[i],
+                n_overrelaxation_sweeps,
+                nb_offsets,
+                nb_atom,
+                nb_ijk,
+                nb_J,
+                K,
+                H,
+                g,
+                S,
+                muB,
+                self.seeds[i],
+            )
+            for i in range(n_replicas)
+        ]
+
+        results = self.pool.starmap(kernel.overrelaxation_heisenberg, args)
+        results.sort(key=lambda x: x[0])
+
+        for i, s, E, seed in results:
+            self.s[i] = s
+            self.E[i] = E
+            self.seeds[i] = seed
+
     def wolff_cluster_updates(
         self,
         n_clusters,
@@ -100,8 +155,8 @@ class MonteCarlo:
         nb_J,
         K,
         H,
-        S,
         g,
+        S,
     ):
         """
         Perform Wolff-style cluster updates on all replicas.
@@ -215,6 +270,7 @@ class MonteCarlo:
         hkl=None,
         n_local_sweeps=2,
         n_cluster_sweeps=0,
+        n_overrelaxation_sweeps=0,
         n_outer=1000,
         n_thermal=700,
         n_interval=None,
@@ -320,6 +376,23 @@ class MonteCarlo:
                         S,
                     )
 
+                if n_overrelaxation_sweeps > 0:
+                    self.overrelaxation(
+                        n_overrelaxation_sweeps,
+                        n_replicas,
+                        delta_atoms,
+                        delta_ions,
+                        delta_bonds,
+                        nb_offsets,
+                        nb_atom,
+                        nb_ijk,
+                        nb_J,
+                        K,
+                        H,
+                        g,
+                        S,
+                    )
+
                 if i_outer >= n_thermal:
 
                     self.crystal.set_spin_vectors(self.s)
@@ -340,6 +413,8 @@ class MonteCarlo:
                         )
 
                 self.replica_exchange()
+
+        self.crystal.set_spin_vectors(self.s)
 
         return self.ensemble_average(n_sample)
 
