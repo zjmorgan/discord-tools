@@ -52,8 +52,8 @@ class MonteCarlo:
         nb_J,
         K,
         H,
+        g,
         S,
-        g=2,
     ):
         args = [
             (
@@ -71,9 +71,9 @@ class MonteCarlo:
                 nb_J,
                 K,
                 H,
+                g,
                 S,
                 muB,
-                g,
                 self.seeds[i],
             )
             for i in range(n_replicas)
@@ -101,7 +101,7 @@ class MonteCarlo:
         K,
         H,
         S,
-        g=2,
+        g,
     ):
         """
         Perform Wolff-style cluster updates on all replicas.
@@ -127,9 +127,9 @@ class MonteCarlo:
                     nb_J,
                     K,
                     H,
+                    g,
                     S,
                     muB,
-                    g,
                     self.seeds[i],
                 )
                 for i in range(n_replicas)
@@ -214,13 +214,12 @@ class MonteCarlo:
         self,
         hkl=None,
         n_local_sweeps=2,
+        n_cluster_sweeps=0,
         n_outer=1000,
         n_thermal=700,
-        n_clusters=0,
         n_interval=None,
         outdir="checkpoints",
         prefix="mc",
-        g=2,
     ):
         n_sample = n_outer - n_thermal
         assert n_sample > 0, "Outer steps less than thermalization steps"
@@ -237,6 +236,7 @@ class MonteCarlo:
         delta_atoms, delta_ions, delta_bonds = self.crystal.get_delta_arrays()
 
         S = self.crystal.get_spin_quantum_numbers()
+        g = self.crystal.get_g_factors()
 
         self.M_sum = np.zeros((n_replicas, 3))
         self.M_sq_sum = np.zeros((n_replicas, 3, 3))
@@ -274,9 +274,9 @@ class MonteCarlo:
                 nb_J,
                 K,
                 H,
+                g,
                 S,
                 muB,
-                g,
             )
 
         if n_interval is not None:
@@ -285,6 +285,23 @@ class MonteCarlo:
         with Pool(processes=n_replicas) as self.pool:
             for i_outer in range(n_outer):
                 print(f"{i_outer}/{n_outer}")
+
+                if n_cluster_sweeps > 0:
+                    self.wolff_cluster_updates(
+                        n_cluster_sweeps,
+                        n_replicas,
+                        delta_atoms,
+                        delta_ions,
+                        delta_bonds,
+                        nb_offsets,
+                        nb_atom,
+                        nb_ijk,
+                        nb_J,
+                        K,
+                        H,
+                        g,
+                        S,
+                    )
 
                 if n_local_sweeps > 0:
                     self.metropolis_hastings(
@@ -299,25 +316,8 @@ class MonteCarlo:
                         nb_J,
                         K,
                         H,
-                        S,
                         g,
-                    )
-
-                if n_clusters > 0:
-                    self.wolff_cluster_updates(
-                        n_clusters,
-                        n_replicas,
-                        delta_atoms,
-                        delta_ions,
-                        delta_bonds,
-                        nb_offsets,
-                        nb_atom,
-                        nb_ijk,
-                        nb_J,
-                        K,
-                        H,
                         S,
-                        g,
                     )
 
                 if i_outer >= n_thermal:

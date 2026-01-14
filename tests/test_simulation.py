@@ -8,7 +8,7 @@ from discord.atomistic import kernel
 from discord.parameters.constants import muB
 
 
-def total_energy(s, bi, bj, d_ijk, J, K, H, S, muB, g):
+def total_energy(s, bi, bj, d_ijk, J, K, H, g, S, muB):
 
     n_atoms, ni, nj, nk, _ = s.shape
 
@@ -48,7 +48,12 @@ def total_energy(s, bi, bj, d_ijk, J, K, H, S, muB, g):
     for i_atom in range(n_atoms):
         S_eff = S[i_atom] * (S[i_atom] + 1.0)
         Sn = s[i_atom]
-        EH += -muB * g * S_eff * np.tensordot(Sn, H, axes=([3], [0])).sum()
+        EH += (
+            -muB
+            * g[i_atom]
+            * S_eff
+            * np.tensordot(Sn, H, axes=([3], [0])).sum()
+        )
     return EJ + EK + EH
 
 
@@ -74,6 +79,7 @@ def test_MnF2(g):
     nb_offsets, nb_atom, nb_ijk = mc.crystal.get_compressed_sparse_row()
 
     S = crystal.get_spin_quantum_numbers()
+    g = crystal.get_g_factors()
 
     for i in range(crystal.s.shape[0]):
         E = kernel.total_heisenberg_energy(
@@ -87,9 +93,9 @@ def test_MnF2(g):
             nb_J,
             K,
             H,
+            g,
             S,
             muB,
-            g,
         )
         E0 = total_energy(
             crystal.s[i],
@@ -99,13 +105,15 @@ def test_MnF2(g):
             J[crystal.inverses],
             K,
             H,
+            g,
             S,
             muB,
-            g,
         )
         assert np.isclose(E, E0)
 
-    mc.parallel_tempering(n_local_sweeps=5, n_outer=100, n_thermal=70, g=g)
+    mc.parallel_tempering(
+        n_local_sweeps=5, n_cluster_sweeps=1, n_outer=100, n_thermal=70
+    )
 
     s = mc.crystal.get_spin_vectors()[0]
 
@@ -117,9 +125,9 @@ def test_MnF2(g):
         J[crystal.inverses],
         K,
         H,
+        g,
         S,
         muB,
-        g,
     )
 
     E = kernel.total_heisenberg_energy(
@@ -133,9 +141,9 @@ def test_MnF2(g):
         nb_J,
         K,
         H,
+        g,
         S,
         muB,
-        g,
     )
 
     assert np.isclose(E, E0)

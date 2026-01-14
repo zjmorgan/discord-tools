@@ -25,9 +25,14 @@ class Crystal:
     S : float or array_like, optional
         Spin quantum number per site. Stored internally as ``S_site``
         and expanded to per-atom values ``S`` after applying symmetry.
+    g : float or array_like, optional
+        Landé g-factor per site. Stored internally as ``g_site``
+        and expanded to per-atom values ``g`` after applying symmetry.
     """
 
-    def __init__(self, cell, space_group, sites, super_cell=(4, 4, 4), S=0.5):
+    def __init__(
+        self, cell, space_group, sites, super_cell=(4, 4, 4), S=0.5, g=2
+    ):
 
         self.cell = " ".join(6 * ["{}"]).format(*cell)
 
@@ -42,6 +47,12 @@ class Crystal:
         self.S_site = S_site if S_site.ndim == 1 else np.full(n_sites, S)
 
         assert len(self.S_site) == n_sites, "Mismatched quantum number length"
+
+        g_site = np.array(g)
+
+        self.g_site = g_site if g_site.ndim == 1 else np.full(n_sites, g)
+
+        assert len(self.g_site) == n_sites, "Mismatched g-factor length"
 
         self.process_sites(sites)
 
@@ -72,6 +83,7 @@ class Crystal:
         mu = self.get_effective_moment()
         self.mu = []
         self.S = []
+        self.g = []
 
         for j, site in enumerate(sites):
             atom, x, y, z = site
@@ -80,6 +92,7 @@ class Crystal:
                 self.xyz.append(self._wrap(np.array(pos)))
                 self.mu.append(mu[j])
                 self.S.append(self.S_site[j])
+                self.g.append(self.g_site[j])
 
         self.n_atoms = len(self.atoms)
 
@@ -88,6 +101,7 @@ class Crystal:
 
         self.mu = np.array(self.mu)
         self.S = np.array(self.S)
+        self.g = np.array(self.g)
 
     def _wrap(self, val):
         val = np.array(val)
@@ -223,19 +237,16 @@ class Crystal:
         """
         bond_type_indices = np.atleast_1d(bond_type_indices)
 
-        # Create mask for bonds to keep
         keep_mask = np.ones(self.n_bonds, dtype=bool)
         for bond_idx in bond_type_indices:
             keep_mask &= self.inverses != bond_idx
 
-        # Filter the bond arrays
         self.bi = self.bi[keep_mask]
         self.bj = self.bj[keep_mask]
         self.d_ijk = self.d_ijk[keep_mask]
         self.inverses = self.inverses[keep_mask]
         self.n_bonds = self.bi.size
 
-        # Rebuild neighbor arrays with filtered bonds
         self._build_neighbor_arrays()
 
     def assign_magnetic_parameters(self, K, J, H=np.zeros(3)):
@@ -304,8 +315,17 @@ class Crystal:
         s /= np.linalg.norm(s, axis=5)[..., np.newaxis]
         self.s = s
 
-    def get_effective_moment(self, g=2):
-        return g * np.sqrt(self.S_site * (self.S_site + 1)) * muB
+    def get_effective_moment(self):
+        return self.g_site * np.sqrt(self.S_site * (self.S_site + 1)) * muB
+
+    def get_g_factors(self):
+        """
+        Per-atom Landé g-factors.
+
+        Expanded from the per-site ``g_site`` after applying symmetry.
+        Used to scale magnetic moments from spin vectors.
+        """
+        return self.g
 
     def get_spin_moments(self):
         """Magnetic moments in Cartesian units.

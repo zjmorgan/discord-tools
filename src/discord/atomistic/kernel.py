@@ -62,11 +62,15 @@ def total_heisenberg_energy(
     nb_J,
     K,
     H,
+    g,
     S,
     muB,
-    g,
 ):
-    """Total Heisenberg energy for a single replica."""
+    """Total Heisenberg energy for a single replica.
+
+    Note: g is currently a 1D array (per-atom scalar g-factor).
+    Future: should be 3x3 tensor per atom for anisotropic g-factors.
+    """
 
     n_atoms, ni, nj, nk, _ = s.shape
 
@@ -130,7 +134,7 @@ def total_heisenberg_energy(
                     delta = delta_atoms[i_atom, i, j, k]
                     EH -= (
                         muB
-                        * g
+                        * g[i_atom]
                         * S_sq_eff
                         * (s0 * H[0] + s1 * H[1] + s2 * H[2])
                         * delta
@@ -201,9 +205,9 @@ def metropolis_heisenberg(
     nb_J,
     K,
     H,
+    g,
     S,
     muB,
-    g,
     seed,
 ):
     """Local Metropolis sweeps for one replica.
@@ -292,7 +296,7 @@ def metropolis_heisenberg(
 
         dEH = (
             -muB
-            * g
+            * g[i_atom]
             * S_sq_eff
             * (delta0 * H[0] + delta1 * H[1] + delta2 * H[2])
         ) * delta_atom
@@ -323,9 +327,9 @@ def wolff_heisenberg(
     nb_J,
     K,
     H,
+    g,
     S,
     muB,
-    g,
     seed,
 ):
     """Single Wolff-style cluster update for one replica.
@@ -555,7 +559,7 @@ def wolff_heisenberg(
 
         dEH_site = (
             -muB
-            * g
+            * g[i_atom]
             * S_sq_eff
             * (
                 (s0p * H[0] + s1p * H[1] + s2p * H[2])

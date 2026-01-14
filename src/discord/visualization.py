@@ -601,3 +601,306 @@ class VisualizeAtoms:
 
         self.plotter.show(screenshot=filename)
         # self.plotter.close()
+
+
+class VisualizeMonteCarlo:
+    """Matplotlib-based visualization of Monte Carlo simulation results.
+
+    Parameters
+    ----------
+    result : dict
+        Dictionary returned by parallel_tempering with keys:
+        'T', 'M(ave)', 'M(std)', 'chi', 'E(ave)', 'E(std)', 'C',
+        'I(ave)', 'I(std)', 'hkl'
+    """
+
+    def __init__(self, result):
+        self.result = result
+        self.T = result["T"]
+
+    def plot_susceptibility(self, filename=None, show=False):
+        """
+        Plot magnetic susceptibility tensor components.
+
+        Parameters
+        ----------
+        filename : str, optional
+            If provided, save figure to this path
+        show : bool, optional
+            If True, display the figure
+
+        Returns
+        -------
+        fig, ax : matplotlib figure and axes
+        """
+        chi = self.result["chi"]
+        chi_11 = chi[:, 0, 0]
+        chi_22 = chi[:, 1, 1]
+        chi_33 = chi[:, 2, 2]
+        chi_23 = chi[:, 1, 2]
+        chi_13 = chi[:, 0, 2]
+        chi_12 = chi[:, 0, 1]
+
+        fig, ax = plt.subplots(1, 1, layout="constrained", figsize=(8, 6))
+        ax.minorticks_on()
+        ax.plot(self.T, chi_11, "-o", label="$\chi_{11}$")
+        ax.plot(self.T, chi_22, "-o", label="$\chi_{22}$")
+        ax.plot(self.T, chi_33, "-o", label="$\chi_{33}$")
+        ax.plot(self.T, chi_23, "-o", label="$\chi_{23}$")
+        ax.plot(self.T, chi_13, "-o", label="$\chi_{13}$")
+        ax.plot(self.T, chi_12, "-o", label="$\chi_{12}$")
+        ax.legend(shadow=True)
+        ax.set_xlabel("$T$ [K]")
+        ax.set_ylabel("$\chi_{ij}$ [$\mu_B^2$/eV]")
+        ax.grid(alpha=0.3)
+
+        if filename:
+            fig.savefig(filename, dpi=150, bbox_inches="tight")
+
+        if show:
+            plt.show()
+        else:
+            plt.close(fig)
+
+        return fig, ax
+
+    def plot_magnetization(self, filename=None, show=False):
+        """
+        Plot magnetization components.
+
+        Parameters
+        ----------
+        filename : str, optional
+            If provided, save figure to this path
+        show : bool, optional
+            If True, display the figure
+
+        Returns
+        -------
+        fig, ax : matplotlib figure and axes
+        """
+        M_ave = self.result["M(ave)"]
+        M_std = self.result.get("M(std)", None)
+
+        Mx = M_ave[:, 0]
+        My = M_ave[:, 1]
+        Mz = M_ave[:, 2]
+
+        fig, ax = plt.subplots(1, 1, layout="constrained", figsize=(8, 6))
+        ax.minorticks_on()
+
+        if M_std is not None:
+            Mx_std = M_std[:, 0]
+            My_std = M_std[:, 1]
+            Mz_std = M_std[:, 2]
+            ax.errorbar(
+                self.T, Mx, Mx_std, fmt="-o", label="$M_{x}$", capsize=3
+            )
+            ax.errorbar(
+                self.T, My, My_std, fmt="-o", label="$M_{y}$", capsize=3
+            )
+            ax.errorbar(
+                self.T, Mz, Mz_std, fmt="-o", label="$M_{z}$", capsize=3
+            )
+        else:
+            ax.plot(self.T, Mx, "-o", label="$M_{x}$")
+            ax.plot(self.T, My, "-o", label="$M_{y}$")
+            ax.plot(self.T, Mz, "-o", label="$M_{z}$")
+
+        ax.legend(shadow=True)
+        ax.set_xlabel("$T$ [K]")
+        ax.set_ylabel("$M_{i}$ [$\mu_B$]")
+        ax.grid(alpha=0.3)
+
+        if filename:
+            fig.savefig(filename, dpi=150, bbox_inches="tight")
+
+        if show:
+            plt.show()
+        else:
+            plt.close(fig)
+
+        return fig, ax
+
+    def plot_heat_capacity(self, filename=None, show=False):
+        """
+        Plot heat capacity.
+
+        Parameters
+        ----------
+        filename : str, optional
+            If provided, save figure to this path
+        show : bool, optional
+            If True, display the figure
+
+        Returns
+        -------
+        fig, ax : matplotlib figure and axes
+        """
+        C = self.result["C"]
+
+        fig, ax = plt.subplots(1, 1, layout="constrained", figsize=(8, 6))
+        ax.minorticks_on()
+        ax.plot(self.T, C, "-o")
+        ax.set_xlabel("$T$ [K]")
+        ax.set_ylabel("$C$ [eV/K]")
+        ax.grid(alpha=0.3)
+
+        if filename:
+            fig.savefig(filename, dpi=150, bbox_inches="tight")
+
+        if show:
+            plt.show()
+        else:
+            plt.close(fig)
+
+        return fig, ax
+
+    def plot_energy(self, filename=None, show=False):
+        """
+        Plot energy.
+
+        Parameters
+        ----------
+        filename : str, optional
+            If provided, save figure to this path
+        show : bool, optional
+            If True, display the figure
+
+        Returns
+        -------
+        fig, ax : matplotlib figure and axes
+        """
+        E = self.result["E(ave)"]
+        E_std = self.result.get("E(std)", None)
+
+        fig, ax = plt.subplots(1, 1, layout="constrained", figsize=(8, 6))
+        ax.minorticks_on()
+
+        if E_std is not None:
+            ax.errorbar(self.T, E, E_std, fmt="-o", capsize=3)
+        else:
+            ax.plot(self.T, E, "-o")
+
+        ax.set_xlabel("$T$ [K]")
+        ax.set_ylabel("$E$ [eV]")
+        ax.grid(alpha=0.3)
+
+        if filename:
+            fig.savefig(filename, dpi=150, bbox_inches="tight")
+
+        if show:
+            plt.show()
+        else:
+            plt.close(fig)
+
+        return fig, ax
+
+    def plot_intensity(self, filename=None, show=False):
+        """
+        Plot magnetic Bragg intensity.
+
+        Parameters
+        ----------
+        filename : str, optional
+            If provided, save figure to this path
+        show : bool, optional
+            If True, display the figure
+
+        Returns
+        -------
+        fig, ax : matplotlib figure and axes
+        """
+        if self.result.get("I(ave)", None) is None:
+            raise ValueError("No intensity data available in results")
+
+        I = self.result["I(ave)"][:, 0]
+        sig = self.result.get("I(std)", None)
+        hkl = self.result.get("hkl", None)
+
+        fig, ax = plt.subplots(1, 1, layout="constrained", figsize=(8, 6))
+        ax.minorticks_on()
+
+        if sig is not None:
+            ax.errorbar(self.T, I, sig[:, 0], fmt="-o", capsize=3)
+        else:
+            ax.plot(self.T, I, "-o")
+
+        ax.set_xlabel("$T$ [K]")
+        ax.set_ylabel("$I$ [arb. units]")
+        ax.grid(alpha=0.3)
+
+        if hkl is not None:
+            ax.set_title(f"({hkl[0]:.0f} {hkl[1]:.0f} {hkl[2]:.0f})")
+
+        if filename:
+            fig.savefig(filename, dpi=150, bbox_inches="tight")
+
+        if show:
+            plt.show()
+        else:
+            plt.close(fig)
+
+        return fig, ax
+
+    def plot_all(self, prefix="mc", outdir=".", show=False):
+        """
+        Generate all standard plots from simulation results.
+
+        Parameters
+        ----------
+        prefix : str, optional
+            Prefix for output filenames
+        outdir : str, optional
+            Directory to save plots
+        show : bool, optional
+            If True, display figures
+
+        Returns
+        -------
+        figures : dict
+            Dictionary of matplotlib figures
+        """
+        import os
+
+        os.makedirs(outdir, exist_ok=True)
+
+        figures = {}
+
+        # Susceptibility
+        fig, _ = self.plot_susceptibility(
+            filename=os.path.join(outdir, f"{prefix}_susceptibility.png"),
+            show=show,
+        )
+        figures["susceptibility"] = fig
+
+        # Magnetization
+        fig, _ = self.plot_magnetization(
+            filename=os.path.join(outdir, f"{prefix}_magnetization.png"),
+            show=show,
+        )
+        figures["magnetization"] = fig
+
+        # Heat capacity
+        fig, _ = self.plot_heat_capacity(
+            filename=os.path.join(outdir, f"{prefix}_heat_capacity.png"),
+            show=show,
+        )
+        figures["heat_capacity"] = fig
+
+        # Energy
+        fig, _ = self.plot_energy(
+            filename=os.path.join(outdir, f"{prefix}_energy.png"),
+            show=show,
+        )
+        figures["energy"] = fig
+
+        # Intensity (if available)
+        if self.result.get("I(ave)", None) is not None:
+            fig, _ = self.plot_intensity(
+                filename=os.path.join(outdir, f"{prefix}_intensity.png"),
+                show=show,
+            )
+            figures["intensity"] = fig
+
+        return figures
