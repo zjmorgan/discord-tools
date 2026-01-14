@@ -115,6 +115,7 @@ def test_MnF2(g):
         n_local_sweeps=1,
         n_cluster_sweeps=1,
         n_overrelaxation_sweeps=1,
+        n_heatbath_sweeps=1,
         n_outer=100,
         n_thermal=70,
     )

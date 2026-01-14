@@ -142,6 +142,61 @@ class MonteCarlo:
             self.E[i] = E
             self.seeds[i] = seed
 
+    def heatbath(
+        self,
+        n_heatbath_sweeps,
+        n_replicas,
+        delta_atoms,
+        delta_ions,
+        delta_bonds,
+        nb_offsets,
+        nb_atom,
+        nb_ijk,
+        nb_J,
+        K,
+        H,
+        g,
+        S,
+    ):
+        """
+        Perform heatbath (Gibbs sampling) sweeps on all replicas.
+
+        Heatbath samples new spin directions from the conditional Boltzmann
+        distribution given the effective field. Always accepts moves and
+        satisfies detailed balance by construction.
+        """
+        args = [
+            (
+                i,
+                self.s[i],
+                delta_atoms,
+                delta_ions,
+                delta_bonds,
+                self.beta[i],
+                self.E[i],
+                n_heatbath_sweeps,
+                nb_offsets,
+                nb_atom,
+                nb_ijk,
+                nb_J,
+                K,
+                H,
+                g,
+                S,
+                muB,
+                self.seeds[i],
+            )
+            for i in range(n_replicas)
+        ]
+
+        results = self.pool.starmap(kernel.heatbath_heisenberg, args)
+        results.sort(key=lambda x: x[0])
+
+        for i, s, E, seed in results:
+            self.s[i] = s
+            self.E[i] = E
+            self.seeds[i] = seed
+
     def wolff_cluster_updates(
         self,
         n_clusters,
@@ -271,6 +326,7 @@ class MonteCarlo:
         n_local_sweeps=2,
         n_cluster_sweeps=0,
         n_overrelaxation_sweeps=0,
+        n_heatbath_sweeps=0,
         n_outer=1000,
         n_thermal=700,
         n_interval=None,
@@ -342,56 +398,35 @@ class MonteCarlo:
             for i_outer in range(n_outer):
                 print(f"{i_outer}/{n_outer}")
 
-                if n_cluster_sweeps > 0:
-                    self.wolff_cluster_updates(
-                        n_cluster_sweeps,
-                        n_replicas,
-                        delta_atoms,
-                        delta_ions,
-                        delta_bonds,
-                        nb_offsets,
-                        nb_atom,
-                        nb_ijk,
-                        nb_J,
-                        K,
-                        H,
-                        g,
-                        S,
-                    )
+                # Common parameters for all MC update methods
+                mc_params = (
+                    n_replicas,
+                    delta_atoms,
+                    delta_ions,
+                    delta_bonds,
+                    nb_offsets,
+                    nb_atom,
+                    nb_ijk,
+                    nb_J,
+                    K,
+                    H,
+                    g,
+                    S,
+                )
 
-                if n_local_sweeps > 0:
-                    self.metropolis_hastings(
-                        n_local_sweeps,
-                        n_replicas,
-                        delta_atoms,
-                        delta_ions,
-                        delta_bonds,
-                        nb_offsets,
-                        nb_atom,
-                        nb_ijk,
-                        nb_J,
-                        K,
-                        H,
-                        g,
-                        S,
-                    )
+                if n_cluster_sweeps > 0:
+                    self.wolff_cluster_updates(n_cluster_sweeps, *mc_params)
 
                 if n_overrelaxation_sweeps > 0:
-                    self.overrelaxation(
-                        n_overrelaxation_sweeps,
-                        n_replicas,
-                        delta_atoms,
-                        delta_ions,
-                        delta_bonds,
-                        nb_offsets,
-                        nb_atom,
-                        nb_ijk,
-                        nb_J,
-                        K,
-                        H,
-                        g,
-                        S,
-                    )
+                    self.overrelaxation(n_overrelaxation_sweeps, *mc_params)
+
+                if n_heatbath_sweeps > 0:
+                    self.heatbath(n_heatbath_sweeps, *mc_params)
+
+                if n_local_sweeps > 0:
+                    self.metropolis_hastings(n_local_sweeps, *mc_params)
+
+                self.replica_exchange()
 
                 if i_outer >= n_thermal:
 
@@ -411,8 +446,6 @@ class MonteCarlo:
                             outdir=outdir,
                             show=False,
                         )
-
-                self.replica_exchange()
 
         self.crystal.set_spin_vectors(self.s)
 

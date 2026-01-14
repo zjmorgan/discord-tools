@@ -50,6 +50,76 @@ def random_unit_vector():
     return np.array([v0 / v, v1 / v, v2 / v])
 
 
+@njit
+def sample_unit_vector_along_field(f0, f1, f2, beta):
+    """Sample a unit vector s with density proportional to exp(beta * f·s).
+
+    This is the exact heatbath/Gibbs sampler for a *linear* energy term
+    E_lin(s) = -f·s (with |s|=1). It samples azimuth uniformly and samples
+    cos(theta) from p(cos) ∝ exp(beta*|f|*cos) on [-1, 1].
+    """
+
+    fn = np.sqrt(f0 * f0 + f1 * f1 + f2 * f2)
+    if fn < 1e-14:
+        v = random_unit_vector()
+        return v[0], v[1], v[2]
+
+    # Unit vector along field
+    h0 = f0 / fn
+    h1 = f1 / fn
+    h2 = f2 / fn
+
+    alpha = beta * fn
+
+    # Sample cos(theta) with inverse CDF.
+    # For alpha -> 0, distribution tends to uniform.
+    if alpha < 1e-6:
+        cos_theta = 2.0 * np.random.rand() - 1.0
+    elif alpha > 50.0:
+        # Large-alpha asymptotic: cos(theta) ≈ 1 + log(u)/alpha
+        cos_theta = 1.0 + np.log(np.random.rand()) / alpha
+        if cos_theta < -1.0:
+            cos_theta = -1.0
+    else:
+        # Exact: cos = -1 + log(1 + u*(exp(2a)-1))/a
+        u = np.random.rand()
+        cos_theta = -1.0 + np.log1p(u * np.expm1(2.0 * alpha)) / alpha
+
+    if cos_theta > 1.0:
+        cos_theta = 1.0
+    if cos_theta < -1.0:
+        cos_theta = -1.0
+
+    sin_theta = np.sqrt(max(0.0, 1.0 - cos_theta * cos_theta))
+    phi = 2.0 * np.pi * np.random.rand()
+
+    # Build an orthonormal basis (v, w, h)
+    if abs(h0) < 0.9:
+        u0, u1, u2 = 1.0, 0.0, 0.0
+    else:
+        u0, u1, u2 = 0.0, 1.0, 0.0
+
+    dot_uh = u0 * h0 + u1 * h1 + u2 * h2
+    v0 = u0 - dot_uh * h0
+    v1 = u1 - dot_uh * h1
+    v2 = u2 - dot_uh * h2
+    vn = np.sqrt(v0 * v0 + v1 * v1 + v2 * v2)
+    v0 /= vn
+    v1 /= vn
+    v2 /= vn
+
+    w0 = h1 * v2 - h2 * v1
+    w1 = h2 * v0 - h0 * v2
+    w2 = h0 * v1 - h1 * v0
+
+    c = np.cos(phi)
+    s = np.sin(phi)
+    s0 = cos_theta * h0 + sin_theta * (c * v0 + s * w0)
+    s1 = cos_theta * h1 + sin_theta * (c * v1 + s * w1)
+    s2 = cos_theta * h2 + sin_theta * (c * v2 + s * w2)
+    return s0, s1, s2
+
+
 @njit(parallel=True)
 def total_heisenberg_energy(
     s,
@@ -335,10 +405,12 @@ def overrelaxation_heisenberg(
 ):
     """Overrelaxation sweeps for one replica.
 
-    For each site, reflects the spin across the effective field direction.
-    This is a microcanonical update that preserves energy exactly (for
-    isotropic exchange) and helps decorrelate configurations faster than
-    Metropolis. Small energy changes occur due to anisotropy and Zeeman terms.
+    For each site, reflects the spin across the exchange field direction.
+
+    For an isotropic exchange-only Hamiltonian this is microcanonical (dE=0)
+    and always accepted. When anisotropy and/or Zeeman terms are present, this
+    reflection is used as a symmetric Metropolis-Hastings proposal and is
+    accepted/rejected based on the full energy change.
     """
 
     np.random.seed(seed)
@@ -452,11 +524,189 @@ def overrelaxation_heisenberg(
 
         dE = dEJ + dEK + dEH
 
-        # Update spin and energy
-        s[i_atom, i, j, k, 0] = s_new0
-        s[i_atom, i, j, k, 1] = s_new1
-        s[i_atom, i, j, k, 2] = s_new2
-        E += dE
+        # Symmetric proposal (involution), accept/reject on full dE
+        if dE <= 0.0 or np.random.rand() < np.exp(-beta * dE):
+            s[i_atom, i, j, k, 0] = s_new0
+            s[i_atom, i, j, k, 1] = s_new1
+            s[i_atom, i, j, k, 2] = s_new2
+            E += dE
+
+    return idx, s, E, int(np.random.randint(0, 2**31 - 1))
+
+
+@njit
+def heatbath_heisenberg(
+    idx,
+    s,
+    delta_atoms,
+    delta_ions,
+    delta_bonds,
+    beta,
+    E,
+    n_heatbath_sweeps,
+    nb_offsets,
+    nb_atom,
+    nb_ijk,
+    nb_J,
+    K,
+    H,
+    g,
+    S,
+    muB,
+    seed,
+):
+    """Heatbath-style local update for one replica.
+
+    Important detail: the anisotropy term is quadratic in s, so the full
+    conditional distribution is not a simple "cone" distribution.
+
+    We therefore:
+    1) Draw a proposal from the exact heatbath distribution for the *linear*
+       terms (exchange + Zeeman), and
+    2) Apply a Metropolis-Hastings correction for the anisotropy term only.
+
+    This is exact for the full Hamiltonian, and reduces to a true always-accept
+    heatbath when anisotropy is disabled (delta_ion == 0 or K == 0).
+    """
+    np.random.seed(seed)
+
+    n_atoms, ni, nj, nk, _ = s.shape
+
+    # Perform sweeps over all sites
+    for _ in range(n_heatbath_sweeps):
+        for i_atom in range(n_atoms):
+            S_sq_eff = S[i_atom] * (S[i_atom] + 1.0)
+            K_ion = K[i_atom]
+
+            for i in range(ni):
+                for j in range(nj):
+                    for k in range(nk):
+                        delta_atom = delta_atoms[i_atom, i, j, k]
+                        if delta_atom <= 0.0:
+                            continue
+
+                    delta_ion = delta_ions[i_atom, i, j, k]
+                    delta_bond = delta_bonds[i_atom, i, j, k]
+
+                    # Get current spin
+                    s0_orig = s[i_atom, i, j, k, 0]
+                    s1_orig = s[i_atom, i, j, k, 1]
+                    s2_orig = s[i_atom, i, j, k, 2]
+
+                    # Compute exchange field
+                    h0_exch, h1_exch, h2_exch = local_field_at_site(
+                        s,
+                        delta_bonds,
+                        i_atom,
+                        i,
+                        j,
+                        k,
+                        nb_offsets,
+                        nb_atom,
+                        nb_ijk,
+                        nb_J,
+                        ni,
+                        nj,
+                        nk,
+                    )
+
+                    # Proposal field for linear terms (exchange + Zeeman) in energy units.
+                    # Local linear energy: E_lin = -s · f, with
+                    # f_exch = S_sq_eff * delta_bond * h_exch
+                    # f_H    = muB * g * S_sq_eff * delta_atom * H
+                    f0 = S_sq_eff * delta_bond * h0_exch + (
+                        muB * g[i_atom] * S_sq_eff * delta_atom * H[0]
+                    )
+                    f1 = S_sq_eff * delta_bond * h1_exch + (
+                        muB * g[i_atom] * S_sq_eff * delta_atom * H[1]
+                    )
+                    f2 = S_sq_eff * delta_bond * h2_exch + (
+                        muB * g[i_atom] * S_sq_eff * delta_atom * H[2]
+                    )
+
+                    s0_new, s1_new, s2_new = sample_unit_vector_along_field(
+                        f0, f1, f2, beta
+                    )
+
+                    # Calculate energy change
+                    delta_s0 = s0_new - s0_orig
+                    delta_s1 = s1_new - s1_orig
+                    delta_s2 = s2_new - s2_orig
+
+                    # Exchange energy change
+                    dEJ = (
+                        -S_sq_eff
+                        * (
+                            delta_s0 * h0_exch
+                            + delta_s1 * h1_exch
+                            + delta_s2 * h2_exch
+                        )
+                        * delta_bond
+                    )
+
+                    # K*s_old (used for anisotropy energy difference)
+                    Ks0 = (
+                        K_ion[0, 0] * s0_orig
+                        + K_ion[0, 1] * s1_orig
+                        + K_ion[0, 2] * s2_orig
+                    )
+                    Ks1 = (
+                        K_ion[1, 0] * s0_orig
+                        + K_ion[1, 1] * s1_orig
+                        + K_ion[1, 2] * s2_orig
+                    )
+                    Ks2 = (
+                        K_ion[2, 0] * s0_orig
+                        + K_ion[2, 1] * s1_orig
+                        + K_ion[2, 2] * s2_orig
+                    )
+
+                    # Anisotropy energy change (quadratic in s)
+                    Ks0_new = (
+                        K_ion[0, 0] * s0_new
+                        + K_ion[0, 1] * s1_new
+                        + K_ion[0, 2] * s2_new
+                    )
+                    Ks1_new = (
+                        K_ion[1, 0] * s0_new
+                        + K_ion[1, 1] * s1_new
+                        + K_ion[1, 2] * s2_new
+                    )
+                    Ks2_new = (
+                        K_ion[2, 0] * s0_new
+                        + K_ion[2, 1] * s1_new
+                        + K_ion[2, 2] * s2_new
+                    )
+
+                    dEK = (
+                        -S_sq_eff
+                        * (
+                            (
+                                s0_new * Ks0_new
+                                + s1_new * Ks1_new
+                                + s2_new * Ks2_new
+                            )
+                            - (s0_orig * Ks0 + s1_orig * Ks1 + s2_orig * Ks2)
+                        )
+                        * delta_ion
+                    )
+
+                    # Zeeman energy change
+                    dEH = (
+                        -muB
+                        * g[i_atom]
+                        * S_sq_eff
+                        * (delta_s0 * H[0] + delta_s1 * H[1] + delta_s2 * H[2])
+                        * delta_atom
+                    )
+
+                    # Metropolis-Hastings correction for anisotropy only.
+                    # If dEK == 0 (no anisotropy), this always accepts.
+                    if dEK <= 0.0 or np.random.rand() < np.exp(-beta * dEK):
+                        s[i_atom, i, j, k, 0] = s0_new
+                        s[i_atom, i, j, k, 1] = s1_new
+                        s[i_atom, i, j, k, 2] = s2_new
+                        E += dEJ + dEK + dEH
 
     return idx, s, E, int(np.random.randint(0, 2**31 - 1))
 
@@ -481,7 +731,8 @@ def wolff_heisenberg(
     muB,
     seed,
 ):
-    """Single Wolff-style cluster update for one replica.
+    """
+    Single Wolff-style cluster update for one replica.
 
     Cluster growth uses the exchange couplings only (``nb_J``) with a
     random reflection axis. After flipping the cluster, the full
