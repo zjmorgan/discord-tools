@@ -153,3 +153,55 @@ def test_MnF2(g):
 
     assert np.isclose(E, E0)
     assert np.isclose(E, mc.E[0])
+
+
+def test_checkpoint_roundtrip_continues_averages(tmp_path):
+    h5py = pytest.importorskip("h5py")
+
+    cell = [4.873, 4.873, 3.130, 90, 90, 90]
+    space_group = "P 42/m n m"
+    sites = [["Mn", 0, 0.0, 0.0]]
+    crystal = Crystal(cell, space_group, sites, S=2.5)
+
+    crystal.generate_bonds(d_cut=4.8)
+    K, J = crystal.initialize_magnetic_parameters()
+    K[:] = np.diag([0, 0, 0.091])
+    J[0] = 0.028 * np.eye(3)
+    J[1] = -0.152 * np.eye(3)
+    crystal.assign_magnetic_parameters(K, J)
+
+    mc = MonteCarlo(crystal)
+
+    ckpt = tmp_path / "mc_checkpoint.h5"
+    mc.parallel_tempering(
+        n_local_sweeps=1,
+        n_cluster_sweeps=0,
+        n_overrelaxation_sweeps=0,
+        n_heatbath_sweeps=0,
+        n_outer=40,
+        n_thermal=20,
+        checkpoint_final=True,
+        checkpoint_path=str(ckpt),
+    )
+
+    with h5py.File(ckpt, "r") as f:
+        n0 = int(f["state"].attrs["n_samples_accumulated"])
+        assert n0 > 0
+
+    # Resume and run more; sample count should increase.
+    mc2 = MonteCarlo(crystal)
+    mc2.parallel_tempering(
+        n_local_sweeps=1,
+        n_cluster_sweeps=0,
+        n_overrelaxation_sweeps=0,
+        n_heatbath_sweeps=0,
+        n_outer=60,
+        n_thermal=20,
+        resume_from=str(ckpt),
+        checkpoint_final=True,
+        checkpoint_path=str(ckpt),
+    )
+
+    with h5py.File(ckpt, "r") as f:
+        n1 = int(f["state"].attrs["n_samples_accumulated"])
+        assert n1 > n0
