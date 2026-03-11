@@ -662,7 +662,7 @@ class MonteCarlo:
         E_var = E_sq_ave - E_ave**2
         E_std = np.sqrt(E_var)
 
-        C = self.beta**2 * E_var
+        C = kB * self.beta**2 * E_var
 
         I_ave = None
         I_std = None
