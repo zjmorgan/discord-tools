@@ -296,7 +296,9 @@ def linear_field_energy_units(
 # ----------------------------
 
 
-@njit(parallel=True)
+# Serial on purpose: parallel prange reductions sum in a thread-dependent
+# order, which breaks bitwise reproducibility of seeded runs.
+@njit
 def total_heisenberg_energy(
     s,
     delta_atoms,
@@ -315,7 +317,7 @@ def total_heisenberg_energy(
     n_atoms, ni, nj, nk, _ = s.shape
 
     EJ = 0.0
-    for i_atom in prange(n_atoms):
+    for i_atom in range(n_atoms):
         S_sq_eff = S[i_atom] * (S[i_atom] + 1.0)
         for i in range(ni):
             for j in range(nj):
@@ -352,7 +354,7 @@ def total_heisenberg_energy(
                     )
 
     EK = 0.0
-    for i_atom in prange(n_atoms):
+    for i_atom in range(n_atoms):
         S_sq_eff = S[i_atom] * (S[i_atom] + 1.0)
         K_i = K[i_atom]
         for i in range(ni):
@@ -367,7 +369,7 @@ def total_heisenberg_energy(
                     EK -= S_sq_eff * quad_form3(K_i, s0, s1, s2) * delta_ion
 
     EH = 0.0
-    for i_atom in prange(n_atoms):
+    for i_atom in range(n_atoms):
         S_sq_eff = S[i_atom] * (S[i_atom] + 1.0)
         g_i = g[i_atom]
         for i in range(ni):
@@ -421,6 +423,9 @@ def metropolis_heisenberg(
     n_atoms, ni, nj, nk, _ = s.shape
     n_sites = n_atoms * ni * nj * nk
 
+    n_accepted = 0
+    n_attempted = 0
+
     for _ in range(n_local_sweeps * n_sites):
         flat = np.random.randint(n_sites)
         i_atom, i, j, k = unravel_site(flat, n_atoms, ni, nj, nk)
@@ -428,6 +433,7 @@ def metropolis_heisenberg(
         delta_atom_center = delta_atoms[i_atom, i, j, k]
         if delta_atom_center <= 0.0:
             continue
+        n_attempted += 1
 
         S_sq_eff = S[i_atom] * (S[i_atom] + 1.0)
         g_i = g[i_atom]
@@ -485,8 +491,9 @@ def metropolis_heisenberg(
             s[i_atom, i, j, k, 1] = sp1
             s[i_atom, i, j, k, 2] = sp2
             E += dE
+            n_accepted += 1
 
-    return idx, s, E, int(np.random.randint(0, 2**31 - 1))
+    return idx, s, E, n_accepted, n_attempted
 
 
 # ----------------------------
@@ -519,6 +526,9 @@ def heatbath_heisenberg(
 
     n_atoms, ni, nj, nk, _ = s.shape
 
+    n_accepted = 0
+    n_attempted = 0
+
     for _ in range(n_heatbath_sweeps):
         for i_atom in range(n_atoms):
             S_sq_eff = S[i_atom] * (S[i_atom] + 1.0)
@@ -530,6 +540,7 @@ def heatbath_heisenberg(
                         delta_atom_center = delta_atoms[i_atom, i, j, k]
                         if delta_atom_center <= 0.0:
                             continue
+                        n_attempted += 1
 
                         s0 = s[i_atom, i, j, k, 0]
                         s1 = s[i_atom, i, j, k, 1]
@@ -623,8 +634,9 @@ def heatbath_heisenberg(
                         s[i_atom, i, j, k, 1] = sp1
                         s[i_atom, i, j, k, 2] = sp2
                         E += dEJ + dEH + dEK
+                        n_accepted += 1
 
-    return idx, s, E, int(np.random.randint(0, 2**31 - 1))
+    return idx, s, E, n_accepted, n_attempted
 
 
 # ----------------------------
@@ -666,6 +678,9 @@ def overrelaxation_heisenberg(
     n_atoms, ni, nj, nk, _ = s.shape
     n_sites = n_atoms * ni * nj * nk
 
+    n_accepted = 0
+    n_attempted = 0
+
     for _ in range(n_overrelaxation_sweeps * n_sites):
         flat = np.random.randint(n_sites)
         i_atom, i, j, k = unravel_site(flat, n_atoms, ni, nj, nk)
@@ -673,6 +688,7 @@ def overrelaxation_heisenberg(
         delta_atom_center = delta_atoms[i_atom, i, j, k]
         if delta_atom_center <= 0.0:
             continue
+        n_attempted += 1
 
         S_sq_eff = S[i_atom] * (S[i_atom] + 1.0)
         g_i = g[i_atom]
@@ -757,8 +773,9 @@ def overrelaxation_heisenberg(
             s[i_atom, i, j, k, 1] = sp1
             s[i_atom, i, j, k, 2] = sp2
             E += dE
+            n_accepted += 1
 
-    return idx, s, E, int(np.random.randint(0, 2**31 - 1))
+    return idx, s, E, n_accepted, n_attempted
 
 
 # --------------------
@@ -772,19 +789,19 @@ def wolff_bond_weight(J, n0, n1, n2, si_proj, sj_proj, S_sq_eff, delta_ij):
     Signed Wolff bond weight w; a bond is activated with probability
     p = 1 - exp(-beta * max(w, 0)).
 
-    For isotropic ferromagnetic J, w is exactly the energy cost of
-    reflecting s_i (but not s_j) about the plane ⟂ n. Whatever J is, each
-    boundary bond contributes a Hastings factor
+    w > 0 for satisfied bonds of either sign (ferromagnetic J with aligned
+    projections, antiferromagnetic J with anti-aligned ones), as in the
+    embedded-Ising Wolff algorithm. For isotropic J, w is exactly the energy
+    cost of reflecting s_i (but not s_j) about the plane ⟂ n. Whatever J
+    is, each boundary bond contributes a Hastings factor
     (1 - p_reverse) / (1 - p_forward) = exp(beta * w)
     to the cluster acceptance, which keeps the move exact.
     """
-    # J_eff = n^T J n, positive (ferromagnetic) part only
+    # J_eff = n^T J n
     Jn0 = J[0, 0] * n0 + J[0, 1] * n1 + J[0, 2] * n2
     Jn1 = J[1, 0] * n0 + J[1, 1] * n1 + J[1, 2] * n2
     Jn2 = J[2, 0] * n0 + J[2, 1] * n1 + J[2, 2] * n2
     J_eff = n0 * Jn0 + n1 * Jn1 + n2 * Jn2
-    if J_eff <= 0.0:
-        return 0.0
     return 2.0 * S_sq_eff * delta_ij * J_eff * si_proj * sj_proj
 
 
@@ -807,16 +824,24 @@ def wolff_heisenberg(
     S,
     muB,
     seed,
+    axis_projectors,
 ):
     """
     Wolff-style embedded cluster:
-      - grow cluster using exchange only (projected along random axis n)
+      - choose the embedding axis n (see below)
+      - grow cluster using exchange only (projected along n)
       - propose reflection of cluster spins about plane ⟂ n
       - MH accept/reject with min(1, exp(-beta * (ΔE - W))), where W is the
         sum of boundary bond weights (the log Hastings ratio of the cluster
-        construction). For isotropic ferromagnetic exchange W cancels the
-        exchange part of ΔE, so only anisotropy and field are corrected.
+        construction). For isotropic exchange W cancels the exchange part
+        of ΔE (of either sign), so only anisotropy and field are corrected.
 
+    The axis is n = P g / |P g| with P drawn uniformly from
+    ``axis_projectors`` (shape (n_proj, 3, 3)) and g a uniform random unit
+    vector. P = I gives a uniformly random axis. Projectors onto eigenspaces
+    of the single-ion tensor K make the reflection leave s^T K s unchanged.
+    Any state-independent axis distribution keeps the move exact, because
+    the reflection is its own inverse for the same n.
     """
     np.random.seed(seed)
 
@@ -832,9 +857,18 @@ def wolff_heisenberg(
             seed_flat = cand
             break
     if seed_flat < 0:
-        return idx, s, E, int(np.random.randint(0, 2**31 - 1))
+        return idx, s, E, 0, 0
 
-    n0, n1, n2 = random_unit_vector3()
+    P = axis_projectors[np.random.randint(axis_projectors.shape[0])]
+    while True:
+        g0, g1, g2 = random_unit_vector3()
+        n0, n1, n2 = matvec3(P, g0, g1, g2)
+        nn = norm3(n0, n1, n2)
+        if nn > 1e-8:
+            break
+    n0 /= nn
+    n1 /= nn
+    n2 /= nn
 
     # queue + membership
     cluster = np.empty(n_sites, dtype=np.int64)
@@ -1039,5 +1073,6 @@ def wolff_heisenberg(
             s[ai, ii, ji, ki, 1] = sp1
             s[ai, ii, ji, ki, 2] = sp2
         E += dE
+        return idx, s, E, back, back
 
-    return idx, s, E, int(np.random.randint(0, 2**31 - 1))
+    return idx, s, E, 0, back

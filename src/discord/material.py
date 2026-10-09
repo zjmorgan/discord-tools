@@ -6,6 +6,9 @@ from scipy.linalg import cholesky
 
 from mantid.geometry import CrystalStructure
 
+from discord.dipolar import ewald_dipolar_tensors
+from discord.parameters.constants import D
+
 
 
 class Crystal:
@@ -264,34 +267,109 @@ class Crystal:
         assert self.H.size == 3
         self._build_neighbor_arrays()
 
+    def add_dipolar_interactions(
+        self, boundary="tinfoil", alpha=None, precision=4.0
+    ):
+        """
+        Add Ewald-summed magnetic dipole-dipole interactions.
+
+        Every site couples to every other site of the periodic supercell
+        (including all periodic images), so each local-field evaluation
+        costs O(N) instead of O(z); without this call nothing changes.
+        The couplings are appended to the exchange bonds, and the
+        interaction of each moment with its own images enters as an extra
+        single-ion term (see :meth:`get_magnetic_parameters`). Kept when
+        exchange is reassigned or bonds are filtered.
+
+        Parameters
+        ----------
+        boundary : {"tinfoil", "vacuum"}
+            Conducting surroundings (no demagnetizing field) or a spherical
+            sample in vacuum. Matters when the net moment is non-zero.
+        alpha, precision : float, optional
+            Ewald parameters, see
+            :func:`discord.dipolar.ewald_dipolar_tensors`.
+
+        Notes
+        -----
+        With moments mu_i = g_i sqrt(S_i(S_i+1)) muB C s_i, the dipolar
+        energy (mu0/4pi) 1/2 sum mu_i.T_ij.mu_j is mapped onto the exchange
+        convention E = -1/2 sum S~_i^2 s_i.J_ij.s_j by
+        J_ij = -D g_i g_j (S~_j / S~_i) C^T T_ij C, with D = (mu0/4pi) muB^2.
+        Effective anisotropies fitted to experiment may already include
+        dipolar contributions; refit K before adding them explicitly.
+        """
+        N = tuple(self.N)
+        T = ewald_dipolar_tensors(
+            self.A, self.xyz, N, boundary, alpha=alpha, precision=precision
+        )
+        T = np.einsum("ia,...ij,jb->...ab", self.C, T, self.C)
+
+        S_eff = np.sqrt(self.S * (self.S + 1.0))
+        moment = self.g * S_eff
+        scale = -D * moment[:, None] * moment[None, :] / S_eff[:, None] ** 2
+        J = scale[:, :, None, None, None, None, None] * T
+
+        self.K_dipolar = np.stack(
+            [-0.5 * D * self.g[a] ** 2 * T[a, a, 0, 0, 0] for a in range(self.n_atoms)]
+        )
+
+        a, b, i, j, k = np.indices((self.n_atoms, self.n_atoms, *N)).reshape(5, -1)
+        keep = ~((a == b) & (i == 0) & (j == 0) & (k == 0))
+        self.dipolar = {
+            "bi": a[keep],
+            "bj": b[keep],
+            "d_ijk": np.stack([i, j, k], axis=1)[keep],
+            "J": J.reshape(-1, 3, 3)[keep],
+            "boundary": boundary,
+        }
+
+        if hasattr(self, "J"):
+            self._build_neighbor_arrays()
+
+    def remove_dipolar_interactions(self):
+        """Remove dipolar interactions added by :meth:`add_dipolar_interactions`."""
+        self.dipolar = None
+        self.K_dipolar = None
+        if hasattr(self, "J"):
+            self._build_neighbor_arrays()
+
     def _build_neighbor_arrays(self):
-        counts = np.bincount(self.bi, minlength=self.n_atoms)
+        bi, bj, d_ijk = self.bi, self.bj, self.d_ijk
+        J_ij = self.J[self.inverses]
+
+        dipolar = getattr(self, "dipolar", None)
+        if dipolar is not None:
+            bi = np.concatenate([bi, dipolar["bi"]])
+            bj = np.concatenate([bj, dipolar["bj"]])
+            d_ijk = np.concatenate([d_ijk, dipolar["d_ijk"]])
+            J_ij = np.concatenate([J_ij, dipolar["J"]])
+
+        counts = np.bincount(bi, minlength=self.n_atoms)
         self.nb_offsets = np.empty(self.n_atoms + 1, dtype=np.int64)
         self.nb_offsets[0] = 0
         self.nb_offsets[1:] = np.cumsum(counts)
 
-        n_bonds = self.nb_offsets[-1]
-
-        self.nb_atom = np.empty(n_bonds, dtype=np.int64)
-        self.nb_ijk = np.empty((n_bonds, 3), dtype=np.int64)
-        self.nb_J = np.empty((n_bonds, 3, 3), dtype=np.float64)
-
-        J_ij = self.J[self.inverses]
-
-        cursor = self.nb_offsets.copy()
-        for i in range(self.bi.size):
-            l = self.bi[i]
-            pos = cursor[l]
-            self.nb_atom[pos] = self.bj[i]
-            self.nb_ijk[pos] = self.d_ijk[i]
-            self.nb_J[pos] = J_ij[i]
-            cursor[l] += 1
+        # stable sort by source atom keeps each atom's bonds contiguous
+        order = np.argsort(bi, kind="stable")
+        self.nb_atom = np.ascontiguousarray(bj[order], dtype=np.int64)
+        self.nb_ijk = np.ascontiguousarray(d_ijk[order], dtype=np.int64)
+        self.nb_J = np.ascontiguousarray(J_ij[order], dtype=np.float64)
 
     def get_compressed_sparse_row(self):
         return self.nb_offsets, self.nb_atom, self.nb_ijk
 
     def get_magnetic_parameters(self):
-        return self.nb_J, self.K, self.H
+        """
+        Bond tensors, effective single-ion tensors and field for the kernels.
+
+        The single-ion tensors include the dipolar self-image term when
+        dipolar interactions have been added.
+        """
+        K = self.K
+        if getattr(self, "K_dipolar", None) is not None:
+            K = K + self.K_dipolar
+        return self.nb_J, K, self.H
 
     def get_number_bonds(self):
         return self.n_bonds

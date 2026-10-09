@@ -333,3 +333,118 @@ def test_per_site_fluctuations_independent_of_supercell():
         a["chi(err)"][:, diag, diag], b["chi(err)"][:, diag, diag]
     )
     assert np.all(np.abs(chi_a - chi_b) < 4 * sig_chi)
+
+
+def test_per_temperature_schedule_and_timing():
+    mc = MonteCarlo(_small_mnf2(), n_replicas=4, seed=11)
+    result = mc.parallel_tempering(
+        n_local_sweeps=[1, 1, 0, 0],
+        n_heatbath_sweeps=[0, 0, 2, 0],
+        n_overrelaxation_sweeps=[0, 3, 0, 1],
+        n_cluster_sweeps=[0, 0, 0, 2],
+        n_outer=30,
+        n_thermal=10,
+    )
+    timing = result["timing"]
+    assert timing["n_steps"] == 20
+
+    # Kernel calls per step follow the schedule (Wolff: one per cluster).
+    assert np.array_equal(timing["metropolis"]["calls_per_step"], [1, 1, 0, 0])
+    assert np.array_equal(timing["heatbath"]["calls_per_step"], [0, 0, 1, 0])
+    assert np.array_equal(
+        timing["overrelaxation"]["calls_per_step"], [0, 1, 0, 1]
+    )
+    assert np.array_equal(timing["wolff"]["calls_per_step"], [0, 0, 0, 2])
+
+    for method, active in [
+        ("metropolis", [0, 1]),
+        ("heatbath", [2]),
+        ("overrelaxation", [1, 3]),
+        ("wolff", [3]),
+    ]:
+        entry = timing[method]
+        idle = np.setdiff1d(np.arange(4), active)
+        assert np.all(entry["kernel_time_per_step"][active] > 0)
+        assert np.all(entry["kernel_time_per_step"][idle] == 0)
+        assert np.all((entry["acceptance"][active] >= 0))
+        assert np.all((entry["acceptance"][active] <= 1))
+        assert np.all(np.isnan(entry["acceptance"][idle]))
+    assert timing["wolff"]["cluster_size"][3] >= 1
+
+    # Wall-time breakdown of the update phase is consistent.
+    assert timing["updates"] > 0 and timing["kernel_mean"] > 0
+    assert timing["load_imbalance"] >= 0
+    assert np.isclose(
+        timing["updates"],
+        timing["kernel_mean"]
+        + timing["load_imbalance"]
+        + timing["dispatch_overhead"],
+    )
+    assert timing["total_wall_time_per_step"] >= timing["updates"]
+
+    # Tracked energies stay consistent with per-temperature schedules.
+    nb_J, K, H = mc.crystal.get_magnetic_parameters()
+    nb_offsets, nb_atom, nb_ijk = mc.crystal.get_compressed_sparse_row()
+    for i in range(4):
+        E = kernel.total_heisenberg_energy(
+            mc.s[i],
+            mc.crystal.delta_atoms,
+            mc.crystal.delta_ions,
+            mc.crystal.delta_bonds,
+            nb_offsets,
+            nb_atom,
+            nb_ijk,
+            nb_J,
+            K,
+            H,
+            mc.crystal.get_g_factors(),
+            mc.crystal.get_spin_quantum_numbers(),
+            muB,
+        )
+        assert np.isclose(E, mc.E[i])
+
+
+def test_schedule_validation():
+    mc = MonteCarlo(_small_mnf2(), n_replicas=3, seed=0)
+    with pytest.raises(ValueError, match="one entry per temperature"):
+        mc.parallel_tempering(n_local_sweeps=[1, 1], n_outer=2, n_thermal=1)
+    with pytest.raises(ValueError, match="not ergodic"):
+        mc.parallel_tempering(
+            n_local_sweeps=[1, 0, 1],
+            n_overrelaxation_sweeps=1,
+            n_outer=2,
+            n_thermal=1,
+        )
+
+
+def test_sample_interval():
+    mc = MonteCarlo(_small_mnf2(), n_replicas=3, seed=2)
+    result = mc.parallel_tempering(
+        n_local_sweeps=1, n_outer=40, n_thermal=10, sample_interval=3
+    )
+    # Production steps 10..39 sampled at 10, 13, ..., 37; timing covers all.
+    assert result["n_samples"] == 10
+    assert result["series"]["E"].shape == (10, 3)
+    assert result["timing"]["n_steps"] == 30
+
+
+def test_wolff_anisotropy_axes_option():
+    mc = MonteCarlo(_small_mnf2(), n_replicas=3, seed=4)
+    result = mc.parallel_tempering(
+        n_local_sweeps=1,
+        n_cluster_sweeps=2,
+        wolff_axes="anisotropy",
+        n_outer=20,
+        n_thermal=5,
+    )
+    assert np.all(result["timing"]["wolff"]["calls_per_step"] == 2)
+
+    # Restricted axes alone are not ergodic.
+    with pytest.raises(ValueError, match="random axes"):
+        mc.parallel_tempering(
+            n_local_sweeps=0,
+            n_cluster_sweeps=1,
+            wolff_axes="anisotropy",
+            n_outer=2,
+            n_thermal=1,
+        )

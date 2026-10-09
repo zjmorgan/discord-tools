@@ -1,5 +1,6 @@
 import numpy as np
 import os
+import time
 from datetime import datetime, timezone
 import json
 
@@ -15,6 +16,169 @@ try:
     import h5py  # type: ignore
 except Exception:  # pragma: no cover
     h5py = None
+
+
+# Update methods in the order they are applied within each step
+METHODS = ("wolff", "overrelaxation", "heatbath", "metropolis")
+
+KERNELS = {
+    "wolff": kernel.wolff_heisenberg,
+    "overrelaxation": kernel.overrelaxation_heisenberg,
+    "heatbath": kernel.heatbath_heisenberg,
+    "metropolis": kernel.metropolis_heisenberg,
+}
+
+
+def wolff_axis_projectors(K, mode="random", rtol=1e-6):
+    """
+    Projectors defining the Wolff embedding-axis distribution.
+
+    The kernel draws one projector P uniformly and uses n = P g / |P g|
+    with g a uniform random unit vector.
+
+    Parameters
+    ----------
+    K : array_like
+        Single-ion anisotropy tensors, shape ``(n_atoms, 3, 3)``.
+    mode : {"random", "anisotropy", "mixed"}
+        ``"random"``: uniformly random axes (P = I). ``"anisotropy"``: axes
+        drawn within the eigenspaces of K (a random direction in a
+        degenerate plane), so cluster reflections leave the anisotropy
+        energy unchanged. ``"mixed"``: both, with equal weight per
+        projector; it falls back to ``"random"`` for isotropic K.
+    rtol : float
+        Relative tolerance for degeneracy and shared-frame checks.
+
+    Returns
+    -------
+    projectors : ndarray
+        Shape ``(n_proj, 3, 3)``.
+
+    Raises
+    ------
+    ValueError
+        For ``"anisotropy"`` with isotropic K, or when the anisotropic sites
+        do not share principal axes.
+    """
+    identity = np.eye(3)[None]
+    if mode == "random":
+        return identity.copy()
+    if mode not in ("anisotropy", "mixed"):
+        raise ValueError(f"Unknown wolff_axes mode {mode!r}")
+
+    K = np.asarray(K, dtype=float)
+    K = 0.5 * (K + np.swapaxes(K, 1, 2))
+    traceless = K - np.trace(K, axis1=1, axis2=2)[:, None, None] / 3 * np.eye(3)
+    norms = np.linalg.norm(traceless, axis=(1, 2))
+    scale = np.linalg.norm(K, axis=(1, 2)).max(initial=0.0)
+    anisotropic = norms > rtol * max(scale, np.finfo(float).tiny)
+
+    if not anisotropic.any():
+        if mode == "mixed":
+            return identity.copy()
+        raise ValueError(
+            "wolff_axes='anisotropy' needs anisotropic single-ion tensors K"
+        )
+
+    # A generic combination of commuting tensors has their common eigenbasis,
+    # degenerate only where all of them are.
+    weights = np.random.default_rng(0).uniform(0.5, 1.5, size=len(K))
+    combo = np.einsum("i,ijk->jk", weights * anisotropic, traceless)
+    vals, vecs = np.linalg.eigh(combo)
+    spread = vals.max() - vals.min()
+    groups = [[0]]
+    for a in range(1, 3):
+        if vals[a] - vals[groups[-1][-1]] > rtol * spread:
+            groups.append([a])
+        else:
+            groups[-1].append(a)
+    projectors = np.array([vecs[:, g] @ vecs[:, g].T for g in groups])
+
+    for i in np.flatnonzero(anisotropic):
+        Ki = K[i]
+        for P in projectors:
+            c = np.trace(P @ Ki @ P) / np.trace(P)
+            residual = np.linalg.norm(P @ Ki @ P - c * P) + np.linalg.norm(
+                P @ Ki @ (np.eye(3) - P)
+            )
+            if residual > rtol * np.linalg.norm(Ki):
+                raise ValueError(
+                    "Single-ion tensors do not share principal axes; "
+                    "use wolff_axes='random'"
+                )
+
+    if mode == "mixed":
+        projectors = np.concatenate([projectors, identity])
+    return np.ascontiguousarray(projectors)
+
+
+# Hamiltonian and lattice arrays, sent to each worker once at pool start
+_WORKER = {}
+
+
+def _init_worker(static):
+    _WORKER.clear()
+    _WORKER.update(static)
+
+
+def _run_schedule(i, s, E, beta, counts, seed):
+    """
+    Apply one step of the update schedule to replica ``i`` in a worker.
+
+    ``counts[m]`` is the number of sweeps (Wolff: clusters) of
+    ``METHODS[m]``; each kernel call gets a fresh seed from ``seed``.
+
+    Returns ``(i, s, E, stats)`` with ``stats[m] = (calls, accepted,
+    attempted, seconds)``.
+    """
+    w = _WORKER
+    deltas = (w["delta_atoms"], w["delta_ions"], w["delta_bonds"])
+    params = (
+        w["nb_offsets"],
+        w["nb_atom"],
+        w["nb_ijk"],
+        w["nb_J"],
+        w["K"],
+        w["H"],
+        w["g"],
+        w["S"],
+        muB,
+    )
+    rng = np.random.default_rng(seed)
+    stats = np.zeros((len(METHODS), 4))
+
+    for m, method in enumerate(METHODS):
+        n = int(counts[m])
+        if n == 0:
+            continue
+        func = KERNELS[method]
+        n_calls = n if method == "wolff" else 1
+        seeds = rng.integers(0, 2**32, size=n_calls, dtype=np.uint64)
+        accepted = attempted = 0
+        t0 = time.perf_counter()
+        if method == "wolff":
+            for c in range(n):
+                _, s, E, n_acc, n_try = func(
+                    i,
+                    s,
+                    *deltas,
+                    beta,
+                    E,
+                    *params,
+                    int(seeds[c]),
+                    w["axis_projectors"],
+                )
+                accepted += n_acc
+                attempted += n_try
+            calls = n
+        else:
+            _, s, E, accepted, attempted = func(
+                i, s, *deltas, beta, E, n, *params, int(seeds[0])
+            )
+            calls = 1
+        stats[m] = calls, accepted, attempted, time.perf_counter() - t0
+
+    return i, s, E, stats
 
 
 # Upper-triangle (i, j) pairs in the column order used by save_results
@@ -186,6 +350,8 @@ class MonteCarlo:
                 _ds(material, "J", np.asarray(self.crystal.J))
             if hasattr(self.crystal, "H"):
                 _ds(material, "H", np.asarray(self.crystal.H))
+            if getattr(self.crystal, "K_dipolar", None) is not None:
+                _ds(material, "K_dipolar", np.asarray(self.crystal.K_dipolar))
 
             _ds(material, "g", np.asarray(self.crystal.get_g_factors()))
             _ds(
@@ -311,6 +477,12 @@ class MonteCarlo:
                     self.crystal.J = np.array(material["J"])
                 if "H" in material:
                     self.crystal.H = np.array(material["H"])
+                # Dipolar bonds are part of nb_J; restore their self term too.
+                self.crystal.K_dipolar = (
+                    np.array(material["K_dipolar"])
+                    if "K_dipolar" in material
+                    else None
+                )
 
                 if (
                     "delta_atoms" in material
@@ -443,220 +615,139 @@ class MonteCarlo:
                     self.s[i], self.s[j] = self.s[j].copy(), self.s[i].copy()
                     self.E[i], self.E[j] = self.E[j], self.E[i]
 
-    def metropolis_hastings(
-        self,
-        n_local_sweeps,
-        n_replicas,
-        delta_atoms,
-        delta_ions,
-        delta_bonds,
-        nb_offsets,
-        nb_atom,
-        nb_ijk,
-        nb_J,
-        K,
-        H,
-        g,
-        S,
-    ):
-        seeds = self.kernel_seeds(n_replicas)
-        args = [
-            (
-                i,
-                self.s[i],
-                delta_atoms,
-                delta_ions,
-                delta_bonds,
-                self.beta[i],
-                self.E[i],
-                n_local_sweeps,
-                nb_offsets,
-                nb_atom,
-                nb_ijk,
-                nb_J,
-                K,
-                H,
-                g,
-                S,
-                muB,
-                int(seeds[i]),
+    def _per_replica(self, n, name):
+        """Broadcast a sweep count (int or one per temperature) to replicas."""
+        n_replicas = self.get_n_replicas()
+        counts = np.asarray(n)
+        if counts.ndim == 0:
+            counts = np.full(n_replicas, counts)
+        if counts.shape != (n_replicas,):
+            raise ValueError(
+                f"{name} must be an int or have one entry per temperature "
+                f"({n_replicas}), got shape {counts.shape}"
             )
+        if np.any(counts < 0) or np.any(counts != np.round(counts)):
+            raise ValueError(f"{name} must be non-negative integers")
+        return counts.astype(np.int64)
+
+    def _reset_stats(self):
+        n_replicas = self.get_n_replicas()
+        self.stats = {"n_steps": 0, "kernel_max": 0.0, "kernel_mean": 0.0}
+        for method in METHODS:
+            self.stats[method] = {
+                "calls": np.zeros(n_replicas, dtype=np.int64),
+                "accepted": np.zeros(n_replicas, dtype=np.int64),
+                "attempted": np.zeros(n_replicas, dtype=np.int64),
+                "kernel_time": np.zeros(n_replicas),
+            }
+        self.stats["wall_time"] = {
+            "updates": 0.0,
+            "exchange": 0.0,
+            "measurement": 0.0,
+        }
+
+    def update_replicas(self, schedule, record=False):
+        """
+        Apply one step of the update schedule to every replica.
+
+        One task per replica runs all of its methods (in ``METHODS`` order)
+        inside a worker, so each step costs a single round trip to the pool.
+
+        Parameters
+        ----------
+        schedule : ndarray of int
+            Shape ``(n_replicas, len(METHODS))``: sweeps (Wolff: clusters)
+            of each method per replica.
+        record : bool
+            Accumulate kernel time, acceptance and the wall time of the
+            phase into ``self.stats``.
+        """
+        n_replicas = self.get_n_replicas()
+        seeds = self.kernel_seeds(n_replicas)
+        tasks = [
+            (i, self.s[i], self.E[i], self.beta[i], schedule[i], int(seeds[i]))
             for i in range(n_replicas)
         ]
 
-        results = self.pool.starmap(kernel.metropolis_heisenberg, args)
-        results.sort(key=lambda x: x[0])
+        t0 = time.perf_counter()
+        results = self.pool.starmap(_run_schedule, tasks)
+        elapsed = time.perf_counter() - t0
 
-        for i, s, E, _ in results:
+        kernel_total = np.zeros(n_replicas)
+        for i, s, E, stats in results:
             self.s[i] = s
             self.E[i] = E
+            kernel_total[i] = stats[:, 3].sum()
+            if record:
+                for m, method in enumerate(METHODS):
+                    entry = self.stats[method]
+                    entry["calls"][i] += int(stats[m, 0])
+                    entry["accepted"][i] += int(stats[m, 1])
+                    entry["attempted"][i] += int(stats[m, 2])
+                    entry["kernel_time"][i] += stats[m, 3]
 
-    def overrelaxation(
-        self,
-        n_overrelaxation_sweeps,
-        n_replicas,
-        delta_atoms,
-        delta_ions,
-        delta_bonds,
-        nb_offsets,
-        nb_atom,
-        nb_ijk,
-        nb_J,
-        K,
-        H,
-        g,
-        S,
-    ):
+        if record:
+            self.stats["wall_time"]["updates"] += elapsed
+            self.stats["kernel_max"] += kernel_total.max()
+            self.stats["kernel_mean"] += kernel_total.mean()
+
+    def timing_summary(self):
         """
-        Perform overrelaxation sweeps on all replicas.
+        Cost and acceptance of each update method per temperature.
 
-        Overrelaxation reflects each spin across its local effective field,
-        providing a microcanonical update that decorrelates configurations
-        faster than Metropolis updates while approximately preserving energy.
+        Accumulated over production steps only (after thermalization, which
+        also absorbs numba compilation), and restarted on resume.
+
+        Returns
+        -------
+        summary : dict or None
+            ``"n_steps"``: production steps recorded. For each method in
+            ``METHODS``: ``"calls_per_step"``, ``"kernel_time_per_step"``
+            (seconds inside the worker, per temperature) and
+            ``"acceptance"``; for Wolff also ``"cluster_size"``.
+            Wall seconds per step: ``"updates"`` (the parallel update
+            phase), ``"exchange"``, ``"measurement"`` (amortized over
+            ``sample_interval``) and ``"total_wall_time_per_step"``. The
+            update phase splits into ``"kernel_mean"`` (average kernel time
+            of a replica), ``"load_imbalance"`` (slowest replica minus the
+            average) and ``"dispatch_overhead"`` (the rest: transfer and
+            scheduling).
         """
-        seeds = self.kernel_seeds(n_replicas)
-        args = [
-            (
-                i,
-                self.s[i],
-                delta_atoms,
-                delta_ions,
-                delta_bonds,
-                self.beta[i],
-                self.E[i],
-                n_overrelaxation_sweeps,
-                nb_offsets,
-                nb_atom,
-                nb_ijk,
-                nb_J,
-                K,
-                H,
-                g,
-                S,
-                muB,
-                int(seeds[i]),
-            )
-            for i in range(n_replicas)
-        ]
+        stats = getattr(self, "stats", None)
+        if stats is None or stats["n_steps"] == 0:
+            return None
 
-        results = self.pool.starmap(kernel.overrelaxation_heisenberg, args)
-        results.sort(key=lambda x: x[0])
-
-        for i, s, E, _ in results:
-            self.s[i] = s
-            self.E[i] = E
-
-    def heatbath(
-        self,
-        n_heatbath_sweeps,
-        n_replicas,
-        delta_atoms,
-        delta_ions,
-        delta_bonds,
-        nb_offsets,
-        nb_atom,
-        nb_ijk,
-        nb_J,
-        K,
-        H,
-        g,
-        S,
-    ):
-        """
-        Perform heatbath (Gibbs sampling) sweeps on all replicas.
-
-        Heatbath samples new spin directions from the conditional Boltzmann
-        distribution given the effective field. When anisotropy is present,
-        the kernel uses an exact heatbath for the linear terms and a
-        Metropolis-Hastings correction for the anisotropy term.
-        """
-        seeds = self.kernel_seeds(n_replicas)
-        args = [
-            (
-                i,
-                self.s[i],
-                delta_atoms,
-                delta_ions,
-                delta_bonds,
-                self.beta[i],
-                self.E[i],
-                n_heatbath_sweeps,
-                nb_offsets,
-                nb_atom,
-                nb_ijk,
-                nb_J,
-                K,
-                H,
-                g,
-                S,
-                muB,
-                int(seeds[i]),
-            )
-            for i in range(n_replicas)
-        ]
-
-        results = self.pool.starmap(kernel.heatbath_heisenberg, args)
-        results.sort(key=lambda x: x[0])
-
-        for i, s, E, _ in results:
-            self.s[i] = s
-            self.E[i] = E
-
-    def wolff_cluster_updates(
-        self,
-        n_clusters,
-        n_replicas,
-        delta_atoms,
-        delta_ions,
-        delta_bonds,
-        nb_offsets,
-        nb_atom,
-        nb_ijk,
-        nb_J,
-        K,
-        H,
-        g,
-        S,
-    ):
-        """
-        Perform Wolff-style cluster updates on all replicas.
-
-        This is analogous to :meth:`metropolis_hastings` but uses the
-        cluster kernel instead of local single-spin updates. One call
-        performs ``n_clusters`` cluster flips per replica.
-        """
-
-        for _ in range(n_clusters):
-            seeds = self.kernel_seeds(n_replicas)
-            args = [
-                (
-                    i,
-                    self.s[i],
-                    delta_atoms,
-                    delta_ions,
-                    delta_bonds,
-                    self.beta[i],
-                    self.E[i],
-                    nb_offsets,
-                    nb_atom,
-                    nb_ijk,
-                    nb_J,
-                    K,
-                    H,
-                    g,
-                    S,
-                    muB,
-                    int(seeds[i]),
-                )
-                for i in range(n_replicas)
-            ]
-
-            results = self.pool.starmap(kernel.wolff_heisenberg, args)
-            results.sort(key=lambda x: x[0])
-
-            for i, s, E, _ in results:
-                self.s[i] = s
-                self.E[i] = E
+        n_steps = stats["n_steps"]
+        wall = stats["wall_time"]
+        summary = {"n_steps": n_steps}
+        for method in METHODS:
+            st = stats[method]
+            with np.errstate(invalid="ignore", divide="ignore"):
+                acceptance = st["accepted"] / st["attempted"]
+                entry = {
+                    "calls_per_step": st["calls"] / n_steps,
+                    "kernel_time_per_step": st["kernel_time"] / n_steps,
+                    "acceptance": np.where(
+                        st["attempted"] > 0, acceptance, np.nan
+                    ),
+                }
+                if method == "wolff":
+                    entry["cluster_size"] = np.where(
+                        st["calls"] > 0, st["attempted"] / st["calls"], np.nan
+                    )
+            summary[method] = entry
+        summary["updates"] = wall["updates"] / n_steps
+        summary["kernel_mean"] = stats["kernel_mean"] / n_steps
+        summary["load_imbalance"] = (
+            stats["kernel_max"] - stats["kernel_mean"]
+        ) / n_steps
+        summary["dispatch_overhead"] = (
+            wall["updates"] - stats["kernel_max"]
+        ) / n_steps
+        summary["exchange"] = wall["exchange"] / n_steps
+        summary["measurement"] = wall["measurement"] / n_steps
+        summary["total_wall_time_per_step"] = sum(wall.values()) / n_steps
+        return summary
 
     def sample_parameters(self, hkl):
         n_sites = self.crystal.get_total_sites()
@@ -733,6 +824,7 @@ class MonteCarlo:
         }
 
         parameters.update(self.error_analysis(n_sample))
+        parameters["timing"] = self.timing_summary()
 
         return parameters
 
@@ -841,6 +933,8 @@ class MonteCarlo:
         n_outer=1000,
         n_thermal=700,
         n_interval=None,
+        sample_interval=1,
+        wolff_axes="random",
         checkpoint_interval=None,
         checkpoint_final=None,
         checkpoint_path=None,
@@ -848,7 +942,34 @@ class MonteCarlo:
         outdir="checkpoints",
         prefix="mc",
     ):
+        """
+        Replica-exchange Monte Carlo over the temperature grid ``self.T``.
+
+        Each outer step applies Wolff, overrelaxation, heatbath and
+        Metropolis updates (in that order) to every replica, then attempts
+        replica exchanges; after ``n_thermal`` steps one sample is recorded
+        every ``sample_interval`` steps (autocorrelation times are then in
+        units of samples).
+
+        Each ``n_*_sweeps`` is an int (same at every temperature) or a
+        sequence with one entry per temperature, so the update mix can be
+        tuned per temperature. Replica ``i`` always holds temperature
+        ``T[i]`` because exchanges swap configurations. Sweep methods count
+        lattice sweeps; ``n_cluster_sweeps`` counts Wolff clusters. Every
+        temperature needs at least one Metropolis, heatbath or Wolff update
+        (with ``wolff_axes="anisotropy"``, Metropolis or heatbath).
+
+        ``wolff_axes`` sets the Wolff embedding-axis distribution: see
+        :func:`wolff_axis_projectors`. ``"anisotropy"`` keeps cluster flips
+        from paying single-ion anisotropy energy, which matters for large
+        clusters in anisotropic magnets at low temperature.
+
+        Returns the ensemble averages (see :meth:`ensemble_average`),
+        including statistical errors (:meth:`error_analysis`) and per-method
+        cost and acceptance under ``"timing"`` (:meth:`timing_summary`).
+        """
         assert n_outer > 0
+        assert sample_interval >= 1
 
         if checkpoint_final is None:
             checkpoint_final = (
@@ -910,6 +1031,29 @@ class MonteCarlo:
             self.s = self.crystal.get_spin_vectors()
             self.E = np.zeros(n_replicas)
 
+        schedule = {
+            "wolff": self._per_replica(n_cluster_sweeps, "n_cluster_sweeps"),
+            "overrelaxation": self._per_replica(
+                n_overrelaxation_sweeps, "n_overrelaxation_sweeps"
+            ),
+            "heatbath": self._per_replica(
+                n_heatbath_sweeps, "n_heatbath_sweeps"
+            ),
+            "metropolis": self._per_replica(n_local_sweeps, "n_local_sweeps"),
+        }
+        # Wolff restricted to anisotropy axes alone is not ergodic
+        ergodic = schedule["heatbath"] + schedule["metropolis"]
+        if wolff_axes != "anisotropy":
+            ergodic = ergodic + schedule["wolff"]
+        if np.any(ergodic == 0):
+            raise ValueError(
+                "Every temperature needs at least one Metropolis or heatbath "
+                "update per step, or a Wolff update with random axes "
+                "(overrelaxation alone is not ergodic); "
+                f"missing at T = {self.T[ergodic == 0]}"
+            )
+        self._reset_stats()
+
         nb_offsets, nb_atom, nb_ijk = self.crystal.get_compressed_sparse_row()
         nb_J, K, H = self.crystal.get_magnetic_parameters()
         delta_atoms, delta_ions, delta_bonds = self.crystal.get_delta_arrays()
@@ -934,47 +1078,51 @@ class MonteCarlo:
                     muB,
                 )
 
-        with Pool(processes=n_replicas) as self.pool:
+        static = dict(
+            axis_projectors=wolff_axis_projectors(K, wolff_axes),
+            delta_atoms=delta_atoms,
+            delta_ions=delta_ions,
+            delta_bonds=delta_bonds,
+            nb_offsets=nb_offsets,
+            nb_atom=nb_atom,
+            nb_ijk=nb_ijk,
+            nb_J=nb_J,
+            K=K,
+            H=H,
+            g=g,
+            S=S,
+        )
+        schedule_matrix = np.stack([schedule[m] for m in METHODS], axis=1)
+
+        with Pool(
+            processes=n_replicas, initializer=_init_worker, initargs=(static,)
+        ) as self.pool:
             last_i_outer = i_outer_start - 1
             for i_outer in range(i_outer_start, n_outer):
                 last_i_outer = i_outer
                 print(f"{i_outer}/{n_outer}")
 
-                # Common parameters for all MC update methods
-                mc_params = (
-                    n_replicas,
-                    delta_atoms,
-                    delta_ions,
-                    delta_bonds,
-                    nb_offsets,
-                    nb_atom,
-                    nb_ijk,
-                    nb_J,
-                    K,
-                    H,
-                    g,
-                    S,
-                )
+                record = i_outer >= n_thermal
+                sample = record and (i_outer - n_thermal) % sample_interval == 0
 
-                if n_cluster_sweeps > 0:
-                    self.wolff_cluster_updates(n_cluster_sweeps, *mc_params)
+                self.update_replicas(schedule_matrix, record)
 
-                if n_overrelaxation_sweeps > 0:
-                    self.overrelaxation(n_overrelaxation_sweeps, *mc_params)
-
-                if n_heatbath_sweeps > 0:
-                    self.heatbath(n_heatbath_sweeps, *mc_params)
-
-                if n_local_sweeps > 0:
-                    self.metropolis_hastings(n_local_sweeps, *mc_params)
-
+                t0 = time.perf_counter()
                 self.replica_exchange()
+                t1 = time.perf_counter()
 
-                if i_outer >= n_thermal:
+                if sample:
                     self.crystal.set_spin_vectors(self.s)
                     self.sample_parameters(hkl)
                     self.n_samples_accumulated += 1
 
+                if record:
+                    wall = self.stats["wall_time"]
+                    wall["exchange"] += t1 - t0
+                    wall["measurement"] += time.perf_counter() - t1
+                    self.stats["n_steps"] += 1
+
+                if sample:
                     if (
                         n_interval is not None
                         and (i_outer + 1) % n_interval == 0

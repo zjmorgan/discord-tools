@@ -17,6 +17,7 @@ import numpy as np
 import pytest
 
 from discord.atomistic import kernel
+from discord.atomistic.simulation import wolff_axis_projectors
 
 # The kernels take muB as an argument; unit value keeps the field scale simple.
 MUB = 1.0
@@ -102,12 +103,27 @@ def run_chain(sys, schedule, beta, n_steps, n_thermal, seed):
 
     E_series = np.empty(n_steps)
     m2_series = np.empty(n_steps)
+    # "wolff_aligned" draws axes within eigenspaces of K (random if isotropic)
+    projectors = {
+        "wolff": wolff_axis_projectors(sys["K"], "random"),
+        "wolff_aligned": wolff_axis_projectors(sys["K"], "mixed")[:-1]
+        if np.ptp(np.linalg.eigvalsh(sys["K"][0])) > 0
+        else wolff_axis_projectors(sys["K"], "random"),
+    }
+
     for step in range(n_thermal + n_steps):
         for method, n in schedule:
-            if method == "wolff":
+            if method in projectors:
                 for _ in range(n):
-                    _, s, E, _ = kernel.wolff_heisenberg(
-                        0, s, *deltas, beta, E, *common, new_seed(rng)
+                    _, s, E, _, _ = kernel.wolff_heisenberg(
+                        0,
+                        s,
+                        *deltas,
+                        beta,
+                        E,
+                        *common,
+                        new_seed(rng),
+                        projectors[method],
                     )
             else:
                 func = {
@@ -115,7 +131,7 @@ def run_chain(sys, schedule, beta, n_steps, n_thermal, seed):
                     "heatbath": kernel.heatbath_heisenberg,
                     "overrelaxation": kernel.overrelaxation_heisenberg,
                 }[method]
-                _, s, E, _ = func(
+                _, s, E, _, _ = func(
                     0, s, *deltas, beta, E, n, *common, new_seed(rng)
                 )
         if step >= n_thermal:
@@ -141,15 +157,23 @@ SCHEDULES = {
     "overrelaxation+metropolis": [("overrelaxation", 3), ("metropolis", 1)],
     "wolff": [("wolff", 1)],
     "wolff+metropolis": [("wolff", 4), ("metropolis", 1)],
+    "wolff_aligned+metropolis": [("wolff_aligned", 4), ("metropolis", 1)],
 }
 
-# Two parameter sets: isotropic exchange with no single-ion terms, and an
-# anisotropic case (exchange anisotropy + easy axis + field) that exercises
-# the MH corrections in every kernel.
+# Parameter sets: isotropic ferromagnet with no single-ion terms, an
+# easy-axis antiferromagnet (Wolff clusters grow along anti-aligned bonds),
+# and an anisotropic case (exchange anisotropy + easy axis + field) that
+# exercises the MH corrections in every kernel.
 J0 = 0.1
 CASES = {
     "isotropic": dict(
         J=J0 * np.eye(3), K=np.zeros((3, 3)), H=np.zeros(3), S=2.5
+    ),
+    "antiferromagnetic": dict(
+        J=-J0 * np.eye(3),
+        K=np.diag([0.0, 0.0, 0.02]),
+        H=np.zeros(3),
+        S=2.5,
     ),
     "anisotropic": dict(
         J=J0 * np.diag([1.0, 1.0, 1.4]),
@@ -250,7 +274,13 @@ def lattice_reference():
 
 @pytest.mark.parametrize(
     "schedule",
-    ["heatbath", "overrelaxation+metropolis", "wolff", "wolff+metropolis"],
+    [
+        "heatbath",
+        "overrelaxation+metropolis",
+        "wolff",
+        "wolff+metropolis",
+        "wolff_aligned+metropolis",
+    ],
 )
 @pytest.mark.parametrize("case_name", list(CASES))
 def test_lattice_matches_metropolis(case_name, schedule, lattice_reference):
@@ -278,3 +308,145 @@ def test_lattice_matches_metropolis(case_name, schedule, lattice_reference):
         f"{schedule}: <m^2>={m2_mc:.5f}, ref {m2_ref:.5f} "
         f"({(m2_mc - m2_ref) / sig_m2:+.1f} sigma)"
     )
+
+
+def test_wolff_clusters_grow_for_antiferromagnet():
+    # On the bipartite simple-cubic lattice the antiferromagnet maps onto the
+    # ferromagnet by a sublattice flip, so cluster sizes must match; with
+    # isotropic exchange every cluster flip is accepted.
+    beta = 0.75
+    stats = {}
+    for name, sign in [("ferro", 1.0), ("antiferro", -1.0)]:
+        sys = build_system(
+            (4, 4, 4),
+            J=sign * J0 * np.eye(3),
+            K=np.zeros((3, 3)),
+            H=np.zeros(3),
+            S=2.5,
+            bonds=SC_BONDS,
+        )
+        rng = np.random.default_rng(5)
+        s = rng.normal(size=(1, 4, 4, 4, 3))
+        s /= np.linalg.norm(s, axis=-1)[..., None]
+        E = total_energy(s, sys)
+        common = (
+            sys["nb_offsets"],
+            sys["nb_atom"],
+            sys["nb_ijk"],
+            sys["nb_J"],
+            sys["K"],
+            sys["H"],
+            sys["g"],
+            sys["S"],
+            MUB,
+        )
+        deltas = (sys["delta_atoms"], sys["delta_ions"], sys["delta_bonds"])
+        accepted, attempted = 0, 0
+        for step in range(3000):
+            _, s, E, n_acc, n_try = kernel.wolff_heisenberg(
+                0, s, *deltas, beta, E, *common, new_seed(rng), np.eye(3)[None]
+            )
+            if step >= 500:
+                accepted += n_acc
+                attempted += n_try
+        stats[name] = (attempted / 2500, accepted / attempted)
+
+    (size_f, acc_f), (size_af, acc_af) = stats["ferro"], stats["antiferro"]
+    assert size_f > 5 and size_af > 5
+    assert abs(size_af - size_f) < 0.2 * size_f
+    assert acc_f == 1.0 and acc_af == 1.0
+
+
+def wolff_cluster_stats(sys, beta, projectors, n_steps=3000, n_thermal=500):
+    """Mean cluster size and acceptance of pure Wolff dynamics."""
+    rng = np.random.default_rng(6)
+    s = rng.normal(size=(*sys["delta_atoms"].shape, 3))
+    s /= np.linalg.norm(s, axis=-1)[..., None]
+    E = total_energy(s, sys)
+    common = (
+        sys["nb_offsets"],
+        sys["nb_atom"],
+        sys["nb_ijk"],
+        sys["nb_J"],
+        sys["K"],
+        sys["H"],
+        sys["g"],
+        sys["S"],
+        MUB,
+    )
+    deltas = (sys["delta_atoms"], sys["delta_ions"], sys["delta_bonds"])
+    accepted, attempted = 0, 0
+    for step in range(n_steps):
+        _, s, E, n_acc, n_try = kernel.wolff_heisenberg(
+            0, s, *deltas, beta, E, *common, new_seed(rng), projectors
+        )
+        if step >= n_thermal:
+            accepted += n_acc
+            attempted += n_try
+    return attempted / (n_steps - n_thermal), accepted / max(attempted, 1)
+
+
+def test_anisotropy_aligned_axes_accept_large_clusters():
+    # Easy-axis antiferromagnet in its ordered phase: random axes tilt large
+    # clusters off the easy axis and are rejected; axes in eigenspaces of K
+    # leave the anisotropy energy unchanged, so with isotropic exchange and
+    # no field every cluster flip is accepted.
+    sys = build_system(
+        (4, 4, 4),
+        J=-J0 * np.eye(3),
+        K=np.diag([0.0, 0.0, 0.05]),
+        H=np.zeros(3),
+        S=2.5,
+        bonds=SC_BONDS,
+    )
+    beta = 1.5
+    size_r, acc_r = wolff_cluster_stats(
+        sys, beta, wolff_axis_projectors(sys["K"], "random")
+    )
+    size_a, acc_a = wolff_cluster_stats(
+        sys, beta, wolff_axis_projectors(sys["K"], "anisotropy")
+    )
+    assert acc_a == 1.0
+    assert acc_r < 0.5
+    assert size_a > 10
+
+
+def test_wolff_axis_projectors():
+    # Uniaxial: the easy axis and the (degenerate) perpendicular plane.
+    P = wolff_axis_projectors(np.diag([0.0, 0.0, 0.1])[None], "anisotropy")
+    ranks = sorted(int(round(np.trace(p))) for p in P)
+    assert ranks == [1, 2]
+    assert any(np.allclose(p, np.diag([0, 0, 1])) for p in P)
+
+    # Rotated orthorhombic frame shared by two sites: three axes.
+    rng = np.random.default_rng(0)
+    Q, _ = np.linalg.qr(rng.normal(size=(3, 3)))
+    K = np.stack([Q @ np.diag(d) @ Q.T for d in ([1, 2, 3], [0, 5, 1])])
+    P = wolff_axis_projectors(K, "anisotropy")
+    assert len(P) == 3
+    for p in P:
+        for Ki in K:
+            assert np.allclose(p @ Ki, Ki @ p)
+    assert np.allclose(P.sum(axis=0), np.eye(3))
+
+    # "mixed" adds uniformly random axes.
+    assert len(wolff_axis_projectors(K, "mixed")) == 4
+
+    # Isotropic K: "random" and "mixed" work, "anisotropy" is rejected.
+    K_iso = np.zeros((1, 3, 3))
+    assert np.allclose(wolff_axis_projectors(K_iso, "mixed"), np.eye(3))
+    with pytest.raises(ValueError, match="anisotropic"):
+        wolff_axis_projectors(K_iso, "anisotropy")
+
+    # Uniaxial sites with different easy axes share the x, y, z frame.
+    K_xz = np.stack([np.diag([0, 0, 1.0]), np.diag([1.0, 0, 0])])
+    P = wolff_axis_projectors(K_xz, "anisotropy")
+    assert len(P) == 3
+
+    # Sites with different principal axes are rejected.
+    c = np.cos(np.pi / 6)
+    s = np.sin(np.pi / 6)
+    R = np.array([[1, 0, 0], [0, c, -s], [0, s, c]])
+    K_bad = np.stack([np.diag([0, 0, 1.0]), R @ np.diag([0, 0, 1.0]) @ R.T])
+    with pytest.raises(ValueError, match="principal axes"):
+        wolff_axis_projectors(K_bad, "anisotropy")
