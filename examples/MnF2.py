@@ -50,7 +50,7 @@ ax.plot(T, chi_13, "-o", label="$\chi_{13}$")
 ax.plot(T, chi_12, "-o", label="$\chi_{12}$")
 ax.legend(shadow=True)
 ax.set_xlabel("$T$ [K]")
-ax.set_ylabel("$\chi_{ij}$ [$\mu_B^2$/eV]")
+ax.set_ylabel("$\chi_{ij}$ [$\mu_B^2$/meV/site]")
 fig.savefig("MnF2_susceptibility.png")
 
 Mx = result["M(ave)"][:, 0]
@@ -73,7 +73,7 @@ fig, ax = plt.subplots(1, 1, layout="constrained")
 ax.minorticks_on()
 ax.plot(T, C, "-o")
 ax.set_xlabel("$T$ [K]")
-ax.set_ylabel("$C$ [eV/K]")
+ax.set_ylabel("$C$ [meV/K/site]")
 fig.savefig("MnF2_heat_capacity.png")
 
 E = result["E(ave)"]
@@ -82,7 +82,7 @@ fig, ax = plt.subplots(1, 1, layout="constrained")
 ax.minorticks_on()
 ax.plot(T, E, "-o")
 ax.set_xlabel("$T$ [K]")
-ax.set_ylabel("$E$ [eV]")
+ax.set_ylabel("$E$ [meV/site]")
 fig.savefig("MnF2_energy.png")
 
 I = result["I(ave)"][:, 0]

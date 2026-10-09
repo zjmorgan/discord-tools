@@ -651,7 +651,7 @@ class VisualizeMonteCarlo:
         ax.plot(self.T, chi_12, "-o", label="$\chi_{12}$")
         ax.legend(shadow=True)
         ax.set_xlabel("$T$ [K]")
-        ax.set_ylabel("$\chi_{ij}$ [$\mu_B^2$/eV]")
+        ax.set_ylabel("$\chi_{ij}$ [$\mu_B^2$/meV]")
         ax.grid(alpha=0.3)
 
         if filename:
@@ -743,7 +743,7 @@ class VisualizeMonteCarlo:
         ax.minorticks_on()
         ax.plot(self.T, C, "-o")
         ax.set_xlabel("$T$ [K]")
-        ax.set_ylabel("$C$ [eV/K]")
+        ax.set_ylabel("$C$ [meV/K]")
         ax.grid(alpha=0.3)
 
         if filename:
@@ -783,7 +783,7 @@ class VisualizeMonteCarlo:
             ax.plot(self.T, E, "-o")
 
         ax.set_xlabel("$T$ [K]")
-        ax.set_ylabel("$E$ [eV]")
+        ax.set_ylabel("$E$ [meV/site]")
         ax.grid(alpha=0.3)
 
         if filename:

@@ -42,7 +42,7 @@ def plot_susceptibility(T, chi, filename=None, show=False):
     ax.plot(T, chi_12, "-o", label="$\chi_{12}$")
     ax.legend(shadow=True)
     ax.set_xlabel("$T$ [K]")
-    ax.set_ylabel("$\chi_{ij}$ [$\mu_B^2$/eV]")
+    ax.set_ylabel("$\chi_{ij}$ [$\mu_B^2$/meV/site]")
     ax.grid(alpha=0.3)
 
     if filename:
@@ -135,7 +135,7 @@ def plot_heat_capacity(T, C, filename=None, show=False):
     ax.minorticks_on()
     ax.plot(T, C, "-o")
     ax.set_xlabel("$T$ [K]")
-    ax.set_ylabel("$C$ [eV/K]")
+    ax.set_ylabel("$C$ [meV/K/site]")
     ax.grid(alpha=0.3)
 
     if filename:
@@ -179,7 +179,7 @@ def plot_energy(T, E, E_std=None, filename=None, show=False):
         ax.plot(T, E, "-o")
 
     ax.set_xlabel("$T$ [K]")
-    ax.set_ylabel("$E$ [eV]")
+    ax.set_ylabel("$E$ [meV/site]")
     ax.grid(alpha=0.3)
 
     if filename:

@@ -251,10 +251,11 @@ def dE_exchange_from_delta(
 def dE_zeeman_from_delta(
     delta0, delta1, delta2, H, g_i, muB, S_sq_eff, delta_atom_center
 ):
+    # EH = -g muB sqrt(S(S+1)) (s · H) * delta_atom: moment g sqrt(S(S+1)) muB
     return (
         -muB
         * g_i
-        * S_sq_eff
+        * np.sqrt(S_sq_eff)
         * dot3(delta0, delta1, delta2, H[0], H[1], H[2])
         * delta_atom_center
     )
@@ -283,18 +284,10 @@ def linear_field_energy_units(
     delta_atom_center,
 ):
     # f for E_lin = - s · f
-    f0 = (
-        S_sq_eff * delta_bond_center * hx_exch
-        + muB * g_i * S_sq_eff * delta_atom_center * H[0]
-    )
-    f1 = (
-        S_sq_eff * delta_bond_center * hy_exch
-        + muB * g_i * S_sq_eff * delta_atom_center * H[1]
-    )
-    f2 = (
-        S_sq_eff * delta_bond_center * hz_exch
-        + muB * g_i * S_sq_eff * delta_atom_center * H[2]
-    )
+    zeeman = muB * g_i * np.sqrt(S_sq_eff) * delta_atom_center
+    f0 = S_sq_eff * delta_bond_center * hx_exch + zeeman * H[0]
+    f1 = S_sq_eff * delta_bond_center * hy_exch + zeeman * H[1]
+    f2 = S_sq_eff * delta_bond_center * hz_exch + zeeman * H[2]
     return f0, f1, f2
 
 
@@ -389,7 +382,7 @@ def total_heisenberg_energy(
                     EH -= (
                         muB
                         * g_i
-                        * S_sq_eff
+                        * np.sqrt(S_sq_eff)
                         * dot3(s0, s1, s2, H[0], H[1], H[2])
                         * delta_atom
                     )
@@ -774,18 +767,25 @@ def overrelaxation_heisenberg(
 
 
 @njit
-def wolff_add_prob(J, n0, n1, n2, si_proj, sj_proj, beta):
-    # J_eff = n^T J n
+def wolff_bond_weight(J, n0, n1, n2, si_proj, sj_proj, S_sq_eff, delta_ij):
+    """
+    Signed Wolff bond weight w; a bond is activated with probability
+    p = 1 - exp(-beta * max(w, 0)).
+
+    For isotropic ferromagnetic J, w is exactly the energy cost of
+    reflecting s_i (but not s_j) about the plane ⟂ n. Whatever J is, each
+    boundary bond contributes a Hastings factor
+    (1 - p_reverse) / (1 - p_forward) = exp(beta * w)
+    to the cluster acceptance, which keeps the move exact.
+    """
+    # J_eff = n^T J n, positive (ferromagnetic) part only
     Jn0 = J[0, 0] * n0 + J[0, 1] * n1 + J[0, 2] * n2
     Jn1 = J[1, 0] * n0 + J[1, 1] * n1 + J[1, 2] * n2
     Jn2 = J[2, 0] * n0 + J[2, 1] * n1 + J[2, 2] * n2
     J_eff = n0 * Jn0 + n1 * Jn1 + n2 * Jn2
     if J_eff <= 0.0:
         return 0.0
-    E_bond = 2.0 * J_eff * si_proj * sj_proj
-    if E_bond <= 0.0:
-        return 0.0
-    return 1.0 - np.exp(-beta * E_bond)
+    return 2.0 * S_sq_eff * delta_ij * J_eff * si_proj * sj_proj
 
 
 @njit
@@ -809,10 +809,13 @@ def wolff_heisenberg(
     seed,
 ):
     """
-    Clean Wolff-style cluster:
+    Wolff-style embedded cluster:
       - grow cluster using exchange only (projected along random axis n)
       - propose reflection of cluster spins about plane ⟂ n
-      - MH accept/reject based on full ΔE (exchange + anisotropy + field)
+      - MH accept/reject with min(1, exp(-beta * (ΔE - W))), where W is the
+        sum of boundary bond weights (the log Hastings ratio of the cluster
+        construction). For isotropic ferromagnetic exchange W cancels the
+        exchange part of ΔE, so only anisotropy and field are corrected.
 
     """
     np.random.seed(seed)
@@ -850,8 +853,11 @@ def wolff_heisenberg(
 
         if delta_atoms[ai, ii, ji, ki] <= 0.0:
             continue
-        if delta_bonds[ai, ii, ji, ki] <= 0.0:
+        delta_bond_i = delta_bonds[ai, ii, ji, ki]
+        if delta_bond_i <= 0.0:
             continue
+
+        S_sq_eff_i = S[ai] * (S[ai] + 1.0)
 
         si0 = s[ai, ii, ji, ki, 0]
         si1 = s[ai, ii, ji, ki, 1]
@@ -874,7 +880,8 @@ def wolff_heisenberg(
 
             if delta_atoms[aj, ij, jj, kj] <= 0.0:
                 continue
-            if delta_bonds[aj, ij, jj, kj] <= 0.0:
+            delta_bond_j = delta_bonds[aj, ij, jj, kj]
+            if delta_bond_j <= 0.0:
                 continue
 
             flat_j = ravel_site(aj, ij, jj, kj, n_atoms, ni, nj, nk)
@@ -886,19 +893,26 @@ def wolff_heisenberg(
             sj2 = s[aj, ij, jj, kj, 2]
             sj_proj = dot3(n0, n1, n2, sj0, sj1, sj2)
 
-            if si_proj * sj_proj <= 0.0:
-                continue
-
-            p_add = wolff_add_prob(nb_J[b], n0, n1, n2, si_proj, sj_proj, beta)
-            if p_add > 0.0 and np.random.rand() < p_add:
+            w = wolff_bond_weight(
+                nb_J[b],
+                n0,
+                n1,
+                n2,
+                si_proj,
+                sj_proj,
+                S_sq_eff_i,
+                delta_bond_i * delta_bond_j,
+            )
+            if w > 0.0 and np.random.rand() < 1.0 - np.exp(-beta * w):
                 in_cluster[flat_j] = 1
                 cluster[back] = flat_j
                 back += 1
 
     # MH accept/reject:
-    # simplest and safest cleanup is to compute ΔE by local sums.
-    # (You can also just compute full energy before/after if you prefer.)
+    # ΔE by local sums, and W = Σ boundary bond weights (log Hastings ratio
+    # of growing this cluster forward vs. reverse).
     dE = 0.0
+    W = 0.0
 
     for c in range(back):
         flat_i = cluster[c]
@@ -928,7 +942,7 @@ def wolff_heisenberg(
         dE += (
             -muB
             * g_i
-            * S_sq_eff
+            * np.sqrt(S_sq_eff)
             * (
                 dot3(sp0, sp1, sp2, H[0], H[1], H[2])
                 - dot3(s0, s1, s2, H[0], H[1], H[2])
@@ -964,27 +978,42 @@ def wolff_heisenberg(
                 sj1 = s[aj, ij, jj, kj, 1]
                 sj2 = s[aj, ij, jj, kj, 2]
 
-                # neighbor spin in proposed config
+                J = nb_J[b]
+
+                # neighbor spin in proposed config; bonds inside the cluster
+                # are visited from both ends, so each end takes half
                 if in_cluster[flat_j] == 1:
                     sj0p, sj1p, sj2p = reflect_about_plane(
                         sj0, sj1, sj2, n0, n1, n2
                     )
+                    w_nn = 0.5 * delta_nn
                 else:
                     sj0p, sj1p, sj2p = sj0, sj1, sj2
+                    w_nn = delta_nn
+                    # boundary bond: tried exactly once during growth
+                    if delta_atoms[aj, ij, jj, kj] > 0.0:
+                        W += wolff_bond_weight(
+                            J,
+                            n0,
+                            n1,
+                            n2,
+                            dot3(n0, n1, n2, s0, s1, s2),
+                            dot3(n0, n1, n2, sj0, sj1, sj2),
+                            S_sq_eff,
+                            delta_bond_center * delta_nn,
+                        )
 
-                J = nb_J[b]
                 Jsj0, Jsj1, Jsj2 = matvec3(J, sj0, sj1, sj2)
                 Jsj0p, Jsj1p, Jsj2p = matvec3(J, sj0p, sj1p, sj2p)
 
-                hx_old += Jsj0 * delta_nn
-                hy_old += Jsj1 * delta_nn
-                hz_old += Jsj2 * delta_nn
+                hx_old += Jsj0 * w_nn
+                hy_old += Jsj1 * w_nn
+                hz_old += Jsj2 * w_nn
 
-                hx_new += Jsj0p * delta_nn
-                hy_new += Jsj1p * delta_nn
-                hz_new += Jsj2p * delta_nn
+                hx_new += Jsj0p * w_nn
+                hy_new += Jsj1p * w_nn
+                hz_new += Jsj2p * w_nn
 
-            # local exchange energy contribution uses your global convention; for ΔE, a consistent local form is:
             # ΔE_i = -S_sq_eff * delta_bond_center * (s'_i·h_new - s_i·h_old)
             dE += (
                 -S_sq_eff
@@ -995,7 +1024,8 @@ def wolff_heisenberg(
                 )
             )
 
-    if dE <= 0.0 or np.random.rand() < np.exp(-beta * dE):
+    dE_acc = dE - W
+    if dE_acc <= 0.0 or np.random.rand() < np.exp(-beta * dE_acc):
         for c in range(back):
             flat_i = cluster[c]
             ai, ii, ji, ki = unravel_site(flat_i, n_atoms, ni, nj, nk)

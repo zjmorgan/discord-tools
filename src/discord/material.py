@@ -6,7 +6,6 @@ from scipy.linalg import cholesky
 
 from mantid.geometry import CrystalStructure
 
-from discord.parameters.constants import muB
 
 
 class Crystal:
@@ -306,17 +305,20 @@ class Crystal:
     def get_unit_atom_position(self):
         return self.xyz
 
-    def initialize_random_spin_configurations(self, n_replicas):
+    def initialize_random_spin_configurations(self, n_replicas, rng=None):
         """Initialize random unit spins for the given number of replicas."""
         n_ijk = self.get_super_cell_shape()
         n_atoms = self.get_number_atoms()
 
-        s = np.random.normal(size=(n_replicas, n_atoms, *n_ijk, 3))
+        if rng is None:
+            rng = np.random.default_rng()
+        s = rng.normal(size=(n_replicas, n_atoms, *n_ijk, 3))
         s /= np.linalg.norm(s, axis=5)[..., np.newaxis]
         self.s = s
 
     def get_effective_moment(self):
-        return self.g_site * np.sqrt(self.S_site * (self.S_site + 1)) * muB
+        """Effective moment g sqrt(S(S+1)) per site, in Bohr magnetons."""
+        return self.g_site * np.sqrt(self.S_site * (self.S_site + 1))
 
     def get_g_factors(self):
         """
@@ -328,7 +330,7 @@ class Crystal:
         return self.g
 
     def get_spin_moments(self):
-        """Magnetic moments in Cartesian units.
+        """Magnetic moments in Cartesian components, in Bohr magnetons.
 
         Returns an array with the same shape as ``self.s`` but scaled by
         the effective moment ``mu`` for each atom.

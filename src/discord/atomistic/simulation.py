@@ -7,7 +7,7 @@ from multiprocessing import Pool
 
 from discord.scattering.intensity import StructureFactor
 
-from discord.atomistic import kernel, correlations
+from discord.atomistic import kernel, correlations, statistics
 from discord.parameters.constants import kB, muB
 from discord.atomistic.plotting import plot_results
 
@@ -17,21 +17,34 @@ except Exception:  # pragma: no cover
     h5py = None
 
 
+# Upper-triangle (i, j) pairs in the column order used by save_results
+VOIGT = [(0, 0), (1, 1), (2, 2), (1, 2), (0, 2), (0, 1)]
+
+
 class MonteCarlo:
     """Replica-exchange Monte Carlo simulation."""
 
-    def __init__(self, crystal, T=[10, 300], n_replicas=30):
+    def __init__(self, crystal, T=[10, 300], n_replicas=30, seed=None):
         self.crystal = crystal
 
         self.T = np.linspace(*T, n_replicas)
 
+        self.seed = seed
+        self.rng = np.random.default_rng(seed)
+
     def get_n_replicas(self):
         return len(self.T)
 
-    def make_seeds(self, n_replicas):
-        root = np.random.SeedSequence()
-        children = root.spawn(n_replicas)
-        return [int(c.generate_state(1, dtype=np.uint64)[0]) for c in children]
+    def kernel_seeds(self, n_replicas):
+        """
+        Fresh, independent seeds for one kernel call on each replica.
+
+        Kernels reseed numba's generator on entry. Chaining the seed each
+        kernel returns is a map on 32-bit integers that falls into a cycle
+        after ~1e4 calls and then replays the same random stream, so seeds
+        are always drawn from the parent generator instead.
+        """
+        return self.rng.integers(0, 2**32, size=n_replicas, dtype=np.uint64)
 
     def _require_h5py(self):
         if h5py is None:
@@ -62,7 +75,7 @@ class MonteCarlo:
 
         Layout:
         - /meta      : format/version metadata
-        - /state     : Markov chain state (T/beta, spins, energies, seeds, step)
+        - /state     : Markov chain state (T/beta, spins, energies, RNG, step)
         - /material  : material/model parameters (K, J, H, g, S, deltas, neighbors)
         - /averages  : running sums and sample counter for continuing averages
         """
@@ -83,7 +96,7 @@ class MonteCarlo:
         with h5py.File(path, "w") as f:
             meta = f.create_group("meta")
             meta.attrs["format"] = "discord.atomistic.checkpoint"
-            meta.attrs["version"] = 1
+            meta.attrs["version"] = 2
             meta.attrs["created_utc"] = datetime.now(timezone.utc).isoformat()
 
             crystal_group = f.create_group("crystal")
@@ -141,7 +154,9 @@ class MonteCarlo:
             _ds(state, "T", np.asarray(self.T))
             _ds(state, "beta", np.asarray(self.beta))
             _ds(state, "E", np.asarray(self.E))
-            _ds(state, "seeds", np.asarray(self.seeds, dtype=np.int64))
+            state.attrs["rng_state_json"] = json.dumps(
+                self.rng.bit_generator.state
+            )
             _ds(state, "s", np.asarray(self.s))
             if hkl is not None:
                 _ds(state, "hkl", np.asarray(hkl))
@@ -183,6 +198,11 @@ class MonteCarlo:
             )
             material.attrs["n_atoms"] = int(self.crystal.get_number_atoms())
 
+            series = f.create_group("series")
+            for key, values in self.get_series().items():
+                if values is not None:
+                    _ds(series, key, values)
+
             av = f.create_group("averages")
             # Running sums (only present after parallel_tempering initializes)
             for name in (
@@ -219,14 +239,22 @@ class MonteCarlo:
             meta = f["meta"]
             if meta.attrs.get("format", "") != "discord.atomistic.checkpoint":
                 raise ValueError("Unrecognized checkpoint format")
-            if int(meta.attrs.get("version", 0)) != 1:
+            version = int(meta.attrs.get("version", 0))
+            if version not in (1, 2):
                 raise ValueError("Unsupported checkpoint version")
 
             state = f["state"]
             self.T = np.array(state["T"])
             self.beta = np.array(state["beta"])
             self.E = np.array(state["E"])
-            self.seeds = np.array(state["seeds"], dtype=np.int64)
+            # Version 1 stored chained per-replica seeds; those are not
+            # reusable, so such checkpoints continue with a fresh generator.
+            if "rng_state_json" in state.attrs:
+                bit_generator = np.random.PCG64()
+                bit_generator.state = json.loads(
+                    state.attrs["rng_state_json"]
+                )
+                self.rng = np.random.Generator(bit_generator)
             self.s = np.array(state["s"])
             self.n_samples_accumulated = int(
                 state.attrs.get("n_samples_accumulated", 0)
@@ -294,6 +322,12 @@ class MonteCarlo:
                         np.array(material["delta_ions"]),
                         np.array(material["delta_bonds"]),
                     )
+
+            self.series = {"E": [], "M": [], "I": []}
+            if "series" in f:
+                for key in self.series:
+                    if key in f["series"]:
+                        self.series[key] = list(np.array(f["series"][key]))
 
             if "averages" in f:
                 av = f["averages"]
@@ -405,10 +439,9 @@ class MonteCarlo:
                 beta0, beta1 = self.beta[i], self.beta[j]
                 E0, E1 = self.E[i], self.E[j]
                 d = (beta0 - beta1) * (E1 - E0)
-                if np.random.rand() < np.exp(-d):
+                if self.rng.random() < np.exp(-d):
                     self.s[i], self.s[j] = self.s[j].copy(), self.s[i].copy()
                     self.E[i], self.E[j] = self.E[j], self.E[i]
-                    self.seeds[i], self.seeds[j] = self.seeds[j], self.seeds[i]
 
     def metropolis_hastings(
         self,
@@ -426,6 +459,7 @@ class MonteCarlo:
         g,
         S,
     ):
+        seeds = self.kernel_seeds(n_replicas)
         args = [
             (
                 i,
@@ -445,7 +479,7 @@ class MonteCarlo:
                 g,
                 S,
                 muB,
-                self.seeds[i],
+                int(seeds[i]),
             )
             for i in range(n_replicas)
         ]
@@ -453,10 +487,9 @@ class MonteCarlo:
         results = self.pool.starmap(kernel.metropolis_heisenberg, args)
         results.sort(key=lambda x: x[0])
 
-        for i, s, E, seed in results:
+        for i, s, E, _ in results:
             self.s[i] = s
             self.E[i] = E
-            self.seeds[i] = seed
 
     def overrelaxation(
         self,
@@ -481,6 +514,7 @@ class MonteCarlo:
         providing a microcanonical update that decorrelates configurations
         faster than Metropolis updates while approximately preserving energy.
         """
+        seeds = self.kernel_seeds(n_replicas)
         args = [
             (
                 i,
@@ -500,7 +534,7 @@ class MonteCarlo:
                 g,
                 S,
                 muB,
-                self.seeds[i],
+                int(seeds[i]),
             )
             for i in range(n_replicas)
         ]
@@ -508,10 +542,9 @@ class MonteCarlo:
         results = self.pool.starmap(kernel.overrelaxation_heisenberg, args)
         results.sort(key=lambda x: x[0])
 
-        for i, s, E, seed in results:
+        for i, s, E, _ in results:
             self.s[i] = s
             self.E[i] = E
-            self.seeds[i] = seed
 
     def heatbath(
         self,
@@ -537,6 +570,7 @@ class MonteCarlo:
         the kernel uses an exact heatbath for the linear terms and a
         Metropolis-Hastings correction for the anisotropy term.
         """
+        seeds = self.kernel_seeds(n_replicas)
         args = [
             (
                 i,
@@ -556,7 +590,7 @@ class MonteCarlo:
                 g,
                 S,
                 muB,
-                self.seeds[i],
+                int(seeds[i]),
             )
             for i in range(n_replicas)
         ]
@@ -564,10 +598,9 @@ class MonteCarlo:
         results = self.pool.starmap(kernel.heatbath_heisenberg, args)
         results.sort(key=lambda x: x[0])
 
-        for i, s, E, seed in results:
+        for i, s, E, _ in results:
             self.s[i] = s
             self.E[i] = E
-            self.seeds[i] = seed
 
     def wolff_cluster_updates(
         self,
@@ -594,6 +627,7 @@ class MonteCarlo:
         """
 
         for _ in range(n_clusters):
+            seeds = self.kernel_seeds(n_replicas)
             args = [
                 (
                     i,
@@ -612,7 +646,7 @@ class MonteCarlo:
                     g,
                     S,
                     muB,
-                    self.seeds[i],
+                    int(seeds[i]),
                 )
                 for i in range(n_replicas)
             ]
@@ -620,15 +654,17 @@ class MonteCarlo:
             results = self.pool.starmap(kernel.wolff_heisenberg, args)
             results.sort(key=lambda x: x[0])
 
-            for i, s, E, seed in results:
+            for i, s, E, _ in results:
                 self.s[i] = s
                 self.E[i] = E
-                self.seeds[i] = seed
 
     def sample_parameters(self, hkl):
         n_sites = self.crystal.get_total_sites()
 
         M = self.crystal.net_moment()
+        self.series["E"].append(self.E / n_sites)
+        self.series["M"].append(M / n_sites)
+
         self.M_sum += M / n_sites
         self.M_sq_sum += M[:, :, None] * M[:, None, :] / n_sites**2
 
@@ -638,6 +674,7 @@ class MonteCarlo:
         if hkl is not None:
             struct_fact = StructureFactor(self.crystal)
             I = struct_fact.magnetic_intensity(hkl)
+            self.series["I"].append(np.array(I, dtype=float))
             self.I_sum += I
             self.I_sq_sum += I**2
 
@@ -647,13 +684,18 @@ class MonteCarlo:
         self.C_ij_sq_sum += C_ij**2
 
     def ensemble_average(self, n_sample):
+        # Accumulators hold per-site e = E/N and m = M/N, so the per-site
+        # fluctuation quantities are C = kB beta^2 N var(e) and
+        # chi = beta N var(m); both are size independent away from T_c.
+        n_sites = self.crystal.get_total_sites()
+
         M_ave = self.M_sum / n_sample
         M_sq_ave = self.M_sq_sum / n_sample
 
         M_var = M_sq_ave - np.einsum("ri,rj->rij", M_ave, M_ave)
         M_std = np.sqrt(M_var[:, np.arange(3), np.arange(3)])
 
-        chi = self.beta[:, None, None] * M_var
+        chi = n_sites * self.beta[:, None, None] * M_var
         chi = 0.5 * (chi + np.swapaxes(chi, 1, 2))
 
         E_ave = self.E_sum / n_sample
@@ -662,7 +704,7 @@ class MonteCarlo:
         E_var = E_sq_ave - E_ave**2
         E_std = np.sqrt(E_var)
 
-        C = kB * self.beta**2 * E_var
+        C = n_sites * kB * self.beta**2 * E_var
 
         I_ave = None
         I_std = None
@@ -674,7 +716,7 @@ class MonteCarlo:
 
         C_ij_ave = self.C_ij_sum / n_sample
         C_ij_sq_ave = self.C_ij_sq_sum / n_sample
-        C_ij_std = np.sqrt(C_ij_sq_ave - C_ij_ave**2)
+        C_ij_std = np.sqrt(np.maximum(C_ij_sq_ave - C_ij_ave**2, 0.0))
 
         parameters = {
             "T": self.T,
@@ -690,7 +732,104 @@ class MonteCarlo:
             "C_ij(std)": C_ij_std,
         }
 
+        parameters.update(self.error_analysis(n_sample))
+
         return parameters
+
+    def get_series(self):
+        """
+        Recorded time series, one entry per sample, indexed by temperature.
+
+        Returns
+        -------
+        series : dict
+            ``"E"``: energy per site, shape ``(n_samples, n_replicas)``;
+            ``"M"``: moment per site, ``(n_samples, n_replicas, 3)``;
+            ``"I"``: intensities at ``hkl``, ``(n_samples, n_replicas,
+            n_hkl)``, or ``None`` if no ``hkl`` was given.
+        """
+        series = getattr(self, "series", None) or {}
+        out = {}
+        for key in ("E", "M", "I"):
+            values = series.get(key, [])
+            out[key] = np.asarray(values) if len(values) > 0 else None
+        return out
+
+    @staticmethod
+    def _jackknife_blocks(n, tau):
+        """Number of jackknife blocks so each block spans ~8 tau_int."""
+        block_len = max(1, int(np.ceil(8.0 * tau)))
+        return int(np.clip(n // block_len, 2, 50))
+
+    def error_analysis(self, n_sample=None):
+        """
+        Autocorrelation times and statistical errors from the time series.
+
+        Errors of means are corrected by the integrated autocorrelation time
+        (``2 * tau_int * var / N``). Errors of fluctuation quantities (C, chi)
+        use a blocked jackknife with blocks of ~8 tau_int per temperature.
+
+        Returns an empty dict when the time series are unavailable (e.g.
+        after resuming from a version 1 checkpoint) or do not match the
+        number of accumulated samples.
+        """
+        series = self.get_series()
+        E_series, M_series = series["E"], series["M"]
+        if E_series is None or (
+            n_sample is not None and len(E_series) != n_sample
+        ):
+            return {}
+
+        n, n_replicas = E_series.shape
+        n_sites = self.crystal.get_total_sites()
+
+        E_ave, E_err, tau_E = statistics.mean_error(E_series)
+        M_ave, M_err, tau_M = statistics.mean_error(M_series)
+        tau_E2, _ = statistics.integrated_autocorrelation_time(E_series**2)
+        MM_series = M_series[..., :, None] * M_series[..., None, :]
+
+        C_err = np.zeros(n_replicas)
+        chi_err = np.zeros((n_replicas, 3, 3))
+        for r in range(n_replicas):
+            beta = self.beta[r]
+
+            n_blocks = self._jackknife_blocks(n, max(tau_E[r], tau_E2[r]))
+            _, C_err[r] = statistics.jackknife(
+                lambda e, e2: n_sites * kB * beta**2 * (e2 - e**2),
+                E_series[:, r],
+                E_series[:, r] ** 2,
+                n_blocks=n_blocks,
+            )
+
+            n_blocks = self._jackknife_blocks(n, tau_M[r].max())
+            _, err = statistics.jackknife(
+                lambda m, mm: n_sites * beta * (mm - np.outer(m, m)),
+                M_series[:, r],
+                MM_series[:, r],
+                n_blocks=n_blocks,
+            )
+            chi_err[r] = 0.5 * (err + err.T)
+
+        out = {
+            "n_samples": n,
+            "E(err)": E_err,
+            "tau(E)": tau_E,
+            "tau(E^2)": tau_E2,
+            "M(err)": M_err,
+            "tau(M)": tau_M,
+            "C(err)": C_err,
+            "chi(err)": chi_err,
+            "I(err)": None,
+            "tau(I)": None,
+            "series": series,
+        }
+
+        if series["I"] is not None and len(series["I"]) == n:
+            _, out["I(err)"], out["tau(I)"] = statistics.mean_error(
+                series["I"]
+            )
+
+        return out
 
     def parallel_tempering(
         self,
@@ -743,7 +882,6 @@ class MonteCarlo:
             ) > 0, "Outer steps less than thermalization steps"
 
             self.beta = 1.0 / (kB * self.T)
-            self.seeds = self.make_seeds(n_replicas)
             self.n_samples_accumulated = 0
 
             self.M_sum = np.zeros((n_replicas, 3))
@@ -763,7 +901,11 @@ class MonteCarlo:
             self.C_ij_sum = np.zeros((n_replicas, n_atoms, n_atoms, *N))
             self.C_ij_sq_sum = np.zeros((n_replicas, n_atoms, n_atoms, *N))
 
-            self.crystal.initialize_random_spin_configurations(n_replicas)
+            self.series = {"E": [], "M": [], "I": []}
+
+            self.crystal.initialize_random_spin_configurations(
+                n_replicas, rng=self.rng
+            )
 
             self.s = self.crystal.get_spin_vectors()
             self.E = np.zeros(n_replicas)
@@ -921,12 +1063,17 @@ class MonteCarlo:
         chi_13 = result["chi"][:, 0, 2]
         chi_12 = result["chi"][:, 0, 1]
 
+        columns = [T, chi_11, chi_22, chi_33, chi_23, chi_13, chi_12]
+        header = "T chi_11 chi_22 chi_33 chi_23 chi_13 chi_12"
+        if "chi(err)" in result:
+            err = result["chi(err)"]
+            columns += [err[:, i, j] for i, j in VOIGT]
+            header += " " + " ".join(f"chi_{i+1}{j+1}_err" for i, j in VOIGT)
+
         np.savetxt(
             filename + "_susceptibility.txt",
-            np.column_stack(
-                (T, chi_11, chi_22, chi_33, chi_23, chi_13, chi_12)
-            ),
-            header="T chi_11 chi_22 chi_33 chi_23 chi_13 chi_12",
+            np.column_stack(columns),
+            header=header,
         )
 
         Mx = result["M(ave)"][:, 0]
@@ -936,27 +1083,45 @@ class MonteCarlo:
         My_std = result["M(std)"][:, 1]
         Mz_std = result["M(std)"][:, 2]
 
+        columns = [T, Mx, My, Mz, Mx_std, My_std, Mz_std]
+        header = "T Mx My Mz Mx_std My_std Mz_std"
+        if "M(err)" in result:
+            columns += list(result["M(err)"].T) + list(result["tau(M)"].T)
+            header += " Mx_err My_err Mz_err tau_Mx tau_My tau_Mz"
+
         np.savetxt(
             filename + "_magnetization.txt",
-            np.column_stack((T, Mx, My, Mz, Mx_std, My_std, Mz_std)),
-            header="T Mx My Mz Mx_std My_std Mz_std",
+            np.column_stack(columns),
+            header=header,
         )
 
         E = result["E(ave)"]
         E_std = result["E(std)"]
 
+        columns = [T, E, E_std]
+        header = "T E E_std"
+        if "E(err)" in result:
+            columns += [result["E(err)"], result["tau(E)"]]
+            header += " E_err tau_E"
+
         np.savetxt(
             filename + "_energy.txt",
-            np.column_stack((T, E, E_std)),
-            header="T E E_std",
+            np.column_stack(columns),
+            header=header,
         )
 
         C = result["C"]
 
+        columns = [T, C]
+        header = "T C"
+        if "C(err)" in result:
+            columns += [result["C(err)"]]
+            header += " C_err"
+
         np.savetxt(
             filename + "_heat_capacity.txt",
-            np.column_stack((T, C)),
-            header="T C",
+            np.column_stack(columns),
+            header=header,
         )
 
         if result["I(ave)"] is not None:

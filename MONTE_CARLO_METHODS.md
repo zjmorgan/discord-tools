@@ -80,9 +80,37 @@ n_local_sweeps=1
 n_heatbath_sweeps=1
 ```
 
+## Hamiltonian and Units
+
+With unit spin vectors **s**ᵢ and S̃ᵢ² = Sᵢ(Sᵢ+1):
+
+E = −½ Σᵢ Σⱼ S̃ᵢ² **s**ᵢ·Jᵢⱼ**s**ⱼ − Σᵢ S̃ᵢ² **s**ᵢ·Kᵢ**s**ᵢ − Σᵢ gᵢ μ_B S̃ᵢ **s**ᵢ·**H**
+
+Energies are in meV (`kB` in meV/K, `muB` in meV/T), fields in T, and moments gᵢ S̃ᵢ **s**ᵢ in μ_B. Reported `E` is meV/site, `M` is μ_B/site, `C` is meV/K/site and `chi` is μ_B²/meV/site.
+
 ## Energy Tracking
 
-All methods maintain accurate incremental energy tracking with errors at floating-point precision (~10⁻¹⁵). The Wolff bug (factor of 0.5 error) has been fixed.
+All methods maintain accurate incremental energy tracking with errors at floating-point precision (~10⁻¹⁵).
+
+## Error Analysis
+
+Each sample records the energy and moment per site (and intensities at `hkl`) for every temperature; they are returned as `result["series"]` and stored in checkpoints. From these, `parallel_tempering` also returns:
+
+- `tau(E)`, `tau(E^2)`, `tau(M)`, `tau(I)`: integrated autocorrelation times (Sokal automatic windowing, convention τ_int = 1/2 for uncorrelated samples), in units of outer steps
+- `E(err)`, `M(err)`, `I(err)`: errors of the means, `sqrt(2 τ_int var / N)`
+- `C(err)`, `chi(err)`: blocked-jackknife errors with blocks of ~8 τ_int
+
+`C` and `chi` are per site, `C = k_B β² N var(e)` and `chi = β N var(m)` with `e = E/N` and `m = M/N`, so results from different supercells can be compared directly (they coincide away from T_c, and the peaks grow with N near it).
+
+`E(std)`, `M(std)` and `I(std)` remain the standard deviation of the distribution, not the error of the mean. The estimators live in `discord.atomistic.statistics`.
+
+## Random Numbers
+
+`MonteCarlo(..., seed=...)` makes a run reproducible. A single generator in the parent process supplies a fresh seed to every kernel call and drives replica exchange; its state is saved in checkpoints (format version 2), so a resumed run continues exactly as an uninterrupted one.
+
+## Correctness Tests
+
+`tests/test_kernel_equivalence.py` checks that every kernel samples the Boltzmann distribution, not just that its energy bookkeeping is consistent. Each schedule is run as a fixed-temperature chain and compared against an exact quadrature result (two-spin system) and a Metropolis-only reference (4×4×4 simple-cubic lattice near T_c), for both isotropic and anisotropic (exchange anisotropy + easy axis + field) Hamiltonians. Any new update method should be added to these tests before it is used.
 
 ## Order of Operations
 
@@ -97,5 +125,5 @@ Each MC step executes methods in this order:
 
 - **Overrelaxation** preserves exchange energy exactly (isotropic systems) but modifies anisotropy/Zeeman energy
 - **Heatbath** uses rejection sampling for the cone distribution at low temperatures
-- **Wolff** energy calculation correctly handles bonds within clusters (no 0.5 factor)
+- **Wolff** bond probabilities include the S(S+1) factor, and the cluster is accepted with min(1, exp(-β(ΔE − W))), where W is the boundary-bond Hastings term. For isotropic ferromagnetic exchange W cancels the exchange part of ΔE, so only anisotropy and field are MH-corrected. Bonds inside the cluster are counted once in ΔE.
 - All methods respect delta masks for magnetic dilution and disorder
