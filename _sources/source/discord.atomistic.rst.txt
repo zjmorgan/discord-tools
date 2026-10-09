@@ -36,6 +36,14 @@ discord.atomistic.simulation module
    :show-inheritance:
    :undoc-members:
 
+discord.atomistic.statistics module
+-----------------------------------
+
+.. automodule:: discord.atomistic.statistics
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 Module contents
 ---------------
 

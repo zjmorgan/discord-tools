@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 
 
@@ -27,41 +26,49 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
   
   <!-- So that users can add custom icons -->
-  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
     <script src="../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'source/discord.atomistic';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
   </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
-
+  <body data-default-mode="">
   
   
   <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -87,9 +94,9 @@
 </div>
 
   
-    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
   </button>
   
@@ -153,7 +160,7 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
  <i class="fa-solid fa-magnifying-glass"></i>
  <span class="search-button__default-text">Search</span>
  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -163,11 +170,18 @@
       
         <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
       
         <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -180,8 +194,7 @@
           
           
           
-          <a href="https://github.com/zjmorgan/discord-tools" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-github-square fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/zjmorgan/discord-tools" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-github-square fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
 </ul></div>
       
@@ -192,7 +205,7 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
  <i class="fa-solid fa-magnifying-glass"></i>
  <span class="search-button__default-text">Search</span>
  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -201,7 +214,7 @@
   
 
   
-    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
       <span class="fa-solid fa-outdent"></span>
     </button>
   
@@ -258,11 +271,18 @@
         
           <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
         
           <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -275,8 +295,7 @@
           
           
           
-          <a href="https://github.com/zjmorgan/discord-tools" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-github-square fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/zjmorgan/discord-tools" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fab fa-github-square fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
 </ul></div>
         
@@ -368,7 +387,7 @@
 <span id="discord-atomistic-kernel-module"></span><h2>discord.atomistic.kernel module<a class="headerlink" href="#module-discord.atomistic.kernel" title="Link to this heading">#</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="discord.atomistic.kernel.dE_anisotropy_from_old_new">
-<span class="sig-name descname"><span class="pre">dE_anisotropy_from_old_new</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sp0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sp1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sp2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S_sq_eff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ion_center</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/kernel.py#L263-L270"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.kernel.dE_anisotropy_from_old_new" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">dE_anisotropy_from_old_new</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sp0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sp1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sp2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S_sq_eff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ion_center</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/kernel.py#L264-L271"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.kernel.dE_anisotropy_from_old_new" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -378,7 +397,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="discord.atomistic.kernel.dE_zeeman_from_delta">
-<span class="sig-name descname"><span class="pre">dE_zeeman_from_delta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S_sq_eff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atom_center</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/kernel.py#L250-L260"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.kernel.dE_zeeman_from_delta" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">dE_zeeman_from_delta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S_sq_eff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atom_center</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/kernel.py#L250-L261"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.kernel.dE_zeeman_from_delta" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -388,12 +407,12 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="discord.atomistic.kernel.heatbath_heisenberg">
-<span class="sig-name descname"><span class="pre">heatbath_heisenberg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bonds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_heatbath_sweeps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_atom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_ijk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/kernel.py#L504-L634"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.kernel.heatbath_heisenberg" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">heatbath_heisenberg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bonds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_heatbath_sweeps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_atom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_ijk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/kernel.py#L497-L627"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.kernel.heatbath_heisenberg" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="discord.atomistic.kernel.linear_field_energy_units">
-<span class="sig-name descname"><span class="pre">linear_field_energy_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hx_exch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hy_exch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hz_exch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S_sq_eff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bond_center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atom_center</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/kernel.py#L273-L298"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.kernel.linear_field_energy_units" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">linear_field_energy_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hx_exch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hy_exch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hz_exch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S_sq_eff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bond_center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atom_center</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/kernel.py#L274-L291"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.kernel.linear_field_energy_units" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -410,7 +429,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="discord.atomistic.kernel.metropolis_heisenberg">
-<span class="sig-name descname"><span class="pre">metropolis_heisenberg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bonds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_local_sweeps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_atom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_ijk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/kernel.py#L405-L496"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.kernel.metropolis_heisenberg" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">metropolis_heisenberg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bonds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_local_sweeps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_atom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_ijk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/kernel.py#L398-L489"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.kernel.metropolis_heisenberg" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -420,7 +439,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="discord.atomistic.kernel.overrelaxation_heisenberg">
-<span class="sig-name descname"><span class="pre">overrelaxation_heisenberg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bonds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_overrelaxation_sweeps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_atom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_ijk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_full_linear_axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/kernel.py#L642-L768"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.kernel.overrelaxation_heisenberg" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">overrelaxation_heisenberg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bonds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_overrelaxation_sweeps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_atom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_ijk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_full_linear_axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/kernel.py#L635-L761"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.kernel.overrelaxation_heisenberg" title="Link to this definition">#</a></dt>
 <dd><dl class="simple">
 <dt>If use_full_linear_axis=True:</dt><dd><p>reflect about full linear field (exchange + Zeeman), so ΔEJ+ΔEH≈0 and only EK needs MH correction.</p>
 </dd>
@@ -463,7 +482,7 @@ Exact heatbath for linear energy E = -f·s.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="discord.atomistic.kernel.total_heisenberg_energy">
-<span class="sig-name descname"><span class="pre">total_heisenberg_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bonds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_atom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_ijk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muB</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/kernel.py#L306-L397"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.kernel.total_heisenberg_energy" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">total_heisenberg_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bonds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_atom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_ijk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muB</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/kernel.py#L299-L390"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.kernel.total_heisenberg_energy" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -472,18 +491,28 @@ Exact heatbath for linear energy E = -f·s.</p>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="discord.atomistic.kernel.wolff_add_prob">
-<span class="sig-name descname"><span class="pre">wolff_add_prob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">si_proj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sj_proj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/kernel.py#L776-L788"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.kernel.wolff_add_prob" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="discord.atomistic.kernel.wolff_bond_weight">
+<span class="sig-name descname"><span class="pre">wolff_bond_weight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">si_proj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sj_proj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S_sq_eff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ij</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/kernel.py#L769-L788"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.kernel.wolff_bond_weight" title="Link to this definition">#</a></dt>
+<dd><p>Signed Wolff bond weight w; a bond is activated with probability
+p = 1 - exp(-beta * max(w, 0)).</p>
+<p>For isotropic ferromagnetic J, w is exactly the energy cost of
+reflecting s_i (but not s_j) about the plane ⟂ n. Whatever J is, each
+boundary bond contributes a Hastings factor
+(1 - p_reverse) / (1 - p_forward) = exp(beta * w)
+to the cluster acceptance, which keeps the move exact.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="discord.atomistic.kernel.wolff_heisenberg">
-<span class="sig-name descname"><span class="pre">wolff_heisenberg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bonds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_atom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_ijk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/kernel.py#L791-L1013"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.kernel.wolff_heisenberg" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">wolff_heisenberg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bonds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_atom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_ijk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/kernel.py#L791-L1043"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.kernel.wolff_heisenberg" title="Link to this definition">#</a></dt>
 <dd><dl class="simple">
-<dt>Clean Wolff-style cluster:</dt><dd><ul class="simple">
+<dt>Wolff-style embedded cluster:</dt><dd><ul class="simple">
 <li><p>grow cluster using exchange only (projected along random axis n)</p></li>
 <li><p>propose reflection of cluster spins about plane ⟂ n</p></li>
-<li><p>MH accept/reject based on full ΔE (exchange + anisotropy + field)</p></li>
+<li><p>MH accept/reject with min(1, exp(-beta * (ΔE - W))), where W is the
+sum of boundary bond weights (the log Hastings ratio of the cluster
+construction). For isotropic ferromagnetic exchange W cancels the
+exchange part of ΔE, so only anisotropy and field are corrected.</p></li>
 </ul>
 </dd>
 </dl>
@@ -657,31 +686,40 @@ Exact heatbath for linear energy E = -f·s.</p>
 <span id="discord-atomistic-simulation-module"></span><h2>discord.atomistic.simulation module<a class="headerlink" href="#module-discord.atomistic.simulation" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">MonteCarlo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crystal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[10,</span> <span class="pre">300]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_replicas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L20-L970"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">MonteCarlo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crystal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[10,</span> <span class="pre">300]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_replicas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L24-L1135"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Replica-exchange Monte Carlo simulation.</p>
 <p class="rubric">Methods</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#discord.atomistic.simulation.MonteCarlo.from_checkpoint_h5" title="discord.atomistic.simulation.MonteCarlo.from_checkpoint_h5"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_checkpoint_h5</span></code></a>(path, *[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#discord.atomistic.simulation.MonteCarlo.error_analysis" title="discord.atomistic.simulation.MonteCarlo.error_analysis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">error_analysis</span></code></a>([n_sample])</p></td>
+<td><p>Autocorrelation times and statistical errors from the time series.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#discord.atomistic.simulation.MonteCarlo.from_checkpoint_h5" title="discord.atomistic.simulation.MonteCarlo.from_checkpoint_h5"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_checkpoint_h5</span></code></a>(path, *[, ...])</p></td>
 <td><p>Construct a MonteCarlo instance from an HDF5 checkpoint.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#discord.atomistic.simulation.MonteCarlo.get_series" title="discord.atomistic.simulation.MonteCarlo.get_series"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_series</span></code></a>()</p></td>
+<td><p>Recorded time series, one entry per sample, indexed by temperature.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#discord.atomistic.simulation.MonteCarlo.heatbath" title="discord.atomistic.simulation.MonteCarlo.heatbath"><code class="xref py py-obj docutils literal notranslate"><span class="pre">heatbath</span></code></a>(n_heatbath_sweeps, n_replicas, ...)</p></td>
 <td><p>Perform heatbath (Gibbs sampling) sweeps on all replicas.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#discord.atomistic.simulation.MonteCarlo.load_checkpoint_h5" title="discord.atomistic.simulation.MonteCarlo.load_checkpoint_h5"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_checkpoint_h5</span></code></a>(path, *[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#discord.atomistic.simulation.MonteCarlo.kernel_seeds" title="discord.atomistic.simulation.MonteCarlo.kernel_seeds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kernel_seeds</span></code></a>(n_replicas)</p></td>
+<td><p>Fresh, independent seeds for one kernel call on each replica.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#discord.atomistic.simulation.MonteCarlo.load_checkpoint_h5" title="discord.atomistic.simulation.MonteCarlo.load_checkpoint_h5"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_checkpoint_h5</span></code></a>(path, *[, ...])</p></td>
 <td><p>Load checkpoint from HDF5 and populate state + averages.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#discord.atomistic.simulation.MonteCarlo.overrelaxation" title="discord.atomistic.simulation.MonteCarlo.overrelaxation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">overrelaxation</span></code></a>(n_overrelaxation_sweeps, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#discord.atomistic.simulation.MonteCarlo.overrelaxation" title="discord.atomistic.simulation.MonteCarlo.overrelaxation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">overrelaxation</span></code></a>(n_overrelaxation_sweeps, ...)</p></td>
 <td><p>Perform overrelaxation sweeps on all replicas.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#discord.atomistic.simulation.MonteCarlo.save_checkpoint_h5" title="discord.atomistic.simulation.MonteCarlo.save_checkpoint_h5"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_checkpoint_h5</span></code></a>(path, *, i_outer, ...[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#discord.atomistic.simulation.MonteCarlo.save_checkpoint_h5" title="discord.atomistic.simulation.MonteCarlo.save_checkpoint_h5"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_checkpoint_h5</span></code></a>(path, *, i_outer, ...[, ...])</p></td>
 <td><p>Save a restartable checkpoint (state + running averages) to HDF5.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#discord.atomistic.simulation.MonteCarlo.save_results" title="discord.atomistic.simulation.MonteCarlo.save_results"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_results</span></code></a>(result, filename)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#discord.atomistic.simulation.MonteCarlo.save_results" title="discord.atomistic.simulation.MonteCarlo.save_results"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_results</span></code></a>(result, filename)</p></td>
 <td><p>Save Monte Carlo simulation results to text files.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#discord.atomistic.simulation.MonteCarlo.wolff_cluster_updates" title="discord.atomistic.simulation.MonteCarlo.wolff_cluster_updates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wolff_cluster_updates</span></code></a>(n_clusters, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#discord.atomistic.simulation.MonteCarlo.wolff_cluster_updates" title="discord.atomistic.simulation.MonteCarlo.wolff_cluster_updates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wolff_cluster_updates</span></code></a>(n_clusters, ...)</p></td>
 <td><p>Perform Wolff-style cluster updates on all replicas.</p></td>
 </tr>
 </tbody>
@@ -695,19 +733,16 @@ Exact heatbath for linear energy E = -f·s.</p>
 <tr class="row-even"><td><p><strong>get_n_replicas</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p><strong>make_seeds</strong></p></td>
+<tr class="row-odd"><td><p><strong>metropolis_hastings</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p><strong>metropolis_hastings</strong></p></td>
+<tr class="row-even"><td><p><strong>parallel_tempering</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p><strong>parallel_tempering</strong></p></td>
+<tr class="row-odd"><td><p><strong>replica_exchange</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p><strong>replica_exchange</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>sample_parameters</strong></p></td>
+<tr class="row-even"><td><p><strong>sample_parameters</strong></p></td>
 <td></td>
 </tr>
 </tbody>
@@ -715,12 +750,24 @@ Exact heatbath for linear energy E = -f·s.</p>
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo.ensemble_average">
-<span class="sig-name descname"><span class="pre">ensemble_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_sample</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L649-L693"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.ensemble_average" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">ensemble_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_sample</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L686-L737"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.ensemble_average" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo.error_analysis">
+<span class="sig-name descname"><span class="pre">error_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_sample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L764-L832"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.error_analysis" title="Link to this definition">#</a></dt>
+<dd><p>Autocorrelation times and statistical errors from the time series.</p>
+<p>Errors of means are corrected by the integrated autocorrelation time
+(<code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">tau_int</span> <span class="pre">*</span> <span class="pre">var</span> <span class="pre">/</span> <span class="pre">N</span></code>). Errors of fluctuation quantities (C, chi)
+use a blocked jackknife with blocks of ~8 tau_int per temperature.</p>
+<p>Returns an empty dict when the time series are unavailable (e.g.
+after resuming from a version 1 checkpoint) or do not match the
+number of accumulated samples.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo.from_checkpoint_h5">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_checkpoint_h5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">apply_material_to_crystal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L336-L398"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.from_checkpoint_h5" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_checkpoint_h5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">apply_material_to_crystal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L370-L432"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.from_checkpoint_h5" title="Link to this definition">#</a></dt>
 <dd><p>Construct a MonteCarlo instance from an HDF5 checkpoint.</p>
 <p>This rebuilds a Crystal using stored crystallographic metadata when
 available, then loads state/averages. Derived neighbor arrays and
@@ -729,12 +776,29 @@ Hamiltonian parameters are restored from the checkpoint.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo.get_n_replicas">
-<span class="sig-name descname"><span class="pre">get_n_replicas</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L28-L29"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.get_n_replicas" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_n_replicas</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L35-L36"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.get_n_replicas" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo.get_series">
+<span class="sig-name descname"><span class="pre">get_series</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L739-L756"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.get_series" title="Link to this definition">#</a></dt>
+<dd><p>Recorded time series, one entry per sample, indexed by temperature.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>series</strong><span class="classifier">dict</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">&quot;E&quot;</span></code>: energy per site, shape <code class="docutils literal notranslate"><span class="pre">(n_samples,</span> <span class="pre">n_replicas)</span></code>;
+<code class="docutils literal notranslate"><span class="pre">&quot;M&quot;</span></code>: moment per site, <code class="docutils literal notranslate"><span class="pre">(n_samples,</span> <span class="pre">n_replicas,</span> <span class="pre">3)</span></code>;
+<code class="docutils literal notranslate"><span class="pre">&quot;I&quot;</span></code>: intensities at <code class="docutils literal notranslate"><span class="pre">hkl</span></code>, <code class="docutils literal notranslate"><span class="pre">(n_samples,</span> <span class="pre">n_replicas,</span>
+<span class="pre">n_hkl)</span></code>, or <code class="docutils literal notranslate"><span class="pre">None</span></code> if no <code class="docutils literal notranslate"><span class="pre">hkl</span></code> was given.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo.heatbath">
-<span class="sig-name descname"><span class="pre">heatbath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_heatbath_sweeps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_replicas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bonds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_atom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_ijk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L516-L570"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.heatbath" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">heatbath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_heatbath_sweeps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_replicas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bonds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_atom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_ijk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L549-L603"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.heatbath" title="Link to this definition">#</a></dt>
 <dd><p>Perform heatbath (Gibbs sampling) sweeps on all replicas.</p>
 <p>Heatbath samples new spin directions from the conditional Boltzmann
 distribution given the effective field. When anisotropy is present,
@@ -743,26 +807,31 @@ Metropolis-Hastings correction for the anisotropy term.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo.kernel_seeds">
+<span class="sig-name descname"><span class="pre">kernel_seeds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_replicas</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L38-L47"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.kernel_seeds" title="Link to this definition">#</a></dt>
+<dd><p>Fresh, independent seeds for one kernel call on each replica.</p>
+<p>Kernels reseed numba’s generator on entry. Chaining the seed each
+kernel returns is a map on 32-bit integers that falls into a cycle
+after ~1e4 calls and then replays the same random stream, so seeds
+are always drawn from the parent generator instead.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo.load_checkpoint_h5">
-<span class="sig-name descname"><span class="pre">load_checkpoint_h5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">apply_material_to_crystal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expect_hkl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L203-L334"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.load_checkpoint_h5" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">load_checkpoint_h5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">apply_material_to_crystal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expect_hkl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L223-L368"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.load_checkpoint_h5" title="Link to this definition">#</a></dt>
 <dd><p>Load checkpoint from HDF5 and populate state + averages.</p>
 <p>Returns a dict with control info: i_outer, n_outer, n_thermal,
 n_samples_accumulated.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo.make_seeds">
-<span class="sig-name descname"><span class="pre">make_seeds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_replicas</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L31-L34"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.make_seeds" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo.metropolis_hastings">
-<span class="sig-name descname"><span class="pre">metropolis_hastings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_local_sweeps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_replicas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bonds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_atom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_ijk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L413-L459"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.metropolis_hastings" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">metropolis_hastings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_local_sweeps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_replicas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bonds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_atom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_ijk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L446-L492"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.metropolis_hastings" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo.overrelaxation">
-<span class="sig-name descname"><span class="pre">overrelaxation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_overrelaxation_sweeps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_replicas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bonds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_atom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_ijk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L461-L514"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.overrelaxation" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">overrelaxation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_overrelaxation_sweeps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_replicas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bonds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_atom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_ijk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L494-L547"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.overrelaxation" title="Link to this definition">#</a></dt>
 <dd><p>Perform overrelaxation sweeps on all replicas.</p>
 <p>Overrelaxation reflects each spin across its local effective field,
 providing a microcanonical update that decorrelates configurations
@@ -771,33 +840,33 @@ faster than Metropolis updates while approximately preserving energy.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo.parallel_tempering">
-<span class="sig-name descname"><span class="pre">parallel_tempering</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hkl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_local_sweeps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_cluster_sweeps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_overrelaxation_sweeps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_heatbath_sweeps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_outer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_thermal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">700</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint_final</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resume_from</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outdir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'checkpoints'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mc'</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L695-L902"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.parallel_tempering" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">parallel_tempering</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hkl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_local_sweeps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_cluster_sweeps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_overrelaxation_sweeps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_heatbath_sweeps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_outer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_thermal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">700</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint_final</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resume_from</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outdir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'checkpoints'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mc'</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L834-L1044"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.parallel_tempering" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo.replica_exchange">
-<span class="sig-name descname"><span class="pre">replica_exchange</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L400-L411"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.replica_exchange" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">replica_exchange</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L434-L444"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.replica_exchange" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo.sample_parameters">
-<span class="sig-name descname"><span class="pre">sample_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hkl</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L628-L647"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.sample_parameters" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">sample_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hkl</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L661-L684"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.sample_parameters" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo.save_checkpoint_h5">
-<span class="sig-name descname"><span class="pre">save_checkpoint_h5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">i_outer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_outer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_thermal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hkl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_offsets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_atom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_ijk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_J</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bonds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compression</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gzip'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compression_opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L42-L201"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.save_checkpoint_h5" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">save_checkpoint_h5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">i_outer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_outer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_thermal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hkl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_offsets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_atom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_ijk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_J</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bonds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compression</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gzip'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compression_opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L55-L221"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.save_checkpoint_h5" title="Link to this definition">#</a></dt>
 <dd><p>Save a restartable checkpoint (state + running averages) to HDF5.</p>
 <p>Layout:
 - /meta      : format/version metadata
-- /state     : Markov chain state (T/beta, spins, energies, seeds, step)
+- /state     : Markov chain state (T/beta, spins, energies, RNG, step)
 - /material  : material/model parameters (K, J, H, g, S, deltas, neighbors)
 - /averages  : running sums and sample counter for continuing averages</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo.save_results">
-<span class="sig-name descname"><span class="pre">save_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L904-L970"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.save_results" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">save_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L1046-L1135"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.save_results" title="Link to this definition">#</a></dt>
 <dd><p>Save Monte Carlo simulation results to text files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -813,13 +882,124 @@ faster than Metropolis updates while approximately preserving energy.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discord.atomistic.simulation.MonteCarlo.wolff_cluster_updates">
-<span class="sig-name descname"><span class="pre">wolff_cluster_updates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_clusters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_replicas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bonds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_atom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_ijk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L572-L626"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.wolff_cluster_updates" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">wolff_cluster_updates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_clusters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_replicas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_ions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_bonds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_atom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_ijk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/simulation.py#L605-L659"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.simulation.MonteCarlo.wolff_cluster_updates" title="Link to this definition">#</a></dt>
 <dd><p>Perform Wolff-style cluster updates on all replicas.</p>
 <p>This is analogous to <a class="reference internal" href="#discord.atomistic.simulation.MonteCarlo.metropolis_hastings" title="discord.atomistic.simulation.MonteCarlo.metropolis_hastings"><code class="xref py py-meth docutils literal notranslate"><span class="pre">metropolis_hastings()</span></code></a> but uses the
 cluster kernel instead of local single-spin updates. One call
 performs <code class="docutils literal notranslate"><span class="pre">n_clusters</span></code> cluster flips per replica.</p>
 </dd></dl>
 
+</dd></dl>
+
+</section>
+<section id="module-discord.atomistic.statistics">
+<span id="discord-atomistic-statistics-module"></span><h2>discord.atomistic.statistics module<a class="headerlink" href="#module-discord.atomistic.statistics" title="Link to this heading">#</a></h2>
+<p>Time-series statistics for Markov chain Monte Carlo output.</p>
+<p>All functions take samples along axis 0; any trailing axes (replicas,
+vector components, …) are treated as independent series.</p>
+<section id="conventions">
+<h3>Conventions<a class="headerlink" href="#conventions" title="Link to this heading">#</a></h3>
+<p>The integrated autocorrelation time is</p>
+<blockquote>
+<div><p>tau_int = 1/2 + sum_{t&gt;=1} rho(t),</p>
+</div></blockquote>
+<p>so that the variance of the mean of N correlated samples is
+<code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">tau_int</span> <span class="pre">*</span> <span class="pre">var(x)</span> <span class="pre">/</span> <span class="pre">N</span></code>. Uncorrelated samples have <code class="docutils literal notranslate"><span class="pre">tau_int</span> <span class="pre">=</span> <span class="pre">1/2</span></code>.</p>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="discord.atomistic.statistics.autocorrelation">
+<span class="sig-name descname"><span class="pre">autocorrelation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/statistics.py#L20-L45"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.statistics.autocorrelation" title="Link to this definition">#</a></dt>
+<dd><p>Normalized autocorrelation function rho(t) along axis 0 (FFT based).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array_like</span></dt><dd><p>Samples, shape <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">...)</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>rho</strong><span class="classifier">ndarray</span></dt><dd><p>Same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code>; <code class="docutils literal notranslate"><span class="pre">rho[0]</span> <span class="pre">==</span> <span class="pre">1</span></code> for non-constant series and
+<code class="docutils literal notranslate"><span class="pre">rho</span> <span class="pre">==</span> <span class="pre">0</span></code> for constant ones.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="discord.atomistic.statistics.integrated_autocorrelation_time">
+<span class="sig-name descname"><span class="pre">integrated_autocorrelation_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.0</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/statistics.py#L48-L83"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.statistics.integrated_autocorrelation_time" title="Link to this definition">#</a></dt>
+<dd><p>Integrated autocorrelation time with Sokal’s automatic windowing.</p>
+<p>The window W is the smallest lag with <code class="docutils literal notranslate"><span class="pre">W</span> <span class="pre">&gt;=</span> <span class="pre">c</span> <span class="pre">*</span> <span class="pre">tau_int(W)</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array_like</span></dt><dd><p>Samples, shape <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">...)</span></code>.</p>
+</dd>
+<dt><strong>c</strong><span class="classifier">float</span></dt><dd><p>Window factor; 5-10 is typical.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>tau</strong><span class="classifier">ndarray</span></dt><dd><p>Integrated autocorrelation time, shape <code class="docutils literal notranslate"><span class="pre">x.shape[1:]</span></code>. Constant
+series give 0.5.</p>
+</dd>
+<dt><strong>window</strong><span class="classifier">ndarray of int</span></dt><dd><p>Selected window per series.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="discord.atomistic.statistics.jackknife">
+<span class="sig-name descname"><span class="pre">jackknife</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_blocks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/statistics.py#L109-L161"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.statistics.jackknife" title="Link to this definition">#</a></dt>
+<dd><p>Blocked jackknife estimate and error of <code class="docutils literal notranslate"><span class="pre">func(*means)</span></code>.</p>
+<p>The series are cut into <code class="docutils literal notranslate"><span class="pre">n_blocks</span></code> contiguous blocks; <code class="docutils literal notranslate"><span class="pre">func</span></code> is
+evaluated on the sample means with one block left out at a time. Blocks
+should be much longer than the autocorrelation time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>func</strong><span class="classifier">callable</span></dt><dd><p>Maps sample means of each series (each reduced over axis 0) to the
+derived quantity, e.g. <code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">e,</span> <span class="pre">e2:</span> <span class="pre">e2</span> <span class="pre">-</span> <span class="pre">e**2</span></code>.</p>
+</dd>
+<dt><strong>*series</strong><span class="classifier">array_like</span></dt><dd><p>Samples, each shape <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">...)</span></code> with a common <code class="docutils literal notranslate"><span class="pre">n</span></code>.</p>
+</dd>
+<dt><strong>n_blocks</strong><span class="classifier">int</span></dt><dd><p>Number of jackknife blocks.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>value, err</strong><span class="classifier">ndarray</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">func</span></code> of the full-sample means and its jackknife error.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="discord.atomistic.statistics.mean_error">
+<span class="sig-name descname"><span class="pre">mean_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/zjmorgan/discord-tools/blob/main/src/discord/atomistic/statistics.py#L86-L106"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#discord.atomistic.statistics.mean_error" title="Link to this definition">#</a></dt>
+<dd><p>Mean and its standard error, corrected for autocorrelation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array_like</span></dt><dd><p>Samples, shape <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">...)</span></code>.</p>
+</dd>
+<dt><strong>tau</strong><span class="classifier">array_like, optional</span></dt><dd><p>Integrated autocorrelation time; estimated if omitted.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>mean, err, tau</strong><span class="classifier">ndarray</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -855,8 +1035,8 @@ performs <code class="docutils literal notranslate"><span class="pre">n_clusters
     class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="visible nav section-nav flex-column">
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submodules">Submodules</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-discord.atomistic.correlations">discord.atomistic.correlations module</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.correlations.vector_vector"><code class="docutils literal notranslate"><span class="pre">vector_vector()</span></code></a></li>
@@ -882,7 +1062,7 @@ performs <code class="docutils literal notranslate"><span class="pre">n_clusters
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.kernel.sample_unit_vector_along_field"><code class="docutils literal notranslate"><span class="pre">sample_unit_vector_along_field()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.kernel.total_heisenberg_energy"><code class="docutils literal notranslate"><span class="pre">total_heisenberg_energy()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.kernel.unravel_site"><code class="docutils literal notranslate"><span class="pre">unravel_site()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.kernel.wolff_add_prob"><code class="docutils literal notranslate"><span class="pre">wolff_add_prob()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.kernel.wolff_bond_weight"><code class="docutils literal notranslate"><span class="pre">wolff_bond_weight()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.kernel.wolff_heisenberg"><code class="docutils literal notranslate"><span class="pre">wolff_heisenberg()</span></code></a></li>
 </ul>
 </li>
@@ -898,11 +1078,13 @@ performs <code class="docutils literal notranslate"><span class="pre">n_clusters
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-discord.atomistic.simulation">discord.atomistic.simulation module</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.simulation.MonteCarlo"><code class="docutils literal notranslate"><span class="pre">MonteCarlo</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.simulation.MonteCarlo.ensemble_average"><code class="docutils literal notranslate"><span class="pre">MonteCarlo.ensemble_average()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.simulation.MonteCarlo.error_analysis"><code class="docutils literal notranslate"><span class="pre">MonteCarlo.error_analysis()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.simulation.MonteCarlo.from_checkpoint_h5"><code class="docutils literal notranslate"><span class="pre">MonteCarlo.from_checkpoint_h5()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.simulation.MonteCarlo.get_n_replicas"><code class="docutils literal notranslate"><span class="pre">MonteCarlo.get_n_replicas()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.simulation.MonteCarlo.get_series"><code class="docutils literal notranslate"><span class="pre">MonteCarlo.get_series()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.simulation.MonteCarlo.heatbath"><code class="docutils literal notranslate"><span class="pre">MonteCarlo.heatbath()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.simulation.MonteCarlo.kernel_seeds"><code class="docutils literal notranslate"><span class="pre">MonteCarlo.kernel_seeds()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.simulation.MonteCarlo.load_checkpoint_h5"><code class="docutils literal notranslate"><span class="pre">MonteCarlo.load_checkpoint_h5()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.simulation.MonteCarlo.make_seeds"><code class="docutils literal notranslate"><span class="pre">MonteCarlo.make_seeds()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.simulation.MonteCarlo.metropolis_hastings"><code class="docutils literal notranslate"><span class="pre">MonteCarlo.metropolis_hastings()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.simulation.MonteCarlo.overrelaxation"><code class="docutils literal notranslate"><span class="pre">MonteCarlo.overrelaxation()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.simulation.MonteCarlo.parallel_tempering"><code class="docutils literal notranslate"><span class="pre">MonteCarlo.parallel_tempering()</span></code></a></li>
@@ -913,6 +1095,14 @@ performs <code class="docutils literal notranslate"><span class="pre">n_clusters
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.simulation.MonteCarlo.wolff_cluster_updates"><code class="docutils literal notranslate"><span class="pre">MonteCarlo.wolff_cluster_updates()</span></code></a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-discord.atomistic.statistics">discord.atomistic.statistics module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#conventions">Conventions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.statistics.autocorrelation"><code class="docutils literal notranslate"><span class="pre">autocorrelation()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.statistics.integrated_autocorrelation_time"><code class="docutils literal notranslate"><span class="pre">integrated_autocorrelation_time()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.statistics.jackknife"><code class="docutils literal notranslate"><span class="pre">jackknife()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discord.atomistic.statistics.mean_error"><code class="docutils literal notranslate"><span class="pre">mean_error()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-discord.atomistic">Module contents</a></li>
@@ -932,8 +1122,8 @@ performs <code class="docutils literal notranslate"><span class="pre">n_clusters
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -943,8 +1133,7 @@ performs <code class="docutils literal notranslate"><span class="pre">n_clusters
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
-    <br/>
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
   </p>
 </div>
       
@@ -957,7 +1146,7 @@ performs <code class="docutils literal notranslate"><span class="pre">n_clusters
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.23.0.
 </p></div>
       
     </div>
