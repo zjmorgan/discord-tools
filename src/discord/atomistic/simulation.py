@@ -8,7 +8,7 @@ from multiprocessing import Pool
 
 from discord.scattering.intensity import StructureFactor
 
-from discord.atomistic import kernel, correlations, statistics
+from discord.atomistic import kernel, correlations, statistics, order
 from discord.parameters.constants import kB, muB
 from discord.atomistic.plotting import plot_results
 
@@ -125,8 +125,11 @@ def _run_schedule(i, s, E, beta, counts, seed):
     """
     Apply one step of the update schedule to replica ``i`` in a worker.
 
-    ``counts[m]`` is the number of sweeps (Wolff: clusters) of
-    ``METHODS[m]``; each kernel call gets a fresh seed from ``seed``.
+    ``counts[m]`` is the number of sweeps of ``METHODS[m]``. For Wolff it
+    is the number of cluster sweeps: clusters are built until their sizes
+    add up to ``counts[m]`` times the number of active sites (at least one
+    cluster when positive; fractions allowed). Each kernel call gets a
+    fresh seed from ``seed``.
 
     Returns ``(i, s, E, stats)`` with ``stats[m] = (calls, accepted,
     attempted, seconds)``.
@@ -148,16 +151,15 @@ def _run_schedule(i, s, E, beta, counts, seed):
     stats = np.zeros((len(METHODS), 4))
 
     for m, method in enumerate(METHODS):
-        n = int(counts[m])
-        if n == 0:
+        if counts[m] <= 0:
             continue
         func = KERNELS[method]
-        n_calls = n if method == "wolff" else 1
-        seeds = rng.integers(0, 2**32, size=n_calls, dtype=np.uint64)
         accepted = attempted = 0
         t0 = time.perf_counter()
         if method == "wolff":
-            for c in range(n):
+            target = counts[m] * w["n_active"]
+            calls = 0
+            while calls == 0 or attempted < target:
                 _, s, E, n_acc, n_try = func(
                     i,
                     s,
@@ -165,15 +167,18 @@ def _run_schedule(i, s, E, beta, counts, seed):
                     beta,
                     E,
                     *params,
-                    int(seeds[c]),
+                    int(rng.integers(0, 2**32, dtype=np.uint64)),
                     w["axis_projectors"],
                 )
                 accepted += n_acc
                 attempted += n_try
-            calls = n
+                calls += 1
+                if n_try == 0:  # no active sites
+                    break
         else:
+            seed_m = int(rng.integers(0, 2**32, dtype=np.uint64))
             _, s, E, accepted, attempted = func(
-                i, s, *deltas, beta, E, n, *params, int(seeds[0])
+                i, s, *deltas, beta, E, int(counts[m]), *params, seed_m
             )
             calls = 1
         stats[m] = calls, accepted, attempted, time.perf_counter() - t0
@@ -369,6 +374,12 @@ class MonteCarlo:
                 if values is not None:
                     _ds(series, key, values)
 
+            if getattr(self, "order", None) is not None:
+                og = f.create_group("order")
+                _ds(og, "q_index", self.order["q_index"])
+                _ds(og, "modes", self.order["modes"])
+                og.attrs["weight"] = self.order["weight"]
+
             av = f.create_group("averages")
             # Running sums (only present after parallel_tempering initializes)
             for name in (
@@ -495,11 +506,19 @@ class MonteCarlo:
                         np.array(material["delta_bonds"]),
                     )
 
-            self.series = {"E": [], "M": [], "I": []}
+            self.series = {"E": [], "M": [], "I": [], "O": []}
             if "series" in f:
                 for key in self.series:
                     if key in f["series"]:
                         self.series[key] = list(np.array(f["series"][key]))
+
+            self.order = None
+            if "order" in f:
+                self.order = {
+                    "q_index": np.array(f["order"]["q_index"]),
+                    "modes": np.array(f["order"]["modes"]),
+                    "weight": float(f["order"].attrs["weight"]),
+                }
 
             if "averages" in f:
                 av = f["averages"]
@@ -615,8 +634,12 @@ class MonteCarlo:
                     self.s[i], self.s[j] = self.s[j].copy(), self.s[i].copy()
                     self.E[i], self.E[j] = self.E[j], self.E[i]
 
-    def _per_replica(self, n, name):
-        """Broadcast a sweep count (int or one per temperature) to replicas."""
+    def _per_replica(self, n, name, fractional=False):
+        """
+        Broadcast a sweep count (scalar or one per temperature) to replicas.
+
+        Counts must be non-negative integers unless ``fractional``.
+        """
         n_replicas = self.get_n_replicas()
         counts = np.asarray(n)
         if counts.ndim == 0:
@@ -626,7 +649,11 @@ class MonteCarlo:
                 f"{name} must be an int or have one entry per temperature "
                 f"({n_replicas}), got shape {counts.shape}"
             )
-        if np.any(counts < 0) or np.any(counts != np.round(counts)):
+        if np.any(counts < 0):
+            raise ValueError(f"{name} must be non-negative")
+        if fractional:
+            return counts.astype(np.float64)
+        if np.any(counts != np.round(counts)):
             raise ValueError(f"{name} must be non-negative integers")
         return counts.astype(np.int64)
 
@@ -655,9 +682,9 @@ class MonteCarlo:
 
         Parameters
         ----------
-        schedule : ndarray of int
-            Shape ``(n_replicas, len(METHODS))``: sweeps (Wolff: clusters)
-            of each method per replica.
+        schedule : ndarray
+            Shape ``(n_replicas, len(METHODS))``: sweeps (Wolff: cluster
+            sweeps, see :func:`_run_schedule`) of each method per replica.
         record : bool
             Accumulate kernel time, acceptance and the wall time of the
             phase into ``self.stats``.
@@ -702,7 +729,9 @@ class MonteCarlo:
         -------
         summary : dict or None
             ``"n_steps"``: production steps recorded. For each method in
-            ``METHODS``: ``"calls_per_step"``, ``"kernel_time_per_step"``
+            ``METHODS``: ``"calls_per_step"``, ``"attempted_per_step"``
+            (site updates proposed; for Wolff, sites in clusters),
+            ``"kernel_time_per_step"``
             (seconds inside the worker, per temperature) and
             ``"acceptance"``; for Wolff also ``"cluster_size"``.
             Wall seconds per step: ``"updates"`` (the parallel update
@@ -726,6 +755,7 @@ class MonteCarlo:
                 acceptance = st["accepted"] / st["attempted"]
                 entry = {
                     "calls_per_step": st["calls"] / n_steps,
+                    "attempted_per_step": st["attempted"] / n_steps,
                     "kernel_time_per_step": st["kernel_time"] / n_steps,
                     "acceptance": np.where(
                         st["attempted"] > 0, acceptance, np.nan
@@ -749,12 +779,36 @@ class MonteCarlo:
         summary["total_wall_time_per_step"] = sum(wall.values()) / n_steps
         return summary
 
+    def find_order(self, rtol=0.05):
+        """
+        Identify the ordering mode from the lowest-temperature replica.
+
+        Sets ``self.order`` to the star of ordering wavevectors (grid
+        indices; in reciprocal-lattice units ``q_index / super_cell``), the
+        sublattice patterns and the per-site weight of the mode. See
+        :mod:`discord.atomistic.order`.
+        """
+        self.crystal.set_spin_vectors(self.s)
+        mu = self.crystal.get_spin_moments()[np.argmin(self.T)]
+        q_index, modes, weight = order.ordering_modes(mu, rtol=rtol)
+        self.order = {"q_index": q_index, "modes": modes, "weight": weight}
+        return self.order
+
     def sample_parameters(self, hkl):
         n_sites = self.crystal.get_total_sites()
 
         M = self.crystal.net_moment()
         self.series["E"].append(self.E / n_sites)
         self.series["M"].append(M / n_sites)
+
+        if getattr(self, "order", None) is not None:
+            self.series["O"].append(
+                order.order_parameter(
+                    self.crystal.get_spin_moments(),
+                    self.order["q_index"],
+                    self.order["modes"],
+                )
+            )
 
         self.M_sum += M / n_sites
         self.M_sq_sum += M[:, :, None] * M[:, None, :] / n_sites**2
@@ -838,11 +892,13 @@ class MonteCarlo:
             ``"E"``: energy per site, shape ``(n_samples, n_replicas)``;
             ``"M"``: moment per site, ``(n_samples, n_replicas, 3)``;
             ``"I"``: intensities at ``hkl``, ``(n_samples, n_replicas,
-            n_hkl)``, or ``None`` if no ``hkl`` was given.
+            n_hkl)``, or ``None`` if no ``hkl`` was given;
+            ``"O"``: order parameter per site (see :meth:`find_order`),
+            ``(n_samples, n_replicas)``, or ``None`` if not recorded.
         """
         series = getattr(self, "series", None) or {}
         out = {}
-        for key in ("E", "M", "I"):
+        for key in ("E", "M", "I", "O"):
             values = series.get(key, [])
             out[key] = np.asarray(values) if len(values) > 0 else None
         return out
@@ -921,6 +977,33 @@ class MonteCarlo:
                 series["I"]
             )
 
+        O_series = series["O"]
+        if O_series is not None and len(O_series) == n:
+            O_ave, O_err, tau_O = statistics.mean_error(O_series)
+            tau_O2, _ = statistics.integrated_autocorrelation_time(O_series**2)
+            chi_O = np.zeros(n_replicas)
+            chi_O_err = np.zeros(n_replicas)
+            for r in range(n_replicas):
+                beta = self.beta[r]
+                n_blocks = self._jackknife_blocks(n, max(tau_O[r], tau_O2[r]))
+                chi_O[r], chi_O_err[r] = statistics.jackknife(
+                    lambda o, o2: n_sites * beta * (o2 - o**2),
+                    O_series[:, r],
+                    O_series[:, r] ** 2,
+                    n_blocks=n_blocks,
+                )
+            out.update(
+                {
+                    "O(ave)": O_ave,
+                    "O(err)": O_err,
+                    "tau(O)": tau_O,
+                    "tau(O^2)": tau_O2,
+                    "chi(O)": chi_O,
+                    "chi(O)(err)": chi_O_err,
+                    "order": self.order,
+                }
+            )
+
         return out
 
     def parallel_tempering(
@@ -935,6 +1018,7 @@ class MonteCarlo:
         n_interval=None,
         sample_interval=1,
         wolff_axes="random",
+        find_order=True,
         checkpoint_interval=None,
         checkpoint_final=None,
         checkpoint_path=None,
@@ -955,9 +1039,15 @@ class MonteCarlo:
         sequence with one entry per temperature, so the update mix can be
         tuned per temperature. Replica ``i`` always holds temperature
         ``T[i]`` because exchanges swap configurations. Sweep methods count
-        lattice sweeps; ``n_cluster_sweeps`` counts Wolff clusters. Every
+        lattice sweeps; ``n_cluster_sweeps`` counts Wolff cluster sweeps:
+        clusters are built until their sizes add up to that many times the
+        number of sites (fractions allowed, at least one cluster). Every
         temperature needs at least one Metropolis, heatbath or Wolff update
         (with ``wolff_axes="anisotropy"``, Metropolis or heatbath).
+
+        With ``find_order``, the ordering mode is identified from the
+        lowest-temperature replica at the first sample (:meth:`find_order`)
+        and its order parameter is recorded at every temperature.
 
         ``wolff_axes`` sets the Wolff embedding-axis distribution: see
         :func:`wolff_axis_projectors`. ``"anisotropy"`` keeps cluster flips
@@ -1022,7 +1112,8 @@ class MonteCarlo:
             self.C_ij_sum = np.zeros((n_replicas, n_atoms, n_atoms, *N))
             self.C_ij_sq_sum = np.zeros((n_replicas, n_atoms, n_atoms, *N))
 
-            self.series = {"E": [], "M": [], "I": []}
+            self.series = {"E": [], "M": [], "I": [], "O": []}
+            self.order = None
 
             self.crystal.initialize_random_spin_configurations(
                 n_replicas, rng=self.rng
@@ -1032,7 +1123,9 @@ class MonteCarlo:
             self.E = np.zeros(n_replicas)
 
         schedule = {
-            "wolff": self._per_replica(n_cluster_sweeps, "n_cluster_sweeps"),
+            "wolff": self._per_replica(
+                n_cluster_sweeps, "n_cluster_sweeps", fractional=True
+            ),
             "overrelaxation": self._per_replica(
                 n_overrelaxation_sweeps, "n_overrelaxation_sweeps"
             ),
@@ -1079,6 +1172,7 @@ class MonteCarlo:
                 )
 
         static = dict(
+            n_active=int(np.count_nonzero(delta_atoms > 0)),
             axis_projectors=wolff_axis_projectors(K, wolff_axes),
             delta_atoms=delta_atoms,
             delta_ions=delta_ions,
@@ -1092,7 +1186,9 @@ class MonteCarlo:
             g=g,
             S=S,
         )
-        schedule_matrix = np.stack([schedule[m] for m in METHODS], axis=1)
+        schedule_matrix = np.stack(
+            [schedule[m].astype(np.float64) for m in METHODS], axis=1
+        )
 
         with Pool(
             processes=n_replicas, initializer=_init_worker, initargs=(static,)
@@ -1112,6 +1208,8 @@ class MonteCarlo:
                 t1 = time.perf_counter()
 
                 if sample:
+                    if find_order and getattr(self, "order", None) is None:
+                        self.find_order()
                     self.crystal.set_spin_vectors(self.s)
                     self.sample_parameters(hkl)
                     self.n_samples_accumulated += 1

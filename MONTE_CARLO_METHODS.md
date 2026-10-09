@@ -46,7 +46,7 @@ mc = MonteCarlo(crystal)
 # Run simulation with all methods
 mc.parallel_tempering(
     n_local_sweeps=1,          # Metropolis sweeps per step
-    n_cluster_sweeps=1,        # Wolff cluster updates per step  
+    n_cluster_sweeps=1,        # Wolff cluster sweeps per step
     n_overrelaxation_sweeps=1, # Overrelaxation sweeps per step
     n_heatbath_sweeps=1,       # Heatbath sweeps per step
     n_outer=1000,              # Total MC steps
@@ -72,11 +72,11 @@ Each `n_*_sweeps` argument is either an int (same at every temperature) or a seq
 mc.parallel_tempering(
     n_local_sweeps=[1, 1, 1, 1],
     n_overrelaxation_sweeps=[4, 4, 1, 0],   # more overrelaxation at low T
-    n_cluster_sweeps=[0, 2, 2, 0],          # clusters near T_c
+    n_cluster_sweeps=[0, 1, 1, 0],          # clusters near T_c
 )
 ```
 
-`n_cluster_sweeps` counts Wolff clusters, not lattice sweeps. Every temperature needs at least one Metropolis, heatbath or Wolff update per step; overrelaxation alone is rejected as non-ergodic.
+`n_cluster_sweeps` counts Wolff cluster sweeps: clusters are built until their sizes add up to that many times the number of sites (fractions such as 0.25 are allowed; at least one cluster is built when positive). Every temperature needs at least one Metropolis, heatbath or Wolff update per step; overrelaxation alone is rejected as non-ergodic.
 
 ## Cost and Acceptance
 
@@ -147,6 +147,12 @@ Each sample records the energy and moment per site (and intensities at `hkl`) fo
 `C` and `chi` are per site, `C = k_B β² N var(e)` and `chi = β N var(m)` with `e = E/N` and `m = M/N`, so results from different supercells can be compared directly (they coincide away from T_c, and the peaks grow with N near it).
 
 `E(std)`, `M(std)` and `I(std)` remain the standard deviation of the distribution, not the error of the mean. The estimators live in `discord.atomistic.statistics`.
+
+## Order Parameter
+
+With `find_order=True` (default) the ordering mode is identified automatically at the first sample from the lowest-temperature replica (`MonteCarlo.find_order`, `discord.atomistic.order`). Moments are Fourier transformed per sublattice; the largest eigenvalue over q of the sublattice correlation matrix C_ab(q) gives the ordering wavevector and the eigenvector the sublattice pattern, so multi-sublattice order (e.g. the antiparallel Mn pair of rutile MnF2 at q = 0) needs no hand-picked hkl. Wavevectors with eigenvalues within 5 % of the maximum form the star; the order parameter sums over it, so equivalent domains give the same value. Perfect order gives the full moment.
+
+Results: `O(ave)`, `O(err)`, `tau(O)`, `tau(O^2)`, `chi(O)` (= N β (⟨O²⟩ − ⟨O⟩²) per site) with `chi(O)(err)`, the mode in `order`, and the series in `series["O"]`; all saved in checkpoints.
 
 ## Random Numbers
 

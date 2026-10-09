@@ -354,7 +354,11 @@ def test_per_temperature_schedule_and_timing():
     assert np.array_equal(
         timing["overrelaxation"]["calls_per_step"], [0, 1, 0, 1]
     )
-    assert np.array_equal(timing["wolff"]["calls_per_step"], [0, 0, 0, 2])
+    # Wolff: clusters until two lattice sweeps' worth of sites (54 sites).
+    n_sites = mc.crystal.get_total_sites()
+    assert np.all(timing["wolff"]["calls_per_step"][:3] == 0)
+    assert timing["wolff"]["calls_per_step"][3] >= 1
+    assert timing["wolff"]["attempted_per_step"][3] >= 2 * n_sites
 
     for method, active in [
         ("metropolis", [0, 1]),
@@ -437,7 +441,8 @@ def test_wolff_anisotropy_axes_option():
         n_outer=20,
         n_thermal=5,
     )
-    assert np.all(result["timing"]["wolff"]["calls_per_step"] == 2)
+    n_sites = mc.crystal.get_total_sites()
+    assert np.all(result["timing"]["wolff"]["attempted_per_step"] >= 2 * n_sites)
 
     # Restricted axes alone are not ergodic.
     with pytest.raises(ValueError, match="random axes"):
@@ -448,3 +453,66 @@ def test_wolff_anisotropy_axes_option():
             n_outer=2,
             n_thermal=1,
         )
+
+
+def test_fractional_cluster_sweeps():
+    mc = MonteCarlo(_small_mnf2(), n_replicas=2, seed=8)
+    result = mc.parallel_tempering(
+        n_local_sweeps=1, n_cluster_sweeps=0.25, n_outer=20, n_thermal=5
+    )
+    wolff = result["timing"]["wolff"]
+    n_sites = mc.crystal.get_total_sites()
+    # at least a quarter of the sites per step; the last cluster overshoots
+    # by at most one cluster (<= n_sites)
+    assert np.all(wolff["attempted_per_step"] >= 0.25 * n_sites)
+    assert np.all(wolff["attempted_per_step"] <= 1.25 * n_sites)
+    with pytest.raises(ValueError, match="non-negative"):
+        mc.parallel_tempering(
+            n_local_sweeps=1, n_cluster_sweeps=-1, n_outer=2, n_thermal=1
+        )
+    with pytest.raises(ValueError, match="integers"):
+        mc.parallel_tempering(
+            n_local_sweeps=0.5, n_outer=2, n_thermal=1
+        )
+
+
+def test_automatic_order_parameter_mnf2(tmp_path):
+    pytest.importorskip("h5py")
+
+    mc = MonteCarlo(_small_mnf2(4), T=[10, 200], n_replicas=4, seed=9)
+    ckpt = tmp_path / "ckpt.h5"
+    result = mc.parallel_tempering(
+        n_local_sweeps=1,
+        n_overrelaxation_sweeps=2,
+        n_outer=400,
+        n_thermal=300,
+        checkpoint_final=True,
+        checkpoint_path=str(ckpt),
+    )
+
+    # Rutile MnF2 orders antiferromagnetically at q = 0 with the two Mn
+    # sublattices antiparallel.
+    q_index, modes = result["order"]["q_index"], result["order"]["modes"]
+    assert q_index.tolist() == [[0, 0, 0]]
+    assert np.real(modes[0, 0] * np.conj(modes[0, 1])) < 0
+
+    mu = 2.0 * np.sqrt(2.5 * 3.5)
+    O = result["O(ave)"]
+    assert O[0] > 0.8 * mu  # ordered at 10 K
+    assert O[-1] < 0.3 * mu  # paramagnetic at 200 K
+    for key in ("O(err)", "tau(O)", "tau(O^2)", "chi(O)", "chi(O)(err)"):
+        assert result[key].shape == (4,) and np.all(np.isfinite(result[key]))
+    assert result["series"]["O"].shape == (100, 4)
+
+    # The order mode and series survive a checkpoint round trip.
+    mc2 = MonteCarlo(_small_mnf2(4), n_replicas=4)
+    result2 = mc2.parallel_tempering(
+        n_local_sweeps=1,
+        n_overrelaxation_sweeps=2,
+        n_outer=420,
+        n_thermal=300,
+        resume_from=str(ckpt),
+        outdir=str(tmp_path),
+    )
+    assert result2["order"]["q_index"].tolist() == [[0, 0, 0]]
+    assert result2["series"]["O"].shape == (120, 4)
